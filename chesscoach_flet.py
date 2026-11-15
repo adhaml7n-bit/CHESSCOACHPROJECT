@@ -263,6 +263,49 @@ class ChessCoachFletApp:
         valid_limit = isinstance(limit, (int, float)) and limit > 0
         self.engine_time_limit = limit if valid_limit else DEFAULT_ENGINE_TIME_LIMIT
 
+    # -----------------------------------------------------------------
+    # Accounts: the database says who is signed in, the UI follows it.
+    # The logic lives in small methods (no dialog code inside), so each
+    # one can be tested on its own.
+    # -----------------------------------------------------------------
+    def _account_label(self) -> str:
+        """Text of the account button: '👤 Guest' or '👤 <display name>'."""
+        user = self.db.get_current_user()
+        if user is None:
+            return "👤 Guest"
+        name = user["display_name"] or user["username"]
+        return "👤 " + (name if len(name) <= 16 else name[:15] + "…")
+
+    def _after_account_change(self):
+        """Call after the signed-in user changed: load that user's settings and repaint."""
+        self._load_user_settings()
+        self.account_btn_text.value = self._account_label()
+        self._apply_theme()  # re-colours every view and ends with page.update()
+
+    def _switch_account(self, user_id: int) -> bool:
+        """Signs in as an existing profile. Returns False if it does not exist."""
+        if self.db.login(user_id) is None:
+            return False
+        self._after_account_change()
+        return True
+
+    def _switch_to_guest(self):
+        self.db.switch_to_guest()
+        self._after_account_change()
+
+    def _create_account(self, username: str, display_name: str = "") -> str | None:
+        """Creates a profile and signs in as it.
+
+        Returns None on success, or a message to show the user (empty name, too
+        long, or already taken). UsernameTakenError is a ValueError too.
+        """
+        try:
+            self.db.create_user(username, display_name)
+        except ValueError as exc:
+            return str(exc)
+        self._after_account_change()
+        return None
+
     def _init_file_picker(self):
         try:
             # In Flet 1.0+, FilePicker is a Service and takes no on_result argument
@@ -354,6 +397,23 @@ class ChessCoachFletApp:
             ink=True,
         )
 
+        # Account button: shows who is signed in ("👤 Guest" or the profile name).
+        self.account_btn_text = ft.Text(
+            self._account_label(),
+            size=13,
+            weight=ft.FontWeight.BOLD,
+            color=t["btn_fg"],
+        )
+        self.account_btn = ft.Container(
+            content=self.account_btn_text,
+            bgcolor=t["btn_bg"],
+            padding=_pad_symmetric(horizontal=14, vertical=8),
+            border_radius=8,
+            on_click=lambda e: self.open_account_dialog(),
+            tooltip="Account / Profile",
+            ink=True,
+        )
+
         self.top_bar = ft.Container(
             height=58,
             bgcolor=t["bg_header"],
@@ -367,7 +427,11 @@ class ChessCoachFletApp:
                         vertical_alignment=ft.CrossAxisAlignment.CENTER,
                         controls=[self.hamburger_btn, self.brand_container],
                     ),
-                    self.settings_btn,
+                    ft.Row(
+                        spacing=8,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                        controls=[self.account_btn, self.settings_btn],
+                    ),
                 ],
             ),
         )
@@ -1696,6 +1760,99 @@ class ChessCoachFletApp:
         self._open_dialog(dlg)
 
     # -----------------------------------------------------------------
+    # Account Dialog (Guest / existing profiles / new profile)
+    # -----------------------------------------------------------------
+    def open_account_dialog(self):
+        t = UI_THEMES[self.ui_mode]
+        current = self.db.get_current_user()
+
+        if current is None:
+            status = "Guest mode: everything works, but nothing is saved."
+        else:
+            status = f"Signed in as {current['display_name']} (@{current['username']})"
+
+        def switch_to(user_id: int):
+            self._switch_account(user_id)
+            self._close_dialog(dlg)
+
+        def continue_as_guest(e):
+            self._switch_to_guest()
+            self._close_dialog(dlg)
+
+        # One button per saved profile; the current one is highlighted with a tick.
+        profile_buttons = []
+        for user in self.db.list_users():
+            is_current = current is not None and user["user_id"] == current["user_id"]
+            label = f"{'✓ ' if is_current else ''}{user['display_name']}  (@{user['username']})"
+            profile_buttons.append(
+                self._make_action_btn(
+                    label,
+                    lambda e, uid=user["user_id"]: switch_to(uid),
+                    primary=is_current,
+                )
+            )
+        if profile_buttons:
+            profiles_area = ft.Container(
+                height=min(len(profile_buttons) * 44, 176),
+                content=ft.Column(spacing=6, scroll=ft.ScrollMode.AUTO, controls=profile_buttons),
+            )
+        else:
+            profiles_area = ft.Text("No profiles yet. Create one below.", size=12, color=t["fg_secondary"])
+
+        username_input = ft.TextField(label="Username (unique)", width=190, text_size=12)
+        display_input = ft.TextField(label="Display name (optional)", width=190, text_size=12)
+        # Our own error line instead of TextField.error_text: that property's name
+        # differs between Flet versions, a plain Text works the same everywhere.
+        error_label = ft.Text("", size=12, color="#EF4444", visible=False)
+
+        def show_error(message: str):
+            error_label.value = f"⚠ {message}"
+            error_label.visible = True
+            try:
+                error_label.update()  # refresh just this control inside the open dialog
+            except Exception:
+                self.page.update()
+
+        def create_profile(e):
+            error = self._create_account(username_input.value or "", display_input.value or "")
+            if error:
+                show_error(error)  # keep the dialog open and show why
+                return
+            self._close_dialog(dlg)
+
+        dlg = ft.AlertDialog(
+            bgcolor=t["bg_panel"],
+            title=ft.Text("👤 Account / Profile", size=18, weight=ft.FontWeight.BOLD, color=t["fg_primary"]),
+            content=ft.Container(
+                width=420,
+                content=ft.Column(
+                    tight=True,
+                    spacing=12,
+                    controls=[
+                        ft.Text(status, size=12, color=t["fg_secondary"]),
+                        ft.Divider(color=t["border"]),
+                        ft.Text("Profiles", size=13, weight=ft.FontWeight.BOLD, color=t["fg_primary"]),
+                        profiles_area,
+                        self._make_action_btn(
+                            "✓ Guest (nothing is saved)" if current is None else "Continue as Guest",
+                            continue_as_guest,
+                            primary=current is None,
+                        ),
+                        ft.Divider(color=t["border"]),
+                        ft.Text("New profile", size=13, weight=ft.FontWeight.BOLD, color=t["fg_primary"]),
+                        ft.Row(spacing=10, controls=[username_input, display_input]),
+                        error_label,
+                        self._make_action_btn("➕ Create & sign in", create_profile, primary=True),
+                    ],
+                ),
+            ),
+            actions=[
+                _make_text_button("Close", lambda e: self._close_dialog(dlg)),
+            ],
+        )
+        self._open_dialog(dlg)
+
+    # -----------------------------------------------------------------
     # Apply Selected UI Theme Across All Views
     # -----------------------------------------------------------------
     def _apply_theme(self):
@@ -1710,6 +1867,8 @@ class ChessCoachFletApp:
         self.hamburger_icon_text.color = "#FFFFFF" if self.sidebar_open else t["fg_primary"]
         self.settings_btn.bgcolor = t["btn_bg"]
         self.settings_btn_text.color = t["btn_fg"]
+        self.account_btn.bgcolor = t["btn_bg"]
+        self.account_btn_text.color = t["btn_fg"]
 
         # Content & Views
         self.content_area.bgcolor = t["bg_main"]
