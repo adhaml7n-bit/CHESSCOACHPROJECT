@@ -1,0 +1,241 @@
+{
+    "chapter_meta": {
+        "chapter_id": "catalan_ch01",
+        "opening_name": "Catalan Opening",
+        "chapter_title": "An Introduction to the Closed Catalan",
+        "player_color": "white",
+        "description": "Explores the fundamental move order, positional concepts, and structural mechanisms of the Closed Catalan, highlighting White's king safety, the long-range pressure of the g2-bishop, and the strategic preparation of central breaks."
+    },
+    "core_trunk": [
+        {
+            "ply": 1,
+            "move_number": 1,
+            "turn": "white",
+            "san": "Nf3",
+            "strategic_idea": "Control key central squares and maintain opening flexibility.",
+            "explanation": "White develops the king's knight to control d4 and e5 while avoiding premature central commitments.",
+            "hint": "Develop your king's knight toward the center."
+        },
+        {
+            "ply": 2,
+            "move_number": 1,
+            "turn": "black",
+            "san": "d5",
+            "strategic_idea": "Stake an immediate classical claim in the center.",
+            "explanation": "Black occupies the center with the d-pawn, controlling e4 and c4.",
+            "hint": null
+        },
+        {
+            "ply": 3,
+            "move_number": 2,
+            "turn": "white",
+            "san": "d4",
+            "strategic_idea": "Establish a firm classical foothold in the center.",
+            "explanation": "White supports the c4 square and stakes out space on e5 and c5.",
+            "hint": "Advance your queen's pawn to claim central space."
+        },
+        {
+            "ply": 4,
+            "move_number": 2,
+            "turn": "black",
+            "san": "Nf6",
+            "strategic_idea": "Develop a kingside minor piece and contest the e4 square.",
+            "explanation": "Black reinforces the d5 pawn and prepares kingside development.",
+            "hint": null
+        },
+        {
+            "ply": 5,
+            "move_number": 3,
+            "turn": "white",
+            "san": "c4",
+            "strategic_idea": "Challenge Black's central pawn anchor on d5.",
+            "explanation": "White attacks Black's d5 point to create central tension and open lines for queenside development.",
+            "hint": "Strike at Black's central pawn with your c-pawn."
+        },
+        {
+            "ply": 6,
+            "move_number": 3,
+            "turn": "black",
+            "san": "e6",
+            "strategic_idea": "Solidify the center and prepare kingside bishop development.",
+            "explanation": "Black protects d5 solidly while opening the diagonal for the dark-squared bishop.",
+            "hint": null
+        },
+        {
+            "ply": 7,
+            "move_number": 4,
+            "turn": "white",
+            "san": "g3",
+            "strategic_idea": "Prepare the signature Catalan kingside fianchetto.",
+            "explanation": "White readies the g2-square for the light-squared bishop to dominate the long diagonal h1-a8.",
+            "hint": "Prepare to fianchetto your king's bishop."
+        },
+        {
+            "ply": 8,
+            "move_number": 4,
+            "turn": "black",
+            "san": "Be7",
+            "strategic_idea": "Complete harmonious kingside minor piece development.",
+            "explanation": "Black develops the bishop modestly to e7, prioritizing rapid castling and maintaining a solid structure.",
+            "hint": null
+        },
+        {
+            "ply": 9,
+            "move_number": 5,
+            "turn": "white",
+            "san": "Bg2",
+            "strategic_idea": "Deploy the Catalan bishop onto its optimal outpost.",
+            "explanation": "The bishop takes up its post on g2, exerting long-term latent pressure against Black's queenside.",
+            "hint": "Place your bishop on the long diagonal."
+        },
+        {
+            "ply": 10,
+            "move_number": 5,
+            "turn": "black",
+            "san": "O-O",
+            "strategic_idea": "Tuck the king away into safety.",
+            "explanation": "Black completes kingside castling before resolving central tension.",
+            "hint": null
+        },
+        {
+            "ply": 11,
+            "move_number": 6,
+            "turn": "white",
+            "san": "O-O",
+            "strategic_idea": "Secure the white king behind a solid pawn fortress.",
+            "explanation": "White castles kingside, bringing the king to safety and mobilizing the h1-rook.",
+            "hint": "Castle your king to safety."
+        },
+        {
+            "ply": 12,
+            "move_number": 6,
+            "turn": "black",
+            "san": "c6",
+            "strategic_idea": "Construct a solid central pawn wedge.",
+            "explanation": "Black establishes the Closed Catalan pawn triangle (c6-d5-e6) to bludgeon the scope of the g2-bishop.",
+            "hint": null
+        },
+        {
+            "ply": 13,
+            "move_number": 7,
+            "turn": "white",
+            "san": "Qc2",
+            "strategic_idea": "Overprotect c4 and prepare central expansion.",
+            "explanation": "White positions the queen to control the c-file, defend c4, and prepare the thematic e2-e4 thrust.",
+            "hint": "Centralize your queen on c2 to guard c4 and control e4."
+        },
+        {
+            "ply": 14,
+            "move_number": 7,
+            "turn": "black",
+            "san": "Nbd7",
+            "strategic_idea": "Develop the queen's knight to support central breaks.",
+            "explanation": "Black reinforces the d5-point and prepares eventual freeing thrusts like ...c5 or ...e5.",
+            "hint": null
+        },
+        {
+            "ply": 15,
+            "move_number": 8,
+            "turn": "white",
+            "san": "Rd1",
+            "strategic_idea": "Place a rook opposite Black's central axis.",
+            "explanation": "White positions the rook on the semi-open d-file, supporting central operations and deterring freeing pawn pushes.",
+            "hint": "Position your rook on the d-file opposite Black's queen."
+        },
+        {
+            "ply": 16,
+            "move_number": 8,
+            "turn": "black",
+            "san": "b6",
+            "strategic_idea": "Prepare queenside fianchetto to activate the problem bishop.",
+            "explanation": "Black prepares to place the light-squared bishop on b7 or a6 to contest White's positional grip.",
+            "hint": null
+        }
+    ],
+    "branches": [
+        {
+            "branch_id": "branch_01",
+            "branch_title": "Early Queenside Fianchetto (7...b6)",
+            "deviation_after_ply": 13,
+            "trigger_move": {
+                "ply": 14,
+                "move_number": 7,
+                "turn": "black",
+                "san": "b6",
+                "strategic_idea": "Accelerate development of the queenside bishop without committing the knight.",
+                "explanation": "Black prepares to activate the c8-bishop directly via b7 or a6 while keeping options open for the queen's knight.",
+                "hint": null
+            },
+            "continuation": [
+                {
+                    "ply": 15,
+                    "move_number": 8,
+                    "turn": "white",
+                    "san": "Rd1",
+                    "strategic_idea": "Maintain positional pressure down the d-file.",
+                    "explanation": "White develops the rook to d1, maintaining flexibility and discouraging an immediate central counter-break.",
+                    "hint": "Develop your rook to the d-file to reinforce the center."
+                },
+                {
+                    "ply": 16,
+                    "move_number": 8,
+                    "turn": "black",
+                    "san": "Bb7",
+                    "strategic_idea": "Complete the fianchetto of the light-squared bishop.",
+                    "explanation": "Black places the bishop on the long diagonal to counter White's Catalan pressure.",
+                    "hint": null
+                }
+            ]
+        },
+        {
+            "branch_id": "branch_02",
+            "branch_title": "Consolidation Maneuver (8...Re8)",
+            "deviation_after_ply": 15,
+            "trigger_move": {
+                "ply": 16,
+                "move_number": 8,
+                "turn": "black",
+                "san": "Re8",
+                "strategic_idea": "Employ a flexible waiting move and support the e-file.",
+                "explanation": "Black delays the queenside commitment, preparing to route the knight via f8 to g6 while bolstering the e6-point.",
+                "hint": null
+            },
+            "continuation": [
+                {
+                    "ply": 17,
+                    "move_number": 9,
+                    "turn": "white",
+                    "san": "b3",
+                    "strategic_idea": "Reinforce c4 and prepare dark-squared bishop development.",
+                    "explanation": "White secures the queenside pawn chain and prepares to develop the bishop to b2 or a3.",
+                    "hint": "Solidify your c4-pawn and prepare to develop your queen's bishop."
+                },
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "b6",
+                    "strategic_idea": "Resume queenside development.",
+                    "explanation": "Black proceeds with developing the light-squared bishop to b7 now that the kingside position is consolidated.",
+                    "hint": null
+                }
+            ]
+        }
+    ],
+    "review_phase": {
+        "min_accuracy_to_pass": 85,
+        "key_checkpoint_plies": [
+            7,
+            9,
+            11,
+            13,
+            15
+        ],
+        "summary_takeaways": [
+            "The Catalan bishop on g2 exerts persistent pressure down the h1-a8 diagonal against Black's queenside.",
+            "The c6-d5-e6 pawn triangle establishes a solid barrier for Black but restricts the light-squared bishop on c8.",
+            "White's queen on c2 performs multiple duties: protecting c4, observing the c-file, and preparing e2-e4.",
+            "Central rook  on d1 serves both prophylactic and active roles, restraining Black's liberating pawn breaks."
+        ]
+    }
+}
