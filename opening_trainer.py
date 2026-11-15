@@ -83,12 +83,18 @@ class OpeningSession:
         self._had_error_on_current_step = False
         self.start_core()
 
+    def _reset_accuracy(self) -> None:
+        """Every run (core, branch or review) is scored on its own, from zero."""
+        self.attempts = 0
+        self.correct_first_try = 0
+        self._had_error_on_current_step = False
+
     def start_core(self) -> dict:
         self.mode = "core"
         self.active_branch_id = None
         self.sequence = list(self.data["core_trunk"])
         self.cursor = 0
-        self._had_error_on_current_step = False
+        self._reset_accuracy()
         return self._auto_advance_opponent()
 
     def start_branch(self, branch_id: str) -> dict:
@@ -103,7 +109,7 @@ class OpeningSession:
         self.sequence = prefix + [branch["trigger_move"]] + list(branch["continuation"])
         # Jump directly to the deviation point so the user doesn't replay already-learned trunk moves
         self.cursor = len(prefix)
-        self._had_error_on_current_step = False
+        self._reset_accuracy()
         return self._auto_advance_opponent()
 
     def start_review(self) -> dict:
@@ -111,9 +117,7 @@ class OpeningSession:
         self.active_branch_id = None
         self.sequence = list(self.data["core_trunk"])
         self.cursor = 0
-        self.attempts = 0
-        self.correct_first_try = 0
-        self._had_error_on_current_step = False
+        self._reset_accuracy()
         return self._auto_advance_opponent()
 
     @property
@@ -169,13 +173,15 @@ class OpeningSession:
             self._had_error_on_current_step = True
             return {
                 "status": "incorrect",
+                "ply": expected["ply"],
                 "played_san": board.san(parsed_move),
                 "hint": expected["hint"],
                 "fen": expected["fen_before"],
             }
 
         # Correct move
-        if not self._had_error_on_current_step:
+        first_try = not self._had_error_on_current_step
+        if first_try:
             self.correct_first_try += 1
         self.attempts += 1
         self._had_error_on_current_step = False
@@ -186,6 +192,8 @@ class OpeningSession:
 
         return {
             "status": "correct",
+            "ply": expected["ply"],
+            "first_try": first_try,
             "played_san": expected["san"],
             "strategic_idea": expected["strategic_idea"],
             "explanation": expected["explanation"],
