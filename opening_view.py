@@ -1,6 +1,7 @@
 import chess
 import flet as ft
 from opening_trainer import load_and_validate_chapter, OpeningSession
+from flet_compat import pad_symmetric, border_all, align_center
 
 PIECE_SYMBOLS = {
     "P": "♙", "N": "♘", "B": "♗", "R": "♖", "Q": "♕", "K": "♔",
@@ -13,7 +14,7 @@ def make_pill_button(label: str, on_click, bg_color: str = "#2563EB") -> ft.Cont
     return ft.Container(
         content=ft.Text(label, color="#FFFFFF", size=13, weight=ft.FontWeight.W_600),
         bgcolor=bg_color,
-        padding=ft.Padding.symmetric(horizontal=14, vertical=8),
+        padding=pad_symmetric(horizontal=14, vertical=8),
         border_radius=8,
         on_click=on_click,
     )
@@ -47,7 +48,7 @@ def build_opening_trainer_view(
         bgcolor="#1E293B",
         padding=16,
         border_radius=12,
-        border=ft.Border.all(1, "#334155"),
+        border=border_all(1, "#334155"),
     )
 
     def render_board():
@@ -73,7 +74,7 @@ def build_opening_trainer_view(
                         width=60,
                         height=60,
                         bgcolor=bg,
-                        alignment=ft.Alignment(0, 0),
+                        alignment=align_center(),
                         on_click=lambda e, s=sq: handle_square_click(s),
                     )
                 )
@@ -102,7 +103,7 @@ def build_opening_trainer_view(
         res = session.submit_move(uci_move)
 
         if res["status"] == "correct":
-            feedback_box.border = ft.Border.all(1, "#22C55E")
+            feedback_box.border = border_all(1, "#22C55E")
             status_title.value = f"✔ {res['played_san']}"
             status_title.color = "#4ADE80"
             idea_text.value = f"Idea: {res['strategic_idea']}"
@@ -120,14 +121,14 @@ def build_opening_trainer_view(
                 explanation_text.value = f"Key Takeaways:\n• {takeaways}"
 
         elif res["status"] == "incorrect":
-            feedback_box.border = ft.Border.all(1, "#F59E0B")
+            feedback_box.border = border_all(1, "#F59E0B")
             status_title.value = f"✘ Not the book move ({res['played_san']})"
             status_title.color = "#FBBF24"
             idea_text.value = f"Hint: {res['hint']}"
             explanation_text.value = "Try another move for White."
 
         else:
-            feedback_box.border = ft.Border.all(1, "#EF4444")
+            feedback_box.border = border_all(1, "#EF4444")
             status_title.value = "Illegal Move"
             status_title.color = "#F87171"
             idea_text.value = res["message"]
@@ -137,7 +138,7 @@ def build_opening_trainer_view(
 
     def switch_mode(mode_name: str, branch_id: str | None = None):
         state["selected_sq"] = None
-        feedback_box.border = ft.Border.all(1, "#334155")
+        feedback_box.border = border_all(1, "#334155")
         status_title.color = "#F8FAFC"
 
         if mode_name == "core":
@@ -212,5 +213,8 @@ if __name__ == "__main__":
         page.window.height = 620
         page.add(build_opening_trainer_view(page))
 
-    ft.run(main)
+    if hasattr(ft, "run"):
+        ft.run(main)
+    else:
+        ft.app(target=main)
     
