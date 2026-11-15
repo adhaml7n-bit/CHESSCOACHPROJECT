@@ -2,6 +2,7 @@ import chess
 import flet as ft
 from opening_trainer import load_and_validate_chapter, OpeningSession
 from flet_compat import pad_symmetric, border_all, align_center
+from database import LINE_CORE, LINE_REVIEW
 
 PIECE_SYMBOLS = {
     "P": "♙", "N": "♘", "B": "♗", "R": "♖", "Q": "♕", "K": "♔",
@@ -24,10 +25,34 @@ def build_opening_trainer_view(
     page: ft.Page,
     json_path: str = "catalan_ch01.json",
     on_back=None,
+    db=None,
 ) -> ft.Control:
-    """Builds the interactive Opening Trainer UI ready to embed inside chesscoach_flet.py."""
+    """Builds the interactive Opening Trainer UI ready to embed inside chesscoach_flet.py.
+
+    db is the app's ChessCoachDB. It is optional so this file still runs on its own;
+    without it (or in Guest mode) the trainer works but nothing is saved.
+    """
     chapter = load_and_validate_chapter(json_path)
     session = OpeningSession(chapter)
+    chapter_id = chapter["chapter_meta"]["chapter_id"]
+
+    def save(method_name: str, *args):
+        """Calls a ChessCoachDB method; a database problem never stops the lesson.
+        The db object (not the user id) is kept, so switching account is seen at once."""
+        if db is None:
+            return
+        try:
+            getattr(db, method_name)(*args)
+        except Exception as exc:  # e.g. the file is locked for longer than the timeout
+            print(f"[ChessCoach] Could not save progress ({method_name}): {exc}")
+
+    def current_line_id() -> str:
+        """Which line this run counts for in line_progress."""
+        if session.mode == "review":
+            return LINE_REVIEW
+        if session.mode == "branch":
+            return session.active_branch_id
+        return LINE_CORE
 
     state = {"selected_sq": None}
 
@@ -103,6 +128,11 @@ def build_opening_trainer_view(
         res = session.submit_move(uci_move)
 
         if res["status"] == "correct":
+            if res["first_try"]:
+                save("record_correct", chapter_id, session.active_branch_id, res["ply"])
+            if res["is_complete"]:
+                save("save_line_result", chapter_id, current_line_id(), res["accuracy"])
+
             feedback_box.border = border_all(1, "#22C55E")
             status_title.value = f"✔ {res['played_san']}"
             status_title.color = "#4ADE80"
@@ -121,6 +151,9 @@ def build_opening_trainer_view(
                 explanation_text.value = f"Key Takeaways:\n• {takeaways}"
 
         elif res["status"] == "incorrect":
+            # fen = position before the move, played_san = the wrong move.
+            save("record_mistake", chapter_id, session.active_branch_id, res["ply"], res["fen"], res["played_san"])
+
             feedback_box.border = border_all(1, "#F59E0B")
             status_title.value = f"✘ Not the book move ({res['played_san']})"
             status_title.color = "#FBBF24"
@@ -217,4 +250,4 @@ if __name__ == "__main__":
         ft.run(main)
     else:
         ft.app(target=main)
-    
+    
