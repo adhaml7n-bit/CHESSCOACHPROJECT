@@ -92,12 +92,12 @@ UI_THEMES = {
         "bg_panel": "#FFFFFF",
         "bg_card": "#FFFFFF",
         "bg_header": "#E2E8F0",
-        "bg_sidebar": "#1E293B",
+        "bg_sidebar": "#F1F5F9",
         "fg_primary": "#0F172A",
         "fg_secondary": "#475569",
         "fg_muted": "#64748B",
-        "fg_sidebar": "#F8FAFC",
-        "fg_sidebar_sub": "#CBD5E1",
+        "fg_sidebar": "#0F172A",
+        "fg_sidebar_sub": "#475569",
         "accent": "#2563EB",
         "accent_hover": "#1D4ED8",
         "border": "#CBD5E1",
@@ -262,6 +262,22 @@ class ChessCoachFletApp:
         limit = saved.get("engine_time_limit")
         valid_limit = isinstance(limit, (int, float)) and limit > 0
         self.engine_time_limit = limit if valid_limit else DEFAULT_ENGINE_TIME_LIMIT
+
+    def _save_settings(self) -> bool:
+        """Saves the current appearance settings for the signed-in user.
+
+        Returns False for a Guest: the database refuses every write in Guest
+        mode, so no 'if guest' check is needed here.
+        The square colours are saved as real values (not None): save_user_settings
+        uses COALESCE, so None would mean "keep the old value", not "use the preset".
+        """
+        return self.db.save_user_settings(
+            ui_mode=self.ui_mode,
+            board_preset=self.board_preset,
+            light_sq_color=self.light_sq_color,
+            dark_sq_color=self.dark_sq_color,
+            engine_time_limit=self.engine_time_limit,
+        )
 
     # -----------------------------------------------------------------
     # Accounts: the database says who is signed in, the UI follows it.
@@ -1667,6 +1683,7 @@ class ChessCoachFletApp:
 
         def on_ui_mode_change(e):
             self.ui_mode = e.control.value
+            self._save_settings()
             self._apply_theme()
 
         def on_preset_change(e):
@@ -1678,6 +1695,7 @@ class ChessCoachFletApp:
             dark_input.value = self.dark_sq_color
             light_preview.bgcolor = self.light_sq_color
             dark_preview.bgcolor = self.dark_sq_color
+            self._save_settings()
             self.draw_board(update_ui=True)
 
         def apply_custom_colors(e):
@@ -1689,6 +1707,7 @@ class ChessCoachFletApp:
             if HEX_COLOR_RE.match(d_val):
                 self.dark_sq_color = d_val
                 dark_preview.bgcolor = d_val
+            self._save_settings()
             self.draw_board(update_ui=True)
 
         ui_radio_group = ft.RadioGroup(
