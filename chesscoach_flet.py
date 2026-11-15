@@ -27,6 +27,7 @@ Key Features:
 """
 
 from opening_view import build_opening_trainer_view
+from database import ChessCoachDB
 import asyncio
 import glob
 import os
@@ -175,6 +176,11 @@ PIECE_UNICODE = {
 
 HEX_COLOR_RE = re.compile(r"^#(?:[0-9a-fA-F]{3}){1,2}$")
 
+# Settings a Guest gets, and what a saved value falls back to if it is missing or invalid.
+DEFAULT_UI_MODE = "dark"
+DEFAULT_BOARD_PRESET = "classic"
+DEFAULT_ENGINE_TIME_LIMIT = 0.5
+
 
 # =====================================================================
 # 2. Main ChessCoach Flet Application Class
@@ -195,11 +201,13 @@ class ChessCoachFletApp:
         except Exception:
             pass
 
-        # ---- Application & Theme State ----
-        self.ui_mode = "dark"  # 'light' or 'dark'
-        self.board_preset = "classic"
-        self.light_sq_color = BOARD_THEMES[self.board_preset]["light_sq"]
-        self.dark_sq_color = BOARD_THEMES[self.board_preset]["dark_sq"]
+        # ---- Database & Current User (Guest until a profile is chosen) ----
+        # Creates chesscoach.db on the very first launch, then logs in as the last used profile.
+        self.db = ChessCoachDB()
+        self.db.login_last_user()
+
+        # ---- Application & Theme State (from the user's saved settings, defaults for a Guest) ----
+        self._load_user_settings()  # sets ui_mode, board_preset, square colors, engine_time_limit
 
         self.current_page = "homepage"  # 'homepage' or 'engine'
         self.sidebar_open = True        # Toggled via the Hamburger button (☰)
@@ -217,7 +225,6 @@ class ChessCoachFletApp:
         self.engine = None
         self.engine_lock = threading.Lock()
         self.engine_path = self._auto_detect_stockfish()
-        self.engine_time_limit = 0.5
         self.play_vs_engine = False
         self.best_move_arrow = None  # (from_sq, to_sq) tuple for best move hint
 
@@ -231,6 +238,30 @@ class ChessCoachFletApp:
 
         if self.engine_path:
             self.connect_stockfish(self.engine_path, silent=True)
+
+    def _load_user_settings(self):
+        """Copies the current user's saved settings into the app state.
+
+        A Guest has no saved settings, so it gets the defaults. A saved value that is
+        missing or no longer valid (for example a theme name that was removed) also falls
+        back to the default, so a bad row can never crash the start-up.
+        """
+        saved = self.db.get_user_settings() or {}
+
+        ui_mode = saved.get("ui_mode")
+        self.ui_mode = ui_mode if ui_mode in UI_THEMES else DEFAULT_UI_MODE
+
+        preset = saved.get("board_preset")
+        self.board_preset = preset if preset in BOARD_THEMES else DEFAULT_BOARD_PRESET
+
+        # A colour stored as None means "use the colours of the preset".
+        preset_colors = BOARD_THEMES[self.board_preset]
+        self.light_sq_color = saved.get("light_sq_color") or preset_colors["light_sq"]
+        self.dark_sq_color = saved.get("dark_sq_color") or preset_colors["dark_sq"]
+
+        limit = saved.get("engine_time_limit")
+        valid_limit = isinstance(limit, (int, float)) and limit > 0
+        self.engine_time_limit = limit if valid_limit else DEFAULT_ENGINE_TIME_LIMIT
 
     def _init_file_picker(self):
         try:
