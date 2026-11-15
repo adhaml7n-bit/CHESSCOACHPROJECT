@@ -19,9 +19,11 @@ CHESSCOACHPROJECT/
 ├── chesscoach_flet.py        # Main Flet application shell, themes, sidebar, Stockfish board & view router
 ├── opening_trainer.py        # Pure python-chess logic engine for opening move validation & FEN progression
 ├── opening_view.py           # Flet UI component for the interactive opening training board
+├── flet_compat.py            # Flet 1.0+ / 0.28.x compatibility helpers shared by opening_view.py
 ├── catalan_ch01.json         # Static curriculum JSON for Closed Catalan (Chapter 1)
-├── database.py               # [NOT CREATED YET] planned SQLite persistence layer (ChessCoachDB)
-├── chesscoach.db             # [NOT CREATED YET] local SQLite database (will be gitignored)
+├── database.py               # SQLite persistence layer (ChessCoachDB) — built & tested, awaiting GUI wiring
+├── test_database.py          # unittest suite for database.py (python -m unittest test_database -v)
+├── chesscoach.db             # Local SQLite database (gitignored, created on first launch)
 └── stockfish*/               # Local Stockfish UCI binaries (gitignored, auto-detected at runtime)
 ```
 
@@ -46,25 +48,27 @@ CHESSCOACHPROJECT/
      - `branches` (`branch_01`: Early Queenside Fianchetto `7...b6`; `branch_02`: Consolidation Maneuver `8...Re8`).
      - `review_phase` (`min_accuracy_to_pass: 85`, `key_checkpoint_plies`, `summary_takeaways`).
 
-4. **SQLite Persistence Layer (`database.py`) — DESIGN ONLY, NOT BUILT YET:**
-   - Status (verified 2026-11-15): the file does not exist and no code references `sqlite` or `ChessCoachDB`. The notes below are the planned design, to be written from scratch.
-   - Planned `ChessCoachDB` managing `chesscoach.db` with 4 relational tables:
-     - `users`: `user_id`, `username` (unique, case-insensitive, passwordless profile), `display_name`, `chesscom_username`, `lichess_username`, `created_at`, `updated_at`.
-     - `user_settings`: `user_id`, `ui_mode`, `board_preset`, `light_sq_color`, `dark_sq_color`, `engine_time_limit`.
-     - `chapter_progress`: `progress_id`, `user_id`, `opening_id`, `chapter_id`, `status`, `completion_pct`, `best_accuracy`, `completed_branches_json`, `attempts_count`, `last_played_at`.
-     - `move_mistakes`: `mistake_id`, `user_id`, `opening_id`, `chapter_id`, `branch_id`, `ply`, `fen`, `expected_san`, `last_wrong_san`, `hint_text`, `wrong_count`, `streak_correct`, `mastered`, `last_mistake_at`.
-   - **Ephemeral Guest Mode (`current_user_id = None`):** When `db.is_guest` is `True`, all write methods (`save_chapter_progress`, `record_mistake`, `save_user_settings`, `update_user_profile`) silently return `False` without modifying disk records.
+4. **SQLite Persistence Layer (`database.py`) — built and tested on 2026-11-15, not wired into the GUI yet:**
+   - `ChessCoachDB` manages `chesscoach.db` (created next to `database.py` on first launch) with 4 `STRICT` tables, schema version 1 (`PRAGMA user_version`):
+     - `users`: `user_id`, `username` (unique, case-insensitive, 1–32 chars, passwordless profile), `display_name`, `chesscom_username`, `lichess_username` (`NULL` = not linked), `created_at`, `updated_at`, `last_login_at`.
+     - `user_settings` (one row per user): `user_id`, `ui_mode`, `board_preset`, `light_sq_color`, `dark_sq_color` (`NULL` = use the preset's colors), `engine_time_limit`.
+     - `line_progress` (one row per user + chapter + line; replaces the planned `chapter_progress`): `user_id`, `chapter_id`, `line_id` (`"core"`, `"review"`, or a branch id), `times_completed`, `best_accuracy`, `last_played_at`.
+     - `move_mistakes` (one row per user + position): `mistake_id`, `user_id`, `chapter_id`, `line_id` (`"core"` or a branch id, never `NULL`), `ply`, `fen`, `last_wrong_san`, `wrong_count`, `streak_correct`, `last_mistake_at`, `next_due_at`.
+   - **Not stored on purpose:** lesson content (hint, expected move, `opening_id`) stays in the chapter JSON, and derived values are computed: chapter status / completion % by `summarize_chapter_progress(chapter, db.get_chapter_progress(chapter_id))`, and "mastered" means `streak_correct >= MASTERY_STREAK` (3).
+   - **Public API:** `list_users`, `get_user`, `get_current_user`, `create_user` (also logs in), `login`, `login_last_user`, `switch_to_guest`, `update_user_profile`, `get_user_settings`, `save_user_settings`, `save_line_result`, `get_chapter_progress`, `record_mistake`, `record_correct`, `get_due_mistakes`.
+   - **Guest Mode (`current_user_id is None`):** every user-data write goes through `ChessCoachDB._write()`, which returns `False` for a guest, and every read connection runs with `PRAGMA query_only = ON`, so SQLite itself rejects stray writes. The only writes without a logged-in user are creating the empty tables on first launch and `create_user()` / `login()`.
+   - **Spaced repetition:** a new mistake is due immediately; a first-try correct answer on a due position (`record_correct`) pushes it back 1 day, then 3 days; the 3rd one masters it; a new mistake resets the streak.
+   - **Tests:** `python -m unittest test_database -v` (38 tests, temporary databases only).
 
 ---
 
 ## 4. Active Roadmap & Next Tasks (In Execution Order)
 
-### Phase 1: Create `database.py`, then wire it into the Application UI (Immediate Next Step)
-0. **Write `database.py` from scratch** following the design in Milestone 4 (the file does not exist yet).
-1. **Optional Future-Proof Columns in `database.py`:**
-   - Before live integration, optionally add `chesscom_rating INTEGER NOT NULL DEFAULT 0`, `lichess_rating INTEGER NOT NULL DEFAULT 0`, and `last_api_sync TEXT NOT NULL DEFAULT ''` to the `users` table in `database.py` (delete any test `chesscoach.db` afterward so the schema recreates cleanly).
+### Phase 1: Wire `database.py` into the Application UI (Immediate Next Step)
+1. **Schema changes go through migrations:** rating / API-sync columns were deliberately left out until the Chess.com / Lichess sync feature is designed. To change the schema, append a step to `MIGRATIONS` in `database.py` and raise `SCHEMA_VERSION`; never delete `chesscoach.db` to recreate it.
 2. **User Profile, Guest Mode & External Links in `chesscoach_flet.py`:**
    - Instantiate `self.db = ChessCoachDB()` inside `ChessCoachFletApp.__init__`.
+   - At startup call `self.db.login_last_user()` (returns `None` and stays in Guest Mode when no profile exists) and apply `self.db.get_user_settings()`; a color that is `None` means "use the preset's colors".
    - Add a **User Profile / Account Switcher** button in the top bar (next to `Settings`) showing either `"👤 Guest (Not Saving)"` or the active user's `display_name`.
    - Build a modal dialog allowing the user to:
      - Switch to **Guest Mode** (ephemeral session, zero disk writes).
@@ -73,8 +77,8 @@ CHESSCOACHPROJECT/
    - Persist `Settings` changes (`ui_mode`, `board_preset`, `light_sq_color`, `dark_sq_color`) to `user_settings` when logged in as a registered user, and load them automatically on login.
 3. **Record Progress & Mistakes During Training (`opening_view.py` & `opening_trainer.py`):**
    - Pass `db: ChessCoachDB` into `build_opening_trainer_view(...)`.
-   - Call `db.record_mistake(...)` whenever the player makes an incorrect move.
-   - Call `db.save_chapter_progress(...)` upon completing lines/chapters so accuracy and completion percentages are persisted.
+   - Call `db.record_mistake(chapter_id, session.active_branch_id, ply, fen_before, wrong_san)` whenever the player makes an incorrect move, and `db.record_correct(chapter_id, session.active_branch_id, ply)` when a move is found on the first try.
+   - Call `db.save_line_result(chapter_id, line_id, accuracy)` when a line is completed (`line_id` = `LINE_CORE`, `LINE_REVIEW`, or the branch id). Status and completion % are derived with `summarize_chapter_progress(...)`, never stored.
 
 ### Phase 2: Build the Approved "Catalan Hub" Screen (`catalan_hub_view.py`)
 - **Design Approved by User:** Instead of jumping directly from the Homepage `"Catalan Opening"` card into the raw board, open an intermediate **Catalan Hub** view (`catalan_hub_view.py`):
@@ -92,14 +96,16 @@ CHESSCOACHPROJECT/
 ---
 
 ## 5. Critical Technical Rules & Constraints
-1. **Cross-Version Flet Compatibility:** Always preserve and use the compatibility helpers at the top of `chesscoach_flet.py` (`_pad_symmetric`, `_pad_only`, `_border_all`, `_align_center`, `_open_dialog`, `_close_dialog`, and `ft.run(main)` / `ft.app(target=main)`) so the app runs cleanly on both **Flet 1.0+** and **Flet 0.28.x**.
+1. **Cross-Version Flet Compatibility:** Always preserve and use the compatibility helpers at the top of `chesscoach_flet.py` (`_pad_symmetric`, `_pad_only`, `_border_all`, `_align_center`, `_open_dialog`, `_close_dialog`, and `ft.run(main)` / `ft.app(target=main)`) so the app runs cleanly on both **Flet 1.0+** and **Flet 0.28.x**. Modules other than `chesscoach_flet.py` import the shared helpers from `flet_compat.py`.
 2. **Theme Synchronization:** Any new view (`catalan_hub_view.py`, profile dialogs, updated `opening_view.py`) must respect the active `UI_THEMES[self.ui_mode]` (`light` / `dark`) and custom board square colors (`self.light_sq_color`, `self.dark_sq_color`).
 3. **Static vs. Dynamic Data:** Never hardcode opening moves in Python or store static lesson text in SQLite. Keep opening theory in `*.json` files and user state/progress/mistakes in `chesscoach.db`.
-4. **Guest Mode Integrity:** Never write to `chesscoach.db` when `db.is_guest` is `True`.
+4. **Guest Mode Integrity:** Never write to `chesscoach.db` when `db.is_guest` is `True`. Any new method that saves user data must go through `ChessCoachDB._write()`; never open a writable connection for user data anywhere else.
 
 ---
 
 ## 6. Known Issues (verified 2026-11-15)
-1. `database.py` is missing (see Milestone 4 and Phase 1, step 0).
-2. `opening_view.py` calls `ft.Padding.symmetric`, `ft.Border.all` and `ft.Alignment(0, 0)` directly instead of the compatibility helpers in `chesscoach_flet.py`, so it may break on Flet 0.28.x (violates Rule 1). Works on the installed Flet 1.1.2.
-3. `opening_view.py` uses hardcoded colors and ignores `UI_THEMES` and the custom board square colors (violates Rule 2).
+1. `opening_view.py` uses hardcoded colors and ignores `UI_THEMES` and the custom board square colors (violates Rule 2).
+2. `chesscoach_flet.py` still defines its own copies of the compatibility helpers that now also live in `flet_compat.py`; remove the duplication later.
+3. `OpeningSession` resets its accuracy counters only in `start_review()`, not in `start_core()` / `start_branch()`, so accuracy is only meaningful for review runs. Reset them there before saving per-line accuracy.
+
+**Resolved on 2026-11-15:** `database.py` created and tested; `opening_view.py` now uses the helpers in `flet_compat.py` for Flet 0.28.x / 1.0+ compatibility.
