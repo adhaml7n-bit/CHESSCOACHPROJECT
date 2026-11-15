@@ -1073,6 +1073,7 @@ class ChessCoachFletApp:
                 page=self.page,
                 json_path=json_file,
                 on_back=lambda: self.show_page("homepage"),
+                db=self.db,
             )
             self.show_page("opening_trainer")
         except Exception as exc:
