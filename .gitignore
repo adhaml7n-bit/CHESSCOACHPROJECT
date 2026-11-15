@@ -5,3 +5,6 @@ __pycache__/
 stockfish*/
 .vscode/
 *.db
+
+# Private AI context file (kept local only)
+CLAUDE.md
