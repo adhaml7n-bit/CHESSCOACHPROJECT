@@ -162,6 +162,78 @@
                 "strategic_idea": "Break open the center to free the g2-bishop.",
                 "explanation": "White strikes in the center to open lines for the pieces and release the g2-bishop along the long diagonal h1-a8.",
                 "hint": "Your pieces are ready: strike in the center."
+            },
+            {
+                "ply": 18,
+                "move_number": 9,
+                "turn": "black",
+                "san": "dxe4",
+                "strategic_idea": null,
+                "explanation": null,
+                "hint": null
+            },
+            {
+                "ply": 19,
+                "move_number": 10,
+                "turn": "white",
+                "san": "Nxe4",
+                "strategic_idea": null,
+                "explanation": null,
+                "hint": null
+            },
+            {
+                "ply": 20,
+                "move_number": 10,
+                "turn": "black",
+                "san": "Nxe4",
+                "strategic_idea": null,
+                "explanation": null,
+                "hint": null
+            },
+            {
+                "ply": 21,
+                "move_number": 11,
+                "turn": "white",
+                "san": "Qxe4",
+                "strategic_idea": null,
+                "explanation": null,
+                "hint": null
+            },
+            {
+                "ply": 22,
+                "move_number": 11,
+                "turn": "black",
+                "san": "Bb7",
+                "strategic_idea": null,
+                "explanation": null,
+                "hint": null
+            },
+            {
+                "ply": 23,
+                "move_number": 12,
+                "turn": "white",
+                "san": "Rd1",
+                "strategic_idea": null,
+                "explanation": null,
+                "hint": null
+            },
+            {
+                "ply": 24,
+                "move_number": 12,
+                "turn": "black",
+                "san": "Nf6",
+                "strategic_idea": null,
+                "explanation": null,
+                "hint": null
+            },
+            {
+                "ply": 25,
+                "move_number": 13,
+                "turn": "white",
+                "san": "Qe2",
+                "strategic_idea": null,
+                "explanation": null,
+                "hint": null
             }
         ]
     },
@@ -195,6 +267,14 @@
                     "review_days": [1, 3, 7]
                 }
             ]
+        },
+        {
+            "level": 3,
+            "type": "learn",
+            "title": "The 9...dxe4 line up to 13.Qe2",
+            "line_id": "main",
+            "from_ply": 18,
+            "to_ply": 25
         }
     ]
 }
