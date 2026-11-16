@@ -1,0 +1,178 @@
+{
+    "format_version": 2,
+    "chapter_meta": {
+        "chapter_id": "catalan_ch01_v2",
+        "opening_name": "Catalan Opening",
+        "chapter_title": "Closed Catalan: 6...c6 with 8.Nbd2",
+        "player_color": "white",
+        "description": "Black builds the solid c6-d5-e6 pawn triangle. White completes development and prepares the central break e2-e4 to free the g2-bishop on the long diagonal.",
+        "min_accuracy_to_pass": 85
+    },
+    "lines": {
+        "main": [
+            {
+                "ply": 1,
+                "move_number": 1,
+                "turn": "white",
+                "san": "d4",
+                "strategic_idea": "Take control of the center.",
+                "explanation": "White occupies the center with the queen's pawn and gains a first foothold for the central pawns.",
+                "hint": "Start by claiming the center with a pawn."
+            },
+            {
+                "ply": 2,
+                "move_number": 1,
+                "turn": "black",
+                "san": "Nf6",
+                "strategic_idea": "Stop White from occupying e4 with a pawn.",
+                "explanation": "Black develops flexibly and controls e4, so White cannot easily build a full pawn center with e2-e4.",
+                "hint": null
+            },
+            {
+                "ply": 3,
+                "move_number": 2,
+                "turn": "white",
+                "san": "c4",
+                "strategic_idea": "Attack the d5 square and open lines for the queenside pieces.",
+                "explanation": "The c-pawn fights for d5 and makes room for White's queenside pieces to develop.",
+                "hint": "Use your c-pawn to fight for d5."
+            },
+            {
+                "ply": 4,
+                "move_number": 2,
+                "turn": "black",
+                "san": "e6",
+                "strategic_idea": "Support the center and open a path for the dark-squared bishop.",
+                "explanation": "Black prepares ...d5 and opens the f8-bishop's diagonal toward e7, d6 or b4.",
+                "hint": null
+            },
+            {
+                "ply": 5,
+                "move_number": 3,
+                "turn": "white",
+                "san": "g3",
+                "strategic_idea": "Prepare the fianchetto of the king's bishop.",
+                "explanation": "White makes room on g2 for the light-squared bishop, which will aim down the long diagonal h1-a8.",
+                "hint": "Prepare a home for your king's bishop on the long diagonal."
+            },
+            {
+                "ply": 6,
+                "move_number": 3,
+                "turn": "black",
+                "san": "d5",
+                "strategic_idea": "Set up a solid central anchor and challenge White's expansion.",
+                "explanation": "Black places a pawn firmly in the middle of the board and blocks the long diagonal for now.",
+                "hint": null
+            },
+            {
+                "ply": 7,
+                "move_number": 4,
+                "turn": "white",
+                "san": "Bg2",
+                "strategic_idea": "Put the bishop on its strongest square.",
+                "explanation": "From g2 the bishop puts long-range pressure on Black's queenside along the h1-a8 diagonal.",
+                "hint": "Develop your bishop onto the long diagonal."
+            },
+            {
+                "ply": 8,
+                "move_number": 4,
+                "turn": "black",
+                "san": "Be7",
+                "strategic_idea": "Develop calmly and keep the center closed.",
+                "explanation": "Instead of taking on c4 (the Open Catalan), Black keeps the pawn on d5 and develops the bishop quietly to prepare castling.",
+                "hint": null
+            },
+            {
+                "ply": 9,
+                "move_number": 5,
+                "turn": "white",
+                "san": "Nf3",
+                "strategic_idea": "Control d4 and e5 and prepare to castle.",
+                "explanation": "The knight develops to its natural square, watches the central squares d4 and e5, and clears the way for castling.",
+                "hint": "Develop your king's knight and get ready to castle."
+            },
+            {
+                "ply": 10,
+                "move_number": 5,
+                "turn": "black",
+                "san": "O-O",
+                "strategic_idea": "Make the king safe before the center opens.",
+                "explanation": "Black castles short quickly, before any fight in the center begins.",
+                "hint": null
+            },
+            {
+                "ply": 11,
+                "move_number": 6,
+                "turn": "white",
+                "san": "O-O",
+                "strategic_idea": "Secure the king behind the fianchetto and activate the rook.",
+                "explanation": "The king is safe behind the g2-bishop and the pawns, and the h1-rook joins the game.",
+                "hint": "Bring your king to safety."
+            },
+            {
+                "ply": 12,
+                "move_number": 6,
+                "turn": "black",
+                "san": "c6",
+                "strategic_idea": "Build the c6-d5-e6 pawn triangle against the g2-bishop.",
+                "explanation": "This solid pawn triangle absorbs the pressure of the g2-bishop along the long diagonal.",
+                "hint": null
+            },
+            {
+                "ply": 13,
+                "move_number": 7,
+                "turn": "white",
+                "san": "Qc2",
+                "strategic_idea": "Protect c4, watch the c-file and prepare e2-e4.",
+                "explanation": "The queen defends the c4-pawn, controls the c-file and supports the coming central push e2-e4.",
+                "hint": "Place your queen where it guards c4 and supports e4."
+            },
+            {
+                "ply": 14,
+                "move_number": 7,
+                "turn": "black",
+                "san": "Nbd7",
+                "strategic_idea": "Develop the knight to support d5 and the center.",
+                "explanation": "The knight protects the d5-point and keeps Black's central structure compact.",
+                "hint": null
+            },
+            {
+                "ply": 15,
+                "move_number": 8,
+                "turn": "white",
+                "san": "Nbd2",
+                "strategic_idea": "Develop flexibly to support the central break while keeping c4 protected.",
+                "explanation": "The knight supports e2-e4 from d2 and can recapture on c4 if needed.",
+                "hint": "Develop your queen's knight so it supports e4 and guards c4."
+            },
+            {
+                "ply": 16,
+                "move_number": 8,
+                "turn": "black",
+                "san": "b6",
+                "strategic_idea": "Prepare to fianchetto the light-squared bishop.",
+                "explanation": "Black's light-squared bishop on c8 is shut in by the e6-pawn, so Black prepares ...Bb7 to bring it to the long diagonal a8-h1.",
+                "hint": null
+            },
+            {
+                "ply": 17,
+                "move_number": 9,
+                "turn": "white",
+                "san": "e4",
+                "strategic_idea": "Break open the center to free the g2-bishop.",
+                "explanation": "White strikes in the center to open lines for the pieces and release the g2-bishop along the long diagonal h1-a8.",
+                "hint": "Your pieces are ready: strike in the center."
+            }
+        ]
+    },
+    "levels": [
+        {
+            "level": 1,
+            "type": "learn",
+            "title": "The 6...c6 setup and the e2-e4 break",
+            "line_id": "main",
+            "from_ply": 1,
+            "to_ply": 17
+        }
+    ]
+}
