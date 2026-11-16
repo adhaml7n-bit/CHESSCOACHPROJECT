@@ -8,3 +8,6 @@ stockfish*/
 
 # Private AI context file (kept local only)
 CLAUDE.md
+
+# Raw source data (e.g. Lichess study exports): other people's comments and accounts, kept local only
+sources/
