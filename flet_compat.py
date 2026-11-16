@@ -16,6 +16,12 @@ def pad_symmetric(horizontal: int = 0, vertical: int = 0):
     return ft.padding.symmetric(horizontal=horizontal, vertical=vertical)
 
 
+def pad_only(left: int = 0, top: int = 0, right: int = 0, bottom: int = 0):
+    if hasattr(ft, "Padding") and hasattr(ft.Padding, "only"):
+        return ft.Padding.only(left=left, top=top, right=right, bottom=bottom)
+    return ft.padding.only(left=left, top=top, right=right, bottom=bottom)
+
+
 def border_all(width: float, color: str):
     if hasattr(ft, "Border") and hasattr(ft.Border, "all"):
         return ft.Border.all(width, color)

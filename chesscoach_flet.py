@@ -26,7 +26,7 @@ Key Features:
 
 """
 
-from opening_view import build_opening_trainer_view
+from level_view import LevelTrainerView
 from database import ChessCoachDB
 import asyncio
 import glob
@@ -107,6 +107,13 @@ UI_THEMES = {
         "btn_fg": "#0F172A",
         "badge_bg": "#EEF2FF",
         "badge_fg": "#3730A3",
+        "fg_on_accent": "#FFFFFF",
+        "success": "#15803D",
+        "success_bg": "#DCFCE7",
+        "warning": "#B45309",
+        "warning_bg": "#FEF3C7",
+        "danger": "#B91C1C",
+        "danger_bg": "#FEE2E2",
     },
     "dark": {
         "name": "Dark Mode",
@@ -129,6 +136,13 @@ UI_THEMES = {
         "btn_fg": "#F8FAFC",
         "badge_bg": "#1E293B",
         "badge_fg": "#93C5FD",
+        "fg_on_accent": "#FFFFFF",
+        "success": "#4ADE80",
+        "success_bg": "#0F2A1C",
+        "warning": "#FBBF24",
+        "warning_bg": "#2A2210",
+        "danger": "#F87171",
+        "danger_bg": "#2A1215",
     },
 }
 
@@ -172,6 +186,13 @@ BOARD_THEMES = {
 PIECE_UNICODE = {
     "P": "♙", "N": "♘", "B": "♗", "R": "♖", "Q": "♕", "K": "♔",
     "p": "♟", "n": "♞", "b": "♝", "r": "♜", "q": "♛", "k": "♚",
+}
+
+# Piece colours of the training screen (same look as the engine board).
+PIECE_COLORS = {
+    "piece_white": "#FFFFFF",
+    "piece_black": "#0F172A",
+    "piece_shadow": "#475569",
 }
 
 HEX_COLOR_RE = re.compile(r"^#(?:[0-9a-fA-F]{3}){1,2}$")
@@ -231,6 +252,9 @@ class ChessCoachFletApp:
         # ---- FilePicker Service (Flet 1.0+ registers automatically, no overlay append) ----
         self.file_picker = None
         self._init_file_picker()
+
+        # ---- Training screen (LevelTrainerView), created when the Catalan card is opened ----
+        self.level_trainer = None
 
         # ---- Build UI & Apply Theme ----
         self._build_layout()
@@ -1066,21 +1090,43 @@ class ChessCoachFletApp:
         self.page.update()
 
     def open_catalan_trainer(self):
+        """Opens the training screen (learn / quiz levels) of Catalan chapter 1."""
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        json_file = os.path.join(script_dir, "catalan_ch01.json")
+        json_file = os.path.join(script_dir, "catalan_ch01_v2.json")
         try:
-            self.opening_trainer_view.content = build_opening_trainer_view(
+            self.level_trainer = LevelTrainerView(
                 page=self.page,
-                json_path=json_file,
-                on_back=lambda: self.show_page("homepage"),
+                chapter_path=json_file,
+                theme=UI_THEMES[self.ui_mode],
+                board_colors=self._board_colors(),
                 db=self.db,
+                on_back=lambda: self.show_page("homepage"),
             )
+            self.opening_trainer_view.content = self.level_trainer.root
             self.show_page("opening_trainer")
         except Exception as exc:
+            self.level_trainer = None
             self._show_info_dialog(
                 "Opening Trainer Error",
                 f"Could not load Catalan Opening chapter:\n{exc}",
             )
+
+    def _board_colors(self) -> dict:
+        """Board colours for the training screen: the preset's highlight colours,
+        the user's square colours and the piece colours."""
+        return {
+            **BOARD_THEMES[self.board_preset],
+            "light_sq": self.light_sq_color,
+            "dark_sq": self.dark_sq_color,
+            **PIECE_COLORS,
+        }
+
+    def _refresh_boards(self):
+        """Redraws every board after a board colour change in Settings."""
+        self.draw_board(update_ui=False)
+        if self.level_trainer is not None:
+            self.level_trainer.set_theme(UI_THEMES[self.ui_mode], self._board_colors(), update=False)
+        self.page.update()
 
     # -----------------------------------------------------------------
     # Render 2D Chessboard, Pieces, Legal Moves & Best Move Hint
@@ -1697,7 +1743,7 @@ class ChessCoachFletApp:
             light_preview.bgcolor = self.light_sq_color
             dark_preview.bgcolor = self.dark_sq_color
             self._save_settings()
-            self.draw_board(update_ui=True)
+            self._refresh_boards()
 
         def apply_custom_colors(e):
             l_val = (light_input.value or "").strip()
@@ -1709,7 +1755,7 @@ class ChessCoachFletApp:
                 self.dark_sq_color = d_val
                 dark_preview.bgcolor = d_val
             self._save_settings()
-            self.draw_board(update_ui=True)
+            self._refresh_boards()
 
         ui_radio_group = ft.RadioGroup(
             value=self.ui_mode,
@@ -1898,6 +1944,8 @@ class ChessCoachFletApp:
         self.homepage_view.visible = self.current_page == "homepage"
         self.engine_view.visible = self.current_page == "engine"
         self.opening_trainer_view.visible = self.current_page == "opening_trainer"
+        if self.level_trainer is not None:  # also re-reads progress after an account change
+            self.level_trainer.set_theme(t, self._board_colors(), update=False)
         self.page.update()
 
     # -----------------------------------------------------------------
