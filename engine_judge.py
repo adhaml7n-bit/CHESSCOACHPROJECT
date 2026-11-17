@@ -16,7 +16,12 @@ answers two questions, and only after the player has moved:
 EngineAssistant gives the screens thread-safe access to the app's Stockfish
 (the app's engine lock and time limit). Everything here blocks, so the screens
 call it from a background thread.
+
+built_for_other_processor() helps the app choose which Stockfish file to start.
 """
+
+import os
+import platform
 
 import chess
 import chess.engine
@@ -24,6 +29,26 @@ import chess.engine
 MAX_LOSS_CP = 50       # owner-approved: at most half a pawn worse than the book move
 MATE_SCORE = 100_000   # a mate counts as this many centipawns
 MIN_TIME, MAX_TIME = 0.1, 2.0  # seconds per analysis: a quiz never waits long
+
+# Processor tags in Stockfish file names (stockfish-windows-x86-64-avx2.exe, ...-arm64-universal.exe)
+_PROCESSOR_TAGS = {
+    "x86-64": ("x86-64", "x86_64", "amd64", "x64"),
+    "arm64": ("arm64", "aarch64", "armv8"),
+}
+_MACHINES = {"amd64": "x86-64", "x86_64": "x86-64", "arm64": "arm64", "aarch64": "arm64"}
+
+
+def built_for_other_processor(path: str, machine: str = "") -> bool:
+    """True when the file name names another processor than this PC's (platform.machine()).
+
+    Such a download cannot start here (an ARM64 build on an x86-64 PC fails with
+    WinError 216), so the app tries those files last. A name without a processor
+    tag counts as fine.
+    """
+    family = _MACHINES.get((machine or platform.machine()).lower())
+    name = os.path.basename(path).lower()
+    return family is not None and any(
+        tag in name for other, tags in _PROCESSOR_TAGS.items() if other != family for tag in tags)
 
 
 def _cp(score: chess.engine.PovScore, color: chess.Color) -> int:

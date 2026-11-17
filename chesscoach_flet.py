@@ -27,7 +27,7 @@ Key Features:
 """
 
 from board_pieces import ASSETS_DIR, piece_controls
-from engine_judge import EngineAssistant
+from engine_judge import EngineAssistant, built_for_other_processor
 from level_view import LevelTrainerView
 from opening_hub import chapters_by_id
 from opening_hub_view import OpeningHubView
@@ -256,7 +256,7 @@ class ChessCoachFletApp:
         self.engine_lock = threading.Lock()
         # The lesson screens' second opinion: the same engine, behind the same lock.
         self.assistant = EngineAssistant(lambda: self.engine, self.engine_lock, lambda: self.engine_time_limit)
-        self.engine_path = self._auto_detect_stockfish()
+        self.engine_path = ""  # the binary connect_stockfish() connected
         self.play_vs_engine = False
         self.best_move_arrow = None  # (from_sq, to_sq) tuple for best move hint
 
@@ -277,8 +277,7 @@ class ChessCoachFletApp:
         self._build_layout()
         self._apply_theme()
 
-        if self.engine_path:
-            self.connect_stockfish(self.engine_path, silent=True)
+        self._connect_first_stockfish()
 
     def _load_user_settings(self):
         """Copies the current user's saved settings into the app state.
@@ -375,7 +374,12 @@ class ChessCoachFletApp:
     # -----------------------------------------------------------------
     # Auto-detect Stockfish binary in project subdirectories & OS paths
     # -----------------------------------------------------------------
-    def _auto_detect_stockfish(self):
+    def _stockfish_candidates(self):
+        """Every Stockfish binary found, in the order start-up tries them.
+
+        Builds for another processor go last: the project folder can hold an
+        ARM64 download, which cannot start on an x86-64 PC.
+        """
         script_dir = os.path.dirname(os.path.abspath(__file__))
         local_patterns = [
             os.path.join(script_dir, "stockfish*", "**", "stockfish*.exe"),
@@ -400,10 +404,20 @@ class ChessCoachFletApp:
         if which_path:
             candidates.insert(0, os.path.abspath(which_path))
 
+        found = []
         for path in candidates:
             if path and os.path.isfile(path) and os.access(path, os.X_OK):
-                return os.path.abspath(path)
-        return ""
+                path = os.path.abspath(path)
+                if path not in found:
+                    found.append(path)
+        found.sort(key=built_for_other_processor)  # stable: otherwise the search order above
+        return found
+
+    def _connect_first_stockfish(self):
+        """Start-up: keeps the first binary that starts; none = built-in analyser."""
+        for path in self._stockfish_candidates():
+            if self.connect_stockfish(path, silent=True):
+                return
 
     # -----------------------------------------------------------------
     # Build Main Application Layout (Top Bar + Collapsible Sidebar + Pages)
@@ -1585,7 +1599,8 @@ class ChessCoachFletApp:
         )
         self._open_dialog(dlg)
 
-    def connect_stockfish(self, path: str, silent: bool = False):
+    def connect_stockfish(self, path: str, silent: bool = False) -> bool:
+        """Starts the engine at path; True when it is connected."""
         abs_path = os.path.abspath(path)
         if not os.path.isfile(abs_path) or not os.access(abs_path, os.X_OK):
             if not silent:
@@ -1593,7 +1608,7 @@ class ChessCoachFletApp:
                     "Invalid Executable",
                     "The selected file is not a valid executable binary.",
                 )
-            return
+            return False
 
         with self.engine_lock:
             try:
@@ -1609,7 +1624,9 @@ class ChessCoachFletApp:
                         "Engine Connected",
                         f"Successfully connected to chess engine:\n{engine_name}",
                     )
+                return True
             except Exception as exc:
+                print(f"[ChessCoach] Stockfish did not start ({abs_path}): {exc}")
                 self.engine = None
                 self.engine_status_lbl.value = (
                     "🟡 External Stockfish not linked (Built-in tactical analyzer active)"
@@ -1621,6 +1638,7 @@ class ChessCoachFletApp:
                         f"Could not launch the selected engine binary:\n{exc}\n\n"
                         "Please make sure you selected a valid Stockfish UCI executable.",
                     )
+                return False
 
     def _evaluate_material_fallback(self, board: chess.Board) -> float:
         values = {

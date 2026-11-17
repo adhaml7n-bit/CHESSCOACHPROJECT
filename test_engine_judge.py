@@ -20,7 +20,8 @@ import unittest
 import chess
 import chess.engine
 
-from engine_judge import MATE_SCORE, EngineAssistant, engine_opinion, judge_alternative, pawns
+from engine_judge import (MATE_SCORE, EngineAssistant, built_for_other_processor, engine_opinion,
+                          judge_alternative, pawns)
 from level_trainer import load_level_chapter
 
 PROJECT = os.path.dirname(os.path.abspath(__file__))
@@ -116,6 +117,20 @@ class AssistantTests(unittest.TestCase):
             self.assertIsNone(assistant.judge(chess.STARTING_FEN, "d2d4", "g1f3"))
         self.assertFalse(lock.locked())
         self.assertIn("Engine analysis failed", printed.getvalue())
+
+
+class ProcessorTests(unittest.TestCase):
+    """The app starts the first Stockfish file that works; other processors' builds are tried last."""
+
+    def test_on_an_x86_64_pc_arm_builds_go_last(self):
+        self.assertTrue(built_for_other_processor(r"stockfish\stockfish-windows-arm64-universal.exe", "AMD64"))
+        self.assertFalse(built_for_other_processor("stockfish-windows-x86-64-universal.exe", "AMD64"))
+        self.assertFalse(built_for_other_processor("stockfish.exe", "AMD64"))  # no tag: fine
+
+    def test_on_an_arm_pc_x86_builds_go_last(self):
+        self.assertTrue(built_for_other_processor("stockfish-windows-x86-64-avx2.exe", "ARM64"))
+        self.assertFalse(built_for_other_processor("stockfish-windows-armv8.exe", "ARM64"))
+        self.assertFalse(built_for_other_processor("stockfish-windows-arm64-universal.exe", "riscv64"))  # unknown PC
 
 
 STOCKFISH = sorted(glob.glob(os.path.join(PROJECT, "stockfish*", "**", "*x86-64*.exe"), recursive=True))
