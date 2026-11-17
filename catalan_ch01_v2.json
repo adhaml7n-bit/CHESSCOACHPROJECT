@@ -1134,6 +1134,261 @@
                     "hint": "Move your d4-knight to a square where it threatens something."
                 }
             ]
+        },
+        "b6_move6": {
+            "from_line": "main",
+            "after_ply": 11,
+            "moves": [
+                {
+                    "ply": 12,
+                    "move_number": 6,
+                    "turn": "black",
+                    "san": "b6",
+                    "strategic_idea": "Your opponent prepares ...Bb7.",
+                    "explanation": "Black wants the light-squared bishop on the long diagonal before deciding on ...c6 or ...c5.",
+                    "hint": null
+                },
+                {
+                    "ply": 13,
+                    "move_number": 7,
+                    "turn": "white",
+                    "san": "Nc3",
+                    "strategic_idea": "You develop your knight and attack d5.",
+                    "explanation": "Your queenside knight comes out to its natural square and adds pressure on the d5-pawn.",
+                    "hint": "Develop your queenside knight to its natural square."
+                },
+                {
+                    "ply": 14,
+                    "move_number": 7,
+                    "turn": "black",
+                    "san": "Bb7",
+                    "strategic_idea": "Your opponent's bishop comes to b7.",
+                    "explanation": "From b7 it protects d5. Its long diagonal is still closed by its own d5-pawn.",
+                    "hint": null
+                },
+                {
+                    "ply": 15,
+                    "move_number": 8,
+                    "turn": "white",
+                    "san": "Ne5",
+                    "strategic_idea": "Your knight jumps to e5.",
+                    "explanation": "The knight protects c4, and with f3 free your g2-bishop now joins the pressure on d5.",
+                    "hint": "Move your f3-knight to a strong central square."
+                },
+                {
+                    "ply": 16,
+                    "move_number": 8,
+                    "turn": "black",
+                    "san": "Na6",
+                    "strategic_idea": "Your opponent's knight goes to a6.",
+                    "explanation": "From a6 it can jump to b4, or come to c5 after the ...c5 break.",
+                    "hint": null
+                },
+                {
+                    "ply": 17,
+                    "move_number": 9,
+                    "turn": "white",
+                    "san": "cxd5",
+                    "strategic_idea": "You exchange on d5.",
+                    "explanation": "After ...exd5, Black's b7-bishop looks straight at its own d5-pawn and has little to do.",
+                    "hint": "Exchange your c-pawn on d5."
+                },
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "exd5",
+                    "strategic_idea": "Your opponent takes back with the e-pawn.",
+                    "explanation": "Black keeps a pawn on d5, and the c-file is now half open for you.",
+                    "hint": null
+                },
+                {
+                    "ply": 19,
+                    "move_number": 10,
+                    "turn": "white",
+                    "san": "Bf4",
+                    "strategic_idea": "Your bishop develops to f4.",
+                    "explanation": "On f4 it protects your strong e5-knight, and it clears c1 for your rook.",
+                    "hint": "Develop your dark-squared bishop so it protects the e5-knight."
+                },
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "c5",
+                    "strategic_idea": "Your opponent strikes at your d4-pawn.",
+                    "explanation": "Black breaks in the center to free the position.",
+                    "hint": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "dxc5",
+                    "strategic_idea": "You take on c5.",
+                    "explanation": "Black has to take back, and then the d5-pawn has no neighbours on the c- or e-file: it becomes isolated.",
+                    "hint": "Take on c5 with your d-pawn."
+                },
+                {
+                    "ply": 22,
+                    "move_number": 11,
+                    "turn": "black",
+                    "san": "Nxc5",
+                    "strategic_idea": "Your opponent takes back with the knight.",
+                    "explanation": "The knight is active on c5, but Black's d5-pawn is now isolated and will need protection.",
+                    "hint": null
+                }
+            ]
+        },
+        "ne4_move6": {
+            "from_line": "main",
+            "after_ply": 11,
+            "moves": [
+                {
+                    "ply": 12,
+                    "move_number": 6,
+                    "turn": "black",
+                    "san": "Ne4",
+                    "strategic_idea": "Your opponent's knight jumps to e4.",
+                    "explanation": "Black takes the e4-square early and wants to support the knight with ...f5.",
+                    "hint": null
+                },
+                {
+                    "ply": 13,
+                    "move_number": 7,
+                    "turn": "white",
+                    "san": "Nc3",
+                    "strategic_idea": "You challenge the e4-knight.",
+                    "explanation": "Your knight develops, attacks e4 and adds pressure on d5.",
+                    "hint": "Develop a knight and challenge the e4-knight."
+                },
+                {
+                    "ply": 14,
+                    "move_number": 7,
+                    "turn": "black",
+                    "san": "f5",
+                    "strategic_idea": "Your opponent supports the knight with the f-pawn.",
+                    "explanation": "Black's pawns on d5, e6 and f5 build a wall that holds e4. But no pawn is left to guard the e5-square.",
+                    "hint": null
+                },
+                {
+                    "ply": 15,
+                    "move_number": 8,
+                    "turn": "white",
+                    "san": "Ne5",
+                    "strategic_idea": "Your knight takes the e5-square.",
+                    "explanation": "No black pawn can ever attack it there. From e5 the knight also protects your c4-pawn.",
+                    "hint": "Put your f3-knight on the square no black pawn can guard."
+                },
+                {
+                    "ply": 16,
+                    "move_number": 8,
+                    "turn": "black",
+                    "san": "c6",
+                    "strategic_idea": "Your opponent completes the wall.",
+                    "explanation": "With ...c6 Black protects d5 once more.",
+                    "hint": null
+                },
+                {
+                    "ply": 17,
+                    "move_number": 9,
+                    "turn": "white",
+                    "san": "f3",
+                    "strategic_idea": "You attack the e4-knight with a pawn.",
+                    "explanation": "The knight has to move or be exchanged.",
+                    "hint": "Chase the e4-knight away with a pawn."
+                },
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "Nxc3",
+                    "strategic_idea": "Your opponent trades the knight on c3.",
+                    "explanation": "The knight takes your c3-knight and attacks your queen, so you take back at once.",
+                    "hint": null
+                },
+                {
+                    "ply": 19,
+                    "move_number": 10,
+                    "turn": "white",
+                    "san": "bxc3",
+                    "strategic_idea": "You take back toward the center.",
+                    "explanation": "Your new c3-pawn supports d4.",
+                    "hint": "Take back on c3 with a pawn."
+                },
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "Nd7",
+                    "strategic_idea": "Your opponent challenges your e5-knight.",
+                    "explanation": "Black's other knight comes to d7 to trade off your strong knight.",
+                    "hint": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "Nxd7",
+                    "strategic_idea": "You exchange knights on d7.",
+                    "explanation": "Black has to take back with the light-squared bishop, which is stuck behind its own pawns.",
+                    "hint": "Exchange knights on d7."
+                },
+                {
+                    "ply": 22,
+                    "move_number": 11,
+                    "turn": "black",
+                    "san": "Bxd7",
+                    "strategic_idea": "Your opponent takes back with the bishop.",
+                    "explanation": "This bishop has little room: Black's pawns on c6, d5, e6 and f5 all stand on light squares.",
+                    "hint": null
+                },
+                {
+                    "ply": 23,
+                    "move_number": 12,
+                    "turn": "white",
+                    "san": "e4",
+                    "strategic_idea": "You break in the center.",
+                    "explanation": "Your e-pawn attacks d5 and f5 and opens lines for your pieces.",
+                    "hint": "Break in the center with your e-pawn."
+                },
+                {
+                    "ply": 24,
+                    "move_number": 12,
+                    "turn": "black",
+                    "san": "fxe4",
+                    "strategic_idea": "Your opponent takes on e4.",
+                    "explanation": "The pawn now attacks your f3-pawn.",
+                    "hint": null
+                },
+                {
+                    "ply": 25,
+                    "move_number": 13,
+                    "turn": "white",
+                    "san": "fxe4",
+                    "strategic_idea": "You take back with your f-pawn.",
+                    "explanation": "Your pawns on c4, d4 and e4 now control the center, and the f-file is open.",
+                    "hint": "Take back on e4 with a pawn."
+                },
+                {
+                    "ply": 26,
+                    "move_number": 13,
+                    "turn": "black",
+                    "san": "Rxf1+",
+                    "strategic_idea": "Your opponent trades rooks with check.",
+                    "explanation": "The rooks come off on the open f-file.",
+                    "hint": null
+                },
+                {
+                    "ply": 27,
+                    "move_number": 14,
+                    "turn": "white",
+                    "san": "Qxf1",
+                    "strategic_idea": "Your queen takes back.",
+                    "explanation": "Your queen now holds the open f-file and protects your c4-pawn.",
+                    "hint": "Take back on f1 with your queen."
+                }
+            ]
         }
     },
     "levels": [
@@ -1447,6 +1702,80 @@
                     "to_ply": 31
                 }
             ],
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 17,
+            "type": "learn",
+            "title": "6...b6: the bishop goes to b7",
+            "line_id": "b6_move6",
+            "from_ply": 12,
+            "to_ply": 22,
+            "intro": "Instead of 6...c6, your opponent can play 6...b6 and put the bishop on b7 before anything else.",
+            "key_ideas": [
+                "Black's d5-pawn is isolated: press it with your g2-bishop, your c3-knight and your queen on the d-file.",
+                "Bring a rook to c1, on the half-open c-file, against the c5-knight.",
+                "Trades help you: the fewer pieces Black has, the weaker the isolated pawn becomes."
+            ]
+        },
+        {
+            "level": 18,
+            "type": "quiz",
+            "title": "Test: 6...b6",
+            "line_id": "b6_move6",
+            "from_ply": 12,
+            "to_ply": 22,
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 19,
+            "type": "learn",
+            "title": "6...Ne4 and ...f5: a wall of pawns",
+            "line_id": "ne4_move6",
+            "from_ply": 12,
+            "to_ply": 27,
+            "intro": "Your opponent can also jump into e4 at once and support the knight with ...f5.",
+            "key_ideas": [
+                "Your pawns on c4, d4 and e4 control the center, while Black's d7-bishop is hemmed in by its own pawns.",
+                "Develop your c1-bishop next and bring your last rook into play.",
+                "If your opponent takes on c4, push e4-e5 to gain space."
+            ]
+        },
+        {
+            "level": 20,
+            "type": "quiz",
+            "title": "Test: 6...Ne4 and ...f5",
+            "line_id": "ne4_move6",
+            "from_ply": 12,
+            "to_ply": 27,
             "question_type": "play_move",
             "show_explanations": false,
             "retry_mistakes": true,
