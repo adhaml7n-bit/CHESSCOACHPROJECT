@@ -167,73 +167,37 @@
                 "ply": 18,
                 "move_number": 9,
                 "turn": "black",
-                "san": "dxe4",
-                "strategic_idea": null,
-                "explanation": null,
+                "san": "dxc4",
+                "strategic_idea": "Your opponent takes your c4-pawn.",
+                "explanation": "Instead of letting you take on d5, Black captures on c4. Black gives up the d5 strongpoint, so your pawns on d4 and e4 now rule the center.",
                 "hint": null
             },
             {
                 "ply": 19,
                 "move_number": 10,
                 "turn": "white",
-                "san": "Nxe4",
-                "strategic_idea": null,
-                "explanation": null,
-                "hint": null
+                "san": "Nxc4",
+                "strategic_idea": "You win the pawn back with your knight.",
+                "explanation": "Your d2-knight recaptures and lands on an active square: from c4 it eyes d6 and e5 and puts pressure on b6.",
+                "hint": "Win your pawn back with a knight."
             },
             {
                 "ply": 20,
                 "move_number": 10,
                 "turn": "black",
-                "san": "Nxe4",
-                "strategic_idea": null,
-                "explanation": null,
+                "san": "Bb7",
+                "strategic_idea": "Your opponent finishes the fianchetto.",
+                "explanation": "The bishop goes to the long diagonal. For now your opponent's own c6-pawn blocks it, so Black is hoping for ...c5 later to open it against your e4-pawn and your king.",
                 "hint": null
             },
             {
                 "ply": 21,
                 "move_number": 11,
                 "turn": "white",
-                "san": "Qxe4",
-                "strategic_idea": null,
-                "explanation": null,
-                "hint": null
-            },
-            {
-                "ply": 22,
-                "move_number": 11,
-                "turn": "black",
-                "san": "Bb7",
-                "strategic_idea": null,
-                "explanation": null,
-                "hint": null
-            },
-            {
-                "ply": 23,
-                "move_number": 12,
-                "turn": "white",
                 "san": "Rd1",
-                "strategic_idea": null,
-                "explanation": null,
-                "hint": null
-            },
-            {
-                "ply": 24,
-                "move_number": 12,
-                "turn": "black",
-                "san": "Nf6",
-                "strategic_idea": null,
-                "explanation": null,
-                "hint": null
-            },
-            {
-                "ply": 25,
-                "move_number": 13,
-                "turn": "white",
-                "san": "Qe2",
-                "strategic_idea": null,
-                "explanation": null,
-                "hint": null
+                "strategic_idea": "You put your rook behind your d-pawn.",
+                "explanation": "The rook supports your d4-pawn and stands opposite the queen on d8. If Black plays ...c5, you are ready to answer with d4-d5 or to open the d-file.",
+                "hint": "Bring a rook behind your d-pawn."
             }
         ]
     },
@@ -271,10 +235,11 @@
         {
             "level": 3,
             "type": "learn",
-            "title": "The 9...dxe4 line up to 13.Qe2",
+            "title": "Your opponent takes on c4: 9...dxc4",
             "line_id": "main",
             "from_ply": 18,
-            "to_ply": 25
+            "to_ply": 21,
+            "intro": "You have just played 9.e4. Now your opponent gives up the center and takes your c4-pawn."
         }
     ]
 }

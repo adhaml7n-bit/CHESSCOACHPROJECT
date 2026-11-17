@@ -23,7 +23,7 @@ REAL_CHAPTER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ca
 
 # Chapter 1 of the app written as two study chapters (its levels 1 and 3).
 CH1_SETUP = "1. d4 Nf6 2. c4 e6 3. g3 d5 4. Bg2 Be7 5. Nf3 O-O 6. O-O c6 7. Qc2 Nbd7 8. Nbd2 b6 9. e4"
-CH1_DXE4 = CH1_SETUP + " dxe4 10. Nxe4 Nxe4 11. Qxe4 Bb7 12. Rd1 Nf6 13. Qe2"
+CH1_DXC4 = CH1_SETUP + " dxc4 10. Nxc4 Bb7 11. Rd1"
 
 COMMENTED = (
     "1. d4 { Take the center. [%cal Gd2d4] } 1... Nf6 { Stop e4. [%csl Ge4] } "
@@ -180,13 +180,13 @@ class PilotTest(unittest.TestCase):
     """Two study chapters must give back the moves and levels of catalan_ch01_v2.json."""
 
     def test_reproduces_chapter_1(self):
-        pgn = study_chapter(CH1_SETUP) + study_chapter(CH1_DXE4, chapter="9...dxe4")
+        pgn = study_chapter(CH1_SETUP) + study_chapter(CH1_DXC4, chapter="9...dxc4")
         chapter, warnings = pgn_to_chapter(pgn, "catalan_ch01_pilot")
         existing = load_level_chapter(REAL_CHAPTER_PATH)
         self.assertEqual(warnings, [])
         self.assertEqual(sans(chapter["lines"]["main"]), sans(existing["lines"]["main"]))
         self.assertEqual(ranges(chapter["levels"])[:3], ranges(existing["levels"]))
-        self.assertEqual(ranges(chapter["levels"])[3], (4, "quiz", "main", 18, 25))
+        self.assertEqual(ranges(chapter["levels"])[3], (4, "quiz", "main", 18, 21))
 
 
 class FileTests(unittest.TestCase):
