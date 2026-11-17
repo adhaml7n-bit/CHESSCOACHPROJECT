@@ -180,6 +180,8 @@ def _validate_quiz(level: dict, where: str, moves: list, player_color: str) -> N
         )
     if not any(step["turn"] == player_color for step in moves):
         raise ChapterFormatError(f"{where}: the quiz range has no {player_color} move to ask about.")
+    if not isinstance(level.get("retry_mistakes", False), bool):
+        raise ChapterFormatError(f"{where}: 'retry_mistakes' must be true or false.")
 
     rules = level.get("on_mistake")
     if not isinstance(rules, list) or not rules:
@@ -256,6 +258,10 @@ class LevelSession:
     The board always shows `fen`. Learn levels move with next_step() /
     previous_step(); quiz levels move with submit_move(). restart() plays the
     level again from its first position.
+
+    A quiz level with "retry_mistakes": true ends with a second-chance round:
+    every position the player got wrong is asked once more (in_retry is True
+    meanwhile). The level's accuracy still counts only the first pass.
     """
 
     def __init__(self, chapter: dict, level_number: int):
@@ -271,6 +277,7 @@ class LevelSession:
         self.player_color = meta["player_color"]
         self.pass_mark = meta.get("min_accuracy_to_pass", 0)
         self.show_explanations = self.level.get("show_explanations", self.kind == "learn")
+        self.retry_mistakes = self.kind == "quiz" and self.level.get("retry_mistakes", False)
 
         line = chapter["lines"][self.level["line_id"]]
         self.moves = line[self.level["from_ply"] - 1:self.level["to_ply"]]
@@ -288,23 +295,41 @@ class LevelSession:
         self._wrong: dict[int, int] = {}  # ply -> wrong attempts in this run (quiz)
         self.first_try_count = 0
         self.answered_count = 0
+        self.retry_queue: list[dict] = []     # positions asked again after the first pass
+        self.retry_index = 0
+        self._retry_wrong: dict[int, int] = {}
+        self.retry_results: dict[int, bool] = {}  # ply -> solved on the first try of the second chance
         return self._play_opponent_moves() if self.kind == "quiz" else []
 
     # -----------------------------------------------------------------
     # Board state (both level types)
     # -----------------------------------------------------------------
     @property
+    def _main_done(self) -> bool:
+        return self.cursor >= len(self.moves)
+
+    @property
+    def in_retry(self) -> bool:
+        """True during the second-chance round of a quiz."""
+        return self._main_done and self.retry_index < len(self.retry_queue)
+
+    @property
     def fen(self) -> str:
+        if self.in_retry:
+            return self.current_question["fen_before"]
         return self.moves[self.cursor - 1]["fen_after"] if self.cursor else self.start_fen
 
     @property
     def last_move(self) -> dict | None:
         """The last move on the board (for highlighting); None at the start."""
+        if self.in_retry:
+            index = self.moves.index(self.current_question)
+            return self.moves[index - 1] if index else None
         return self.moves[self.cursor - 1] if self.cursor else None
 
     @property
     def is_complete(self) -> bool:
-        return self.cursor >= len(self.moves)
+        return self._main_done and not self.in_retry
 
     @property
     def passed(self) -> bool:
@@ -353,7 +378,9 @@ class LevelSession:
     @property
     def current_question(self) -> dict | None:
         """The move the player must find now; None when the quiz is finished."""
-        return None if self.is_complete else self.moves[self.cursor]
+        if self.in_retry:
+            return self.retry_queue[self.retry_index]
+        return None if self._main_done else self.moves[self.cursor]
 
     @property
     def accuracy(self) -> float:
@@ -388,13 +415,16 @@ class LevelSession:
             }
 
         ply = expected["ply"]
+        retrying = self.in_retry
         if move.uci() != expected["uci"]:
-            wrong = self._wrong.get(ply, 0) + 1
-            self._wrong[ply] = wrong
+            counter = self._retry_wrong if retrying else self._wrong
+            wrong = counter.get(ply, 0) + 1
+            counter[ply] = wrong
             rule = self._rule_for(wrong)
             reveal = rule["action"] == "show_correct_move"
             return {
                 "status": "incorrect",
+                "retry": retrying,
                 "ply": ply,
                 "fen": expected["fen_before"],
                 "played_san": board.san(move),
@@ -407,14 +437,24 @@ class LevelSession:
                 "review_days": list(rule["review_days"]),
             }
 
-        wrong = self._wrong.get(ply, 0)
-        self.answered_count += 1
-        if wrong == 0:
-            self.first_try_count += 1
-        self.cursor += 1
-        opponent_moves = self._play_opponent_moves()
+        if retrying:
+            wrong = self._retry_wrong.get(ply, 0)
+            self.retry_results[ply] = wrong == 0
+            self.retry_index += 1
+            opponent_moves = []
+        else:
+            wrong = self._wrong.get(ply, 0)
+            self.answered_count += 1
+            if wrong == 0:
+                self.first_try_count += 1
+            self.cursor += 1
+            opponent_moves = self._play_opponent_moves()
+            if self._main_done and self.retry_mistakes:
+                self.retry_queue = [step for step in self.questions if self._wrong.get(step["ply"])]
         return {
             "status": "correct",
+            "retry": retrying,
+            "starts_retry": not retrying and self.in_retry,
             "ply": ply,
             "san": expected["san"],
             "uci": expected["uci"],
@@ -432,7 +472,7 @@ class LevelSession:
         """One entry per question, for the progress bar: 'ok' (first try),
         'hint' (solved after the hint), 'shown' (the correct move was shown),
         'current' (being asked now) or 'pending'."""
-        current_ply = None if self.is_complete else self.moves[self.cursor]["ply"]
+        current_ply = None if self._main_done else self.moves[self.cursor]["ply"]
         states = []
         for step in self.questions:
             ply = step["ply"]
@@ -460,6 +500,8 @@ class LevelSession:
                     "fen": step["fen_before"],
                     "wrong_attempts": wrong,
                     "review_days": list(self._rule_for(wrong)["review_days"]),
+                    # second chance: True = solved at once, False = not, None = no second chance (yet)
+                    "fixed": self.retry_results.get(step["ply"]),
                 })
         return items
 
@@ -477,7 +519,7 @@ class LevelSession:
 
     def _play_opponent_moves(self) -> list[dict]:
         played = []
-        while not self.is_complete and self.moves[self.cursor]["turn"] != self.player_color:
+        while not self._main_done and self.moves[self.cursor]["turn"] != self.player_color:
             played.append(self.moves[self.cursor])
             self.cursor += 1
         return played

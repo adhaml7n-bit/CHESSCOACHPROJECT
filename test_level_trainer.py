@@ -317,6 +317,73 @@ class QuizTests(unittest.TestCase):
             self.session.next_step()
 
 
+class RetryTests(unittest.TestCase):
+    """Quiz levels with "retry_mistakes": missed positions come back at the end."""
+
+    def setUp(self):
+        level = quiz_level(1, 1, len(SANS))
+        level["retry_mistakes"] = True
+        self.chapter = validate_level_chapter(make_chapter(levels=[level]))
+        self.session = LevelSession(self.chapter, 1)
+        self.main_line = self.chapter["lines"]["main"]
+
+    def test_no_mistakes_means_no_second_chance(self):
+        while not self.session.is_complete:
+            answer(self.session)
+        self.assertFalse(self.session.in_retry)
+        self.assertEqual(self.session.retry_queue, [])
+
+    def test_missed_position_comes_back_at_the_end(self):
+        answer(self.session)                    # 1.d4
+        answer(self.session, ["b1c3"])          # 2.c4 after the hint
+        result = answer(self.session)           # 3.g3 ends the first pass
+        self.assertTrue(result["starts_retry"])
+        self.assertTrue(self.session.in_retry)
+        self.assertFalse(self.session.is_complete)
+        self.assertEqual(self.session.current_question["san"], "c4")
+        self.assertEqual(self.session.fen, self.main_line[2]["fen_before"])
+        self.assertEqual(self.session.last_move["san"], "Nf6")
+        result = self.session.submit_move("c2c4")
+        self.assertTrue(result["retry"] and result["first_try"])
+        self.assertEqual(result["opponent_moves"], [])
+        self.assertTrue(self.session.is_complete)
+        self.assertEqual(self.session.accuracy, 66.7)  # only the first pass counts
+        self.assertEqual([(i["san"], i["fixed"]) for i in self.session.review_items()], [("c4", True)])
+
+    def test_mistake_in_the_second_chance(self):
+        answer(self.session, ["e2e4"])          # 1.d4 after the hint
+        answer(self.session)
+        answer(self.session)
+        result = self.session.submit_move("e2e4")
+        self.assertTrue(result["retry"])
+        self.assertEqual((result["status"], result["action"]), ("incorrect", "show_hint"))
+        self.assertTrue(self.session.in_retry)
+        self.session.submit_move("d2d4")
+        self.assertTrue(self.session.is_complete)
+        self.assertEqual(self.session.review_items()[0]["fixed"], False)
+        self.assertEqual(self.session.review_items()[0]["review_days"], [1, 7])  # from the first pass
+
+    def test_question_states_during_the_second_chance(self):
+        answer(self.session, ["e2e4"])
+        answer(self.session)
+        answer(self.session)
+        self.assertEqual(self.session.question_states(), ["hint", "ok", "ok"])
+
+    def test_restart_clears_the_second_chance(self):
+        answer(self.session, ["e2e4"])
+        answer(self.session)
+        answer(self.session)
+        self.session.restart()
+        self.assertFalse(self.session.in_retry)
+        self.assertEqual(self.session.current_question["san"], "d4")
+
+    def test_retry_flag_must_be_true_or_false(self):
+        data = make_chapter()
+        data["levels"][1]["retry_mistakes"] = "yes"
+        with self.assertRaises(ChapterFormatError):
+            validate_level_chapter(data)
+
+
 class RealChapterQuizTests(unittest.TestCase):
     """Level 2 of catalan_ch01_v2.json: 9 questions, pass mark 85%."""
 

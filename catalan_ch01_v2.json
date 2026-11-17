@@ -240,6 +240,29 @@
             "from_ply": 18,
             "to_ply": 21,
             "intro": "You have just played 9.e4. Now your opponent gives up the center and takes your c4-pawn."
+        },
+        {
+            "level": 4,
+            "type": "quiz",
+            "title": "Test: everything so far (levels 1 and 3)",
+            "line_id": "main",
+            "from_ply": 1,
+            "to_ply": 21,
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
         }
     ]
 }

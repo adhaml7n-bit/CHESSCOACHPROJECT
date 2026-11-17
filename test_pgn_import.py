@@ -185,7 +185,8 @@ class PilotTest(unittest.TestCase):
         existing = load_level_chapter(REAL_CHAPTER_PATH)
         self.assertEqual(warnings, [])
         self.assertEqual(sans(chapter["lines"]["main"]), sans(existing["lines"]["main"]))
-        self.assertEqual(ranges(chapter["levels"])[:3], ranges(existing["levels"]))
+        # Levels 1-3 match; the real level 4 was set by hand to test everything (plies 1-21).
+        self.assertEqual(ranges(chapter["levels"])[:3], ranges(existing["levels"])[:3])
         self.assertEqual(ranges(chapter["levels"])[3], (4, "quiz", "main", 18, 21))
 
 

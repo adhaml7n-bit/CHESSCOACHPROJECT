@@ -220,7 +220,7 @@ class LevelTrainerView:
             self.render()
             return
 
-        if result["first_try"]:
+        if result["first_try"] and not result["retry"]:  # a second chance in the same run is not a review
             self._save("record_correct", self.chapter_id, line_id, result["ply"])
         self.feedback = {"kind": "correct", "question": question, "result": result}
         if result["opponent_moves"] and self.opponent_delay > 0 and hasattr(self.page, "run_task"):
@@ -536,13 +536,21 @@ class LevelTrainerView:
 
     def _quiz_panel(self) -> list:
         session, t = self.session, self.theme
-        number = min(session.answered_count + 1, session.question_count)
-        body = [
-            self._label(f"Quiz · question {number} of {session.question_count}"),
-            self._segments(session.question_states()),
-            self._text("Your move", size=16, bold=True),
-            self._text("Play your move on the board. Your opponent will answer.", color=t["fg_secondary"]),
-        ]
+        if session.in_retry:
+            body = [
+                self._label(f"Second chance · position {session.retry_index + 1} of {len(session.retry_queue)}"),
+                self._segments(session.question_states()),
+                self._text("Your move", size=16, bold=True),
+                self._text("You missed this position earlier. Show that you've got it now.", color=t["fg_secondary"]),
+            ]
+        else:
+            number = min(session.answered_count + 1, session.question_count)
+            body = [
+                self._label(f"Quiz · question {number} of {session.question_count}"),
+                self._segments(session.question_states()),
+                self._text("Your move", size=16, bold=True),
+                self._text("Play your move on the board. Your opponent will answer.", color=t["fg_secondary"]),
+            ]
         feedback = self.feedback
         if feedback:
             question, result = feedback["question"], feedback["result"]
@@ -557,7 +565,11 @@ class LevelTrainerView:
                 body.append(self._label(f"We'll review this position {when}."))
             else:
                 idea = result["strategic_idea"] if session.show_explanations else None
-                body.append(self._box("success", f"Well done! {move_label(question)}", [idea] if idea else []))
+                lines = [idea] if idea else []
+                if result.get("starts_retry"):
+                    lines.append("Now let's go back to the positions you missed.")
+                title = f"You fixed it! {move_label(question)}" if result.get("retry") else f"Well done! {move_label(question)}"
+                body.append(self._box("success", title, lines))
         body.append(self._label(f"You got {session.first_try_count} of {session.answered_count} right on the first try."))
         return body
 
@@ -580,8 +592,16 @@ class LevelTrainerView:
                 body.append(self._label("We'll review these positions with you:"))
                 for item in items:
                     label = move_label({**item, "turn": self.player_color})
+                    if item["fixed"] is True:
+                        label += " · fixed on your second chance"
+                    elif item["fixed"] is False:
+                        label += " · still tricky"
                     body.append(self._text(f"{label} · {review_days_text(item['review_days'])}",
                                            color=t["fg_secondary"]))
+                if session.retry_mistakes:
+                    fixed = sum(1 for item in items if item["fixed"])
+                    body.append(self._text(f"You fixed {fixed} of {len(items)} on your second chance.",
+                                           color=t["success"] if fixed == len(items) else t["warning"]))
             if not passed:
                 body.append(self._box("warning", "Not passed yet", [
                     f"You need {self.pass_mark}% of the moves right on the first try to open the next level."
