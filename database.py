@@ -36,6 +36,9 @@ Spaced repetition (DESIGN.md section 3)
     answer on a due day moves on to the next day of the plan (never to the
     same day again); after the last one the position is mastered and does
     not come back. A new mistake restarts the plan.
+    On the last review the screen also asks why the move is played; a wrong
+    answer there keeps the position at that last review and brings it back
+    PURPOSE_RETRY_DAYS later (postpone_review), with the same questions.
 """
 
 import os
@@ -58,6 +61,8 @@ MAX_USERNAME_LENGTH = 32  # keep in sync with the CHECK on users.username
 # The quiz levels pass their own plan from the chapter JSON ("on_mistake"); these are the defaults.
 ONE_MISTAKE_DAYS = (1, 7)
 TWO_MISTAKES_DAYS = (1, 3, 7)
+# Right move but wrong purpose answer on the last review: back in this many days (owner, 2026-11-17).
+PURPOSE_RETRY_DAYS = 3
 
 
 class UsernameTakenError(ValueError):
@@ -595,6 +600,25 @@ class ChessCoachDB:
         return self._write(
             "UPDATE move_mistakes SET streak_correct = ?, next_due_at = ? WHERE mistake_id = ? AND user_id = ?",
             (streak, _format_time(next_due), mistake["mistake_id"], self.current_user_id),
+        )
+
+    def postpone_review(self, chapter_id: str, line_id: str | None, ply: int,
+                        days: int = PURPOSE_RETRY_DAYS) -> bool:
+        """Call when the move was found on the last review but the purpose answer was wrong.
+
+        The position is not mastered and stays at its last review; it comes back
+        `days` calendar days from today (local midnight) with the same questions.
+        Only a due position that is not mastered moves. Returns True if it moved.
+        """
+        if not isinstance(days, int) or isinstance(days, bool) or days < 1:
+            raise ValueError(f"days must be a whole number of 1 or more, got {days!r}.")
+        now = _utc_now()
+        return self._write(
+            "UPDATE move_mistakes SET next_due_at = ? "
+            "WHERE user_id = ? AND chapter_id = ? AND line_id = ? AND ply = ? "
+            "AND mastered_at IS NULL AND next_due_at <= ?",
+            (_format_time(_day_start_after(now, days)), self.current_user_id, chapter_id,
+             _position_line(line_id), ply, _format_time(now)),
         )
 
     def _due_filter(self, chapter_ids) -> tuple[str, list]:

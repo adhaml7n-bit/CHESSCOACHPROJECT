@@ -459,6 +459,36 @@ class MistakeTests(DatabaseTestCase):
         self.go_to(17)
         self.assertEqual(self.due_plies(), [7])
 
+    def test_a_wrong_purpose_answer_brings_the_last_review_back_in_3_days(self):
+        self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "e4")
+        self.go_to(16)
+        self.db.record_correct("catalan_ch01", None, 7)                     # day 1 done
+        self.go_to(22, 10)                                                  # day 7: right move, wrong purpose
+        self.assertTrue(self.db.postpone_review("catalan_ch01", None, 7))
+        row = self.row()
+        self.assertEqual((row["next_due_at"], row["streak_correct"], row["mastered_at"]),
+                         ("2026-11-25T00:00:00Z", 1, None))
+        self.assertFalse(self.db.postpone_review("catalan_ch01", None, 7))  # not due any more
+        self.go_to(24, 23)
+        self.assertEqual(self.due_plies(), [])
+        self.go_to(25)
+        self.assertEqual(self.due_plies(), [7])                             # still its last review
+        self.assertTrue(self.db.record_correct("catalan_ch01", None, 7))    # both answers right: mastered
+        self.assertIsNotNone(self.row()["mastered_at"])
+        self.assertFalse(self.db.postpone_review("catalan_ch01", None, 7))
+
+    def test_postpone_review_checks_its_days_and_saves_nothing_for_a_guest(self):
+        self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "e4")
+        self.go_to(16)
+        for bad in (0, -1, 1.5, True, "3"):
+            with self.assertRaises(ValueError, msg=bad):
+                self.db.postpone_review("catalan_ch01", None, 7, days=bad)
+        self.assertTrue(self.db.postpone_review("catalan_ch01", None, 7, days=1))
+        self.assertEqual(self.row()["next_due_at"], "2026-11-17T00:00:00Z")
+        self.go_to(17)
+        self.db.switch_to_guest()
+        self.assertFalse(self.db.postpone_review("catalan_ch01", None, 7))
+
     def test_tomorrow_starts_at_local_midnight(self):
         amman = timezone(timedelta(hours=3))
         with mock.patch.object(database, "_local_timezone", lambda: amman):
