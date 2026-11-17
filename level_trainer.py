@@ -425,7 +425,7 @@ def quiz_pass_mark(chapter: dict, level: dict) -> float:
 
 
 def summarize_levels(chapter: dict, line_rows: dict, extra_passed=frozenset()) -> list[dict]:
-    """Status of every level of a chapter, for the level bar.
+    """Status of every level of a chapter, for the levels page.
 
     line_rows    - ChessCoachDB.get_chapter_progress(chapter_id); each level is
                    saved under level_line_id(n).

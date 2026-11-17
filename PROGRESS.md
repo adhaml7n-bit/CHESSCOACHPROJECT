@@ -17,6 +17,7 @@ you learned, remembers the moves you get wrong, and includes a 2D board with **S
 | Engine & board | ✅ Done | Legal-move hints, promotion, castling, en passant, async Stockfish analysis with auto-detection |
 | Opening page | ✅ Done | Catalan introduction, "ideal setup" board, six chapters with progress bars and Start / Resume / Practice again |
 | Training screen | ✅ Done | Learn levels (move by move with ideas) and quiz levels (play the moves from memory) |
+| Levels page | ✅ Done | A chapter opens on a page with all its levels as tiles (passed, next, locked, best quiz score) and a Continue button; inside a level, a one-line header leaves the room to the board |
 | Mistakes in a quiz | ✅ Done | 1st mistake: a hint (or the piece to move is highlighted); 2nd: the correct move is shown and you play it |
 | Second chance | ✅ Done | Positions you missed come back at the end of a quiz, to check you understood |
 | Passing a level | ✅ Done | 85 % first-try accuracy opens the next level; one mistake is always allowed in a short quiz |
@@ -94,7 +95,7 @@ The database file `chesscoach.db` is created automatically on first launch and i
 ```powershell
 .venv\Scripts\python.exe -m unittest
 ```
-178 unit tests: database (47), levels, quizzes and reviews (70), study import (23), opening page data (6), board layout (9), piece pictures (6), review dates (2) and the engine (15, two of them with the real Stockfish when it is installed).
+183 unit tests: database (47), levels, quizzes and reviews (70), study import (23), opening page data (6), screen layout (14), piece pictures (6), review dates (2) and the engine (15, two of them with the real Stockfish when it is installed).
 
 ---
 
@@ -114,7 +115,8 @@ The database file `chesscoach.db` is created automatically on first launch and i
 - Fixed: with several Stockfish downloads, the app could pick a build for another processor and silently run without the engine. It now tries every binary it finds, builds for another processor last.
 - Chapter format: a line can branch from another line, each move's explanation is written once for its position, and a level can cover several lines one after another (preparing the full Closed Catalan).
 - Chapter 1 levels 9-16: the 7...b6 line to move 16, the e5 pawn structure (9...Nbd7, 13...a5, 9...Bb7) and the 7...Nbd7 side lines (9...dxe4, 8...b5, 8...Re8); levels 17-20: 6...b6 and 6...Ne4 with ...f5; levels 21-24: 4...Bb4+ 5.Bd2 Be7 (9...Nbd7, 9...Bb7, 9...Ba6); levels 25-28: 5...Bxd2+ (with 8...c5 and its three follow-ups); levels 29-32: 5...a5, the pawn-grab line with its traps, and 6...O-O; levels 33-36: 5...Bd6, and 4...Nbd7 with ...Bd6; levels 37-40: 4...g6 and 4...Ne4. Chapter 1 is complete.
-- 140 new unit tests (178 in total).
+- Levels page: a chapter now opens on a page with all its levels as tiles and a Continue button, instead of a bar of level buttons above the board; the board uses the room the bar took.
+- 145 new unit tests (183 in total).
 
 ### 2026-11-15 — Persistence & profiles
 - Added the SQLite database layer with 38 unit tests.

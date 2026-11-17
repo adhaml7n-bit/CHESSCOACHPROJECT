@@ -2,8 +2,11 @@
 ChessCoach - training screen for format-2 chapters (learn and quiz levels)
 =========================================================================
 Flet view of level_trainer.LevelSession, built from the design approved on
-2026-11-17 (DESIGN.md section 8): the level bar on top, the board on the left
-and the panel on the right.
+2026-11-17 (DESIGN.md section 8). A chapter opens on its levels page: every
+level as a tile, with a Continue button for the next level to play (owner's
+request 2026-11-17: the level bar above the board took too much room). A level
+then fills the screen: a one-line header, the board on the left and the panel
+on the right; "All levels" goes back to the levels page.
 
     learn  the moves are shown one by one with their ideas (Back / Next)
     quiz   the player plays their own moves with no explanations; the 1st
@@ -32,19 +35,39 @@ from level_trainer import LevelSession, level_line_id, load_level_chapter, summa
 OPPONENT_DELAY_SECONDS = 0.6  # pause before the opponent's reply in a quiz
 LEVEL_ICONS = {"learn": "📖", "quiz": "✎"}
 
-# Layout: the board fills the height left by the header and the level bar, and
-# the panel and the text grow with it, so a big window is not wasted.
+# Layout: the board fills the height left by the header, and the panel and the
+# text grow with it, so a big window is not wasted.
 BASE_SQUARE = 56            # square size the screen was designed at (scale 1.0)
 MIN_SQUARE, MAX_SQUARE = 48, 96
 MAX_SCALE = 1.35            # text and panel grow at most this much
 PANEL_BASE_WIDTH = 360
-CHROME_HEIGHT = 150         # page padding, header, level bar and spacing around the board
+CHROME_HEIGHT = 110         # page padding, the one-line header and the space under it
 SIDE_PADDING, GAP = 40, 20  # page padding (left + right); gap between board and panel
 DEFAULT_AREA = (925, 722)   # the app's start window (1180 x 780) minus the sidebar and the top bar
+
+# Levels page: tiles in rows that fill the width (sizes at scale 1.0).
+TILE_MIN_WIDTH, TILE_HEIGHT, TILE_GAP = 160, 84, 12
+GRID_MARGIN = 8             # kept free at the right so rounding never wraps a row early
 
 
 def _clamp(value, low, high):
     return max(low, min(high, value))
+
+
+def grid_columns(width: float, scale: float = 1.0) -> tuple[int, int]:
+    """Columns and tile width of the levels page for a content area `width`
+    pixels wide: as many tiles of at least TILE_MIN_WIDTH (scaled) as fit,
+    stretched to fill the row."""
+    usable = max(0, int(width) - SIDE_PADDING - GRID_MARGIN)
+    columns = max(1, (usable + TILE_GAP) // (round(TILE_MIN_WIDTH * scale) + TILE_GAP))
+    return columns, (usable - TILE_GAP * (columns - 1)) // columns
+
+
+def level_to_continue(levels: list[dict]) -> int | None:
+    """The level a player goes on with: the first one not passed yet (it is
+    always open, since every level before it is passed). None when every level
+    is passed. levels is level_trainer.summarize_levels()."""
+    return next((level["level"] for level in levels if level["unlocked"] and not level["passed"]), None)
 
 
 def compute_layout(width: float, height: float) -> dict:
@@ -272,13 +295,16 @@ class ScreenBase:
 
 class LevelTrainerView(ScreenBase):
     """The training screen of one format-2 chapter. Put `root` into the page.
+    It opens on the levels page (show_levels); open_level(n) plays a level.
 
     theme        - UI_THEMES[ui_mode] of the app
     board_colors - a BOARD_THEMES preset with the user's light_sq / dark_sq and
                    the piece colours (piece_white, piece_black, piece_shadow)
     db           - the app's ChessCoachDB, or None to save nothing
+    on_back      - called by the levels page's back button (the opening hub)
     area         - a function returning the (width, height) the screen may use;
-                   the board and panel are sized from it (DEFAULT_AREA if None)
+                   the board, the panel and the level tiles are sized from it
+                   (DEFAULT_AREA if None)
     """
 
     def __init__(self, page, chapter_path, theme: dict, board_colors: dict, db=None, on_back=None,
@@ -304,18 +330,60 @@ class LevelTrainerView(ScreenBase):
         self._passed_now = passed_now if passed_now is not None else {}
 
         self.root = ft.Container(expand=True, padding=20)
-        self.session: LevelSession | None = None
+        self.session: LevelSession | None = None  # the level on the board; None until one is opened
+        self.showing_levels = True
+        self.grid = None          # (columns, tile width) of the levels page
         self._levels: list[dict] = []
         self._token = 0
-        self.open_level(self._starting_level(), update=False)
+        self.show_levels(update=False)
 
     # -----------------------------------------------------------------
     # Public
     # -----------------------------------------------------------------
+    def show_levels(self, update: bool = True) -> None:
+        """Shows the levels page, with the progress read again."""
+        self._token += 1          # a pending opponent reply or engine check of the level is dropped
+        self._reset_level_state()
+        self.showing_levels = True
+        self.render(update)
+
     def open_level(self, number: int, update: bool = True) -> None:
         """Starts (or restarts) a level from its first position."""
         self.session = LevelSession(self.chapter, number)
         self._token += 1          # a pending opponent reply of the old level is dropped
+        self._reset_level_state()
+        self.showing_levels = False
+        self.render(update)
+
+    def render(self, update: bool = True) -> None:
+        self.layout = compute_layout(*self._area_size())
+        self._levels = self._load_levels()
+        self.root.bgcolor = self.theme["bg_main"]
+        if self.showing_levels:
+            controls = self._levels_page()
+        else:
+            controls = [
+                self._header(),
+                ft.Row(
+                    wrap=True,
+                    spacing=20,
+                    vertical_alignment=ft.CrossAxisAlignment.START,
+                    controls=[self._board(), self._panel()],
+                ),
+            ]
+        self.root.content = ft.Column(expand=True, scroll=ft.ScrollMode.AUTO, spacing=14, controls=controls)
+        if update:
+            self.page.update()
+
+    def relayout(self, update: bool = True) -> None:
+        """Called by the app when the window or the sidebar changes size: the
+        board, or on the levels page the number of tiles per row, may change."""
+        width, height = self._area_size()
+        layout = compute_layout(width, height)
+        if layout != self.layout or (self.showing_levels and grid_columns(width, layout["scale"]) != self.grid):
+            self.render(update)
+
+    def _reset_level_state(self) -> None:
         self.selected = None      # square of the selected piece
         self.feedback = None      # {"kind": "correct" | "hint" | "shown", "question": ..., "result": ...}
         self.busy = False         # True while the opponent's reply waits
@@ -324,29 +392,6 @@ class LevelTrainerView(ScreenBase):
         self.result_saved = False
         self.engine_rows = None   # [(step, opinion)] of the "Use engine" card, None = not asked
         self.engine_running = False
-        self.render(update)
-
-    def render(self, update: bool = True) -> None:
-        self.layout = compute_layout(*self._area_size())
-        self._levels = self._load_levels()
-        self.root.bgcolor = self.theme["bg_main"]
-        self.root.content = ft.Column(
-            expand=True,
-            scroll=ft.ScrollMode.AUTO,
-            spacing=14,
-            controls=[
-                self._header(),
-                self._level_bar(),
-                ft.Row(
-                    wrap=True,
-                    spacing=20,
-                    vertical_alignment=ft.CrossAxisAlignment.START,
-                    controls=[self._board(), self._panel()],
-                ),
-            ],
-        )
-        if update:
-            self.page.update()
 
     # -----------------------------------------------------------------
     # Progress
@@ -362,14 +407,6 @@ class LevelTrainerView(ScreenBase):
             except Exception as exc:
                 print(f"[ChessCoach] Could not read progress: {exc}")
         return summarize_levels(self.chapter, rows, self._passed_now.get((self._user_key(), self.chapter_id), set()))
-
-    def _starting_level(self) -> int:
-        """The first open level not passed yet; the last level when all are passed."""
-        levels = self._load_levels()
-        for level in levels:
-            if level["unlocked"] and not level["passed"]:
-                return level["level"]
-        return levels[-1]["level"]
 
     def _complete_level(self) -> None:
         if self.result_saved:
@@ -455,54 +492,105 @@ class LevelTrainerView(ScreenBase):
         self.render()
 
     # -----------------------------------------------------------------
-    # Header and level bar
+    # Training screen header (one line, so the board keeps the room)
     # -----------------------------------------------------------------
     def _header(self) -> ft.Row:
-        meta = self.chapter["chapter_meta"]
-        controls = []
-        if self.on_back:
-            controls.append(self._button(f"← {meta.get('opening_name') or 'Back'}", lambda e: self.on_back()))
-        controls.append(self._text(meta["chapter_title"], size=18, bold=True))
-        return ft.Row(spacing=12, vertical_alignment=ft.CrossAxisAlignment.CENTER, controls=controls)
+        session, t = self.session, self.theme
+        level = session.level
+        return ft.Row(spacing=12, vertical_alignment=ft.CrossAxisAlignment.CENTER, controls=[
+            self._button("← All levels", lambda e: self.show_levels()),
+            self._text(f"Level {session.level_number} of {len(self.chapter['levels'])}", size=18, bold=True),
+            self._chip(f"{LEVEL_ICONS[level['type']]} {level['type'].capitalize()}"),
+            ft.Container(expand=True, content=ft.Text(
+                level["title"], size=self._size(14), color=t["fg_secondary"],
+                max_lines=1, overflow=ft.TextOverflow.ELLIPSIS, tooltip=level["title"],
+            )),
+        ])
 
-    def _level_bar(self) -> ft.Row:
+    def _chip(self, label: str) -> ft.Container:
+        return ft.Container(
+            bgcolor=self.theme["section_bar_bg"],
+            border_radius=6,
+            padding=pad_symmetric(horizontal=self._size(8), vertical=self._size(3)),
+            content=ft.Text(label, size=self._size(12), weight=ft.FontWeight.W_600, color=self.theme["fg_secondary"]),
+        )
+
+    # -----------------------------------------------------------------
+    # Levels page: every level of the chapter as a tile
+    # -----------------------------------------------------------------
+    def _levels_page(self) -> list:
+        t, levels = self.theme, self._levels
+        meta = self.chapter["chapter_meta"]
+        header = []
+        if self.on_back:
+            header.append(self._button(f"← {meta.get('opening_name') or 'Back'}", lambda e: self.on_back()))
+        header.append(self._text(meta["chapter_title"], size=22, bold=True))
+
+        passed = sum(1 for level in levels if level["passed"])
+        percent = round(100 * passed / len(levels))
+        next_number = level_to_continue(levels)
+        if next_number is None:
+            go_on = self._text(f"You've passed all {len(levels)} levels. Pick any level to practise it again.",
+                               color=t["success"], bold=True)
+        else:
+            verb = "Start" if passed == 0 else "Continue"
+            go_on = ft.Row(wrap=True, spacing=12, vertical_alignment=ft.CrossAxisAlignment.CENTER, controls=[
+                self._button(f"{verb}: level {next_number} →", lambda e, n=next_number: self.open_level(n), primary=True),
+                self._text(levels[next_number - 1]["title"], color=t["fg_secondary"]),
+            ])
+
+        self.grid = grid_columns(self._area_size()[0], self.layout["scale"])
+        tiles = [self._level_tile(level, self.grid[1], level["level"] == next_number) for level in levels]
+        return [
+            ft.Row(spacing=12, vertical_alignment=ft.CrossAxisAlignment.CENTER, controls=header),
+            ft.Column(spacing=6, controls=[
+                self._label(f"{len(levels)} levels · {passed} passed · {percent}% complete"),
+                self._progress(passed, len(levels)),
+            ]),
+            go_on,
+            self._label(f"{LEVEL_ICONS['learn']} Learn: see the moves and their ideas · "
+                        f"{LEVEL_ICONS['quiz']} Quiz: play them from memory · 🔒 Pass a level to open the next one"),
+            ft.Row(wrap=True, spacing=TILE_GAP, run_spacing=TILE_GAP, controls=tiles),
+        ]
+
+    def _level_tile(self, level: dict, width: int, is_next: bool) -> ft.Container:
         t = self.theme
-        pills = []
-        for level in self._levels:
-            number = level["level"]
-            current = number == self.session.level_number
-            if level["passed"]:
-                icon, icon_color = "✓", t["success"]
-            elif not level["unlocked"]:
-                icon, icon_color = "🔒", t["fg_muted"]
-            else:
-                icon, icon_color = LEVEL_ICONS[level["type"]], t["fg_secondary"]
-            if current:
-                color = t["accent"]
-            else:
-                color = t["fg_secondary"] if level["unlocked"] else t["fg_muted"]
-            clickable = level["unlocked"] and not current
-            pills.append(
-                ft.Container(
-                    bgcolor=t["bg_panel"],
-                    border=border_all(2 if current else 1, t["accent"] if current else t["card_border"]),
-                    border_radius=8,
-                    padding=pad_symmetric(horizontal=self._size(10), vertical=self._size(5)),
-                    tooltip=level["title"],
-                    ink=clickable,
-                    on_click=(lambda e, n=number: self.open_level(n)) if clickable else None,
-                    content=ft.Row(
-                        tight=True,
-                        spacing=6,
-                        controls=[
-                            ft.Text(icon, size=self._size(12), color=icon_color),
-                            ft.Text(f"{number} {level['type'].capitalize()}", size=self._size(12),
-                                    weight=ft.FontWeight.W_600, color=color),
-                        ],
-                    ),
-                )
-            )
-        return ft.Row(wrap=True, spacing=8, controls=pills)
+        number, kind = level["level"], level["type"]
+        locked = not (level["unlocked"] or level["passed"])  # a passed level can always be practised
+        if level["passed"]:
+            accuracy = level["best_accuracy"]
+            status = f"✓ {round(accuracy)}%" if kind == "quiz" and accuracy is not None else "✓"
+            status_color, edge = t["success"], border_all(1, t["success"])
+        elif locked:
+            status, status_color, edge = "🔒", t["fg_muted"], border_all(1, t["card_border"])
+        elif is_next:
+            status, status_color, edge = "Next", t["accent"], border_all(2, t["accent"])
+        else:  # open but not the next one (only after a level's pass mark was raised)
+            status, status_color, edge = "", t["fg_secondary"], border_all(1, t["card_border"])
+        text_color = t["fg_muted"] if locked else t["fg_primary"]
+        return ft.Container(
+            width=width,
+            height=self._size(TILE_HEIGHT),
+            bgcolor=t["section_bar_bg"] if locked else t["bg_panel"],
+            border=edge,
+            border_radius=10,
+            padding=self._size(10),
+            tooltip=level["title"],
+            ink=not locked,
+            on_click=None if locked else (lambda e, n=number: self.open_level(n)),
+            content=ft.Column(spacing=self._size(4), controls=[
+                ft.Row(spacing=6, vertical_alignment=ft.CrossAxisAlignment.CENTER, controls=[
+                    ft.Text(str(number), size=self._size(16), weight=ft.FontWeight.BOLD,
+                            color=t["accent"] if is_next else text_color),
+                    ft.Text(f"{LEVEL_ICONS[kind]} {kind.capitalize()}", size=self._size(11),
+                            color=t["fg_muted"] if locked else t["fg_secondary"]),
+                    ft.Container(expand=True),
+                    ft.Text(status, size=self._size(11), weight=ft.FontWeight.BOLD, color=status_color),
+                ]),
+                ft.Text(level["title"], size=self._size(12), color=text_color,
+                        max_lines=2, overflow=ft.TextOverflow.ELLIPSIS),
+            ]),
+        )
 
     # -----------------------------------------------------------------
     # Board

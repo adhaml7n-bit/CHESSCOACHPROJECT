@@ -15,7 +15,12 @@ from level_view import (
     MAX_SQUARE,
     MIN_SQUARE,
     PANEL_BASE_WIDTH,
+    SIDE_PADDING,
+    TILE_GAP,
+    TILE_MIN_WIDTH,
     compute_layout,
+    grid_columns,
+    level_to_continue,
     move_label,
     review_days_text,
 )
@@ -28,7 +33,13 @@ class LayoutTests(unittest.TestCase):
 
     def test_big_window_grows_board_panel_and_text(self):
         # A maximized 1536 x 864 window (1920 x 1080 at 125 %) with the sidebar closed.
-        self.assertEqual(compute_layout(1536, 738), {"square": 72, "piece": 43, "panel": 463, "scale": 1.29})
+        self.assertEqual(compute_layout(1536, 738), {"square": 76, "piece": 46, "panel": 486, "scale": 1.35})
+
+    def test_board_and_header_fit_the_height(self):
+        # The one-line header (about 46 px at the biggest text) and the page padding fit above the board.
+        for height in (602, 722, 738, 900):
+            with self.subTest(height=height):
+                self.assertLessEqual(8 * compute_layout(1536, height)["square"] + 40 + 46 + 14, height)
 
     def test_closing_the_sidebar_gives_a_bigger_board(self):
         self.assertGreater(compute_layout(1180, 722)["square"], compute_layout(925, 722)["square"])
@@ -41,7 +52,7 @@ class LayoutTests(unittest.TestCase):
         # The smallest window (960 x 660) with the sidebar open: no room side by side,
         # so the board is limited by the height only and the row wraps.
         layout = compute_layout(705, 602)
-        self.assertEqual((layout["square"], layout["panel"]), (56, 360))
+        self.assertEqual((layout["square"], layout["panel"]), (60, 386))
         self.assertGreater(8 * layout["square"] + 20 + layout["panel"], 705 - 40)
 
     def test_tiny_area_never_goes_below_the_minimum(self):
@@ -56,6 +67,32 @@ class LayoutTests(unittest.TestCase):
                     self.assertTrue(MIN_SQUARE <= layout["square"] <= MAX_SQUARE)
                     self.assertTrue(1.0 <= layout["scale"] <= MAX_SCALE)
                     self.assertTrue(PANEL_BASE_WIDTH <= layout["panel"] <= round(PANEL_BASE_WIDTH * MAX_SCALE))
+
+
+class LevelsPageTests(unittest.TestCase):
+    def test_start_window_shows_five_tiles_per_row(self):
+        self.assertEqual(grid_columns(DEFAULT_AREA[0]), (5, 165))
+
+    def test_tiles_fill_the_row_and_never_get_too_small(self):
+        for width in range(300, 3001, 61):
+            for scale in (1.0, 1.2, MAX_SCALE):
+                columns, tile = grid_columns(width, scale)
+                with self.subTest(width=width, scale=scale):
+                    self.assertLessEqual(columns * tile + (columns - 1) * TILE_GAP, width - SIDE_PADDING)
+                    if columns > 1:
+                        self.assertGreaterEqual(tile, round(TILE_MIN_WIDTH * scale))
+
+    def test_a_wider_window_gives_more_tiles_per_row(self):
+        self.assertGreater(grid_columns(1500, MAX_SCALE)[0], grid_columns(1400, MAX_SCALE)[0])
+        self.assertEqual(grid_columns(200)[0], 1)
+
+    def test_level_to_continue(self):
+        def levels(*passed):
+            return [{"level": n, "unlocked": n == 1 or passed[n - 2], "passed": p} for n, p in enumerate(passed, 1)]
+
+        self.assertEqual(level_to_continue(levels(False, False, False)), 1)
+        self.assertEqual(level_to_continue(levels(True, True, False)), 3)
+        self.assertIsNone(level_to_continue(levels(True, True, True)))
 
 
 class TextTests(unittest.TestCase):
