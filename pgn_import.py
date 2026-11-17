@@ -41,6 +41,7 @@ from level_trainer import FORMAT_VERSION, ChapterFormatError, validate_level_cha
 
 MAX_MOVE_NUMBER = 14  # owner's rule: a branch ends by move 14 at the latest
 DEFAULT_PASS_MARK = 85
+DEFAULT_ALLOWED_MISTAKES = 1  # owner's rule: one first-try mistake always passes a (short) quiz
 DEFAULT_OPENING_NAME = "Catalan Opening"
 DEFAULT_MISTAKE_RULES = (
     {"wrong_attempt": 1, "action": "show_hint", "review_days": [1, 7]},
@@ -205,6 +206,7 @@ def pgn_to_chapter(
     player_color: str | None = None,
     opening_name: str = DEFAULT_OPENING_NAME,
     pass_mark: int = DEFAULT_PASS_MARK,
+    allowed_mistakes: int = DEFAULT_ALLOWED_MISTAKES,
 ) -> tuple[dict, list[str]]:
     """Builds a format-2 chapter from a study PGN. Returns (chapter, warnings).
 
@@ -255,6 +257,7 @@ def pgn_to_chapter(
             "player_color": player_color,
             "description": _one_paragraph(games[0].comment),
             "min_accuracy_to_pass": pass_mark,
+            "allowed_mistakes": allowed_mistakes,
         },
         "lines": lines,
         "levels": levels,
@@ -280,6 +283,7 @@ def import_pgn_file(
     opening_name: str = DEFAULT_OPENING_NAME,
     pass_mark: int = DEFAULT_PASS_MARK,
     force: bool = False,
+    allowed_mistakes: int = DEFAULT_ALLOWED_MISTAKES,
 ) -> tuple[dict, list[str]]:
     """Reads a study PGN file and writes the chapter file. Returns (chapter, warnings).
 
@@ -292,7 +296,8 @@ def import_pgn_file(
     if json_path.exists() and not force:
         raise PgnImportError(f"{json_path} already exists. Choose another name, or add --force to replace it.")
     pgn_text = Path(pgn_path).read_text(encoding="utf-8-sig")
-    chapter, warnings = pgn_to_chapter(pgn_text, json_path.stem, player_color, opening_name, pass_mark)
+    chapter, warnings = pgn_to_chapter(pgn_text, json_path.stem, player_color, opening_name, pass_mark,
+                                       allowed_mistakes)
     with open(json_path, "w", encoding="utf-8", newline="\n") as handle:
         handle.write(chapter_to_json(chapter))
     return chapter, warnings
@@ -308,11 +313,14 @@ def main(argv: list[str] | None = None) -> int:
                         help=f"opening name shown in the app (default: {DEFAULT_OPENING_NAME})")
     parser.add_argument("--pass-mark", type=int, default=DEFAULT_PASS_MARK,
                         help=f"quiz accuracy needed to pass, in %% (default: {DEFAULT_PASS_MARK})")
+    parser.add_argument("--allowed-mistakes", type=int, default=DEFAULT_ALLOWED_MISTAKES,
+                        help=f"first-try mistakes that always pass a short quiz (default: {DEFAULT_ALLOWED_MISTAKES})")
     parser.add_argument("--force", action="store_true", help="replace the output file if it already exists")
     args = parser.parse_args(argv)
 
     try:
-        chapter, warnings = import_pgn_file(args.pgn, args.output, args.color, args.opening, args.pass_mark, args.force)
+        chapter, warnings = import_pgn_file(args.pgn, args.output, args.color, args.opening, args.pass_mark,
+                                            force=args.force, allowed_mistakes=args.allowed_mistakes)
     except (PgnImportError, OSError) as exc:
         print(f"Import failed: {exc}", file=sys.stderr)
         return 1

@@ -97,6 +97,11 @@ def validate_level_chapter(data: dict) -> dict:
         raise ChapterFormatError(
             f"chapter_meta.min_accuracy_to_pass must be between 0 and 100, got {pass_mark!r}."
         )
+    allowed = meta.get("allowed_mistakes", 0)
+    if not _is_int(allowed) or allowed < 0:
+        raise ChapterFormatError(
+            f"chapter_meta.allowed_mistakes must be a whole number of 0 or more, got {allowed!r}."
+        )
 
     lines = data.get("lines")
     if not isinstance(lines, dict) or not lines:
@@ -214,6 +219,31 @@ def _validate_quiz(level: dict, where: str, moves: list, player_color: str) -> N
 # 2. Level progress (which levels are open)
 # =====================================================================
 
+def question_count(chapter: dict, level: dict) -> int:
+    """How many of the player's moves a level contains (the questions of a quiz)."""
+    color = chapter["chapter_meta"]["player_color"]
+    line = chapter["lines"][level["line_id"]]
+    return sum(1 for step in line[level["from_ply"] - 1:level["to_ply"]] if step["turn"] == color)
+
+
+def quiz_pass_mark(chapter: dict, level: dict) -> float:
+    """First-try accuracy a quiz level needs to be passed.
+
+    Normally chapter_meta.min_accuracy_to_pass. In a short quiz that mark can
+    mean "no mistake at all" (3 questions: one mistake is 67%), so the mark is
+    lowered until chapter_meta.allowed_mistakes first-try mistakes still pass.
+    A quiz always needs at least one move right on the first try. The value is
+    rounded like LevelSession.accuracy, so the two compare exactly.
+    """
+    meta = chapter["chapter_meta"]
+    pass_mark = meta.get("min_accuracy_to_pass", 0)
+    allowed = meta.get("allowed_mistakes", 0)
+    count = question_count(chapter, level)
+    if 0 < allowed < count:
+        return min(pass_mark, round(100 * (count - allowed) / count, 1))
+    return pass_mark
+
+
 def summarize_levels(chapter: dict, line_rows: dict, extra_passed=frozenset()) -> list[dict]:
     """Status of every level of a chapter, for the level bar.
 
@@ -223,10 +253,9 @@ def summarize_levels(chapter: dict, line_rows: dict, extra_passed=frozenset()) -
                    nothing, so this keeps a Guest moving forward until they leave.
 
     A learn level counts as passed once it is finished; a quiz level once its
-    best accuracy reaches min_accuracy_to_pass. Level 1 is always open; any
-    other level opens when the level before it is passed.
+    best accuracy reaches quiz_pass_mark(). Level 1 is always open; any other
+    level opens when the level before it is passed.
     """
-    pass_mark = chapter["chapter_meta"].get("min_accuracy_to_pass", 0)
     summary = []
     previous_passed = True
     for level in chapter["levels"]:
@@ -239,7 +268,7 @@ def summarize_levels(chapter: dict, line_rows: dict, extra_passed=frozenset()) -
         elif level["type"] == "learn":
             passed = row["times_completed"] >= 1
         else:
-            passed = row["best_accuracy"] is not None and row["best_accuracy"] >= pass_mark
+            passed = row["best_accuracy"] is not None and row["best_accuracy"] >= quiz_pass_mark(chapter, level)
         summary.append({
             "level": number,
             "type": level["type"],
@@ -279,7 +308,10 @@ class LevelSession:
         self.level_number = level_number
         self.kind = self.level["type"]
         self.player_color = meta["player_color"]
-        self.pass_mark = meta.get("min_accuracy_to_pass", 0)
+        self.allowed_mistakes = meta.get("allowed_mistakes", 0)
+        # The accuracy this level needs (lower than the chapter's mark in a short quiz).
+        self.pass_mark = (quiz_pass_mark(chapter, self.level) if self.kind == "quiz"
+                          else meta.get("min_accuracy_to_pass", 0))
         self.show_explanations = self.level.get("show_explanations", self.kind == "learn")
         self.retry_mistakes = self.kind == "quiz" and self.level.get("retry_mistakes", False)
 
@@ -385,6 +417,11 @@ class LevelSession:
         if self.in_retry:
             return self.retry_queue[self.retry_index]
         return None if self._main_done else self.moves[self.cursor]
+
+    @property
+    def mistake_count(self) -> int:
+        """Answered questions of the first pass that were not solved on the first try."""
+        return self.answered_count - self.first_try_count
 
     @property
     def accuracy(self) -> float:

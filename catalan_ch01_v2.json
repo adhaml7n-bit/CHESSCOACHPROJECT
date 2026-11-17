@@ -6,7 +6,8 @@
         "chapter_title": "Closed Catalan: 6...c6 with 8.Nbd2",
         "player_color": "white",
         "description": "Your opponent builds the solid c6-d5-e6 pawn triangle. You complete your development and prepare the central break e2-e4 to free your g2-bishop on the long diagonal.",
-        "min_accuracy_to_pass": 85
+        "min_accuracy_to_pass": 85,
+        "allowed_mistakes": 1
     },
     "lines": {
         "main": [
@@ -331,6 +332,29 @@
                 "Bring out your last pieces: your c1-bishop goes to f4 or g5, often after b3.",
                 "If Black exchanges on d4 (...cxd4), take back with a piece (Nxd4 or Rxd4) and keep control of the center.",
                 "When the c-file opens, bring your other rook to c1."
+            ]
+        },
+        {
+            "level": 6,
+            "type": "quiz",
+            "title": "Test: your answer to ...c5",
+            "line_id": "main",
+            "from_ply": 22,
+            "to_ply": 27,
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
             ]
         }
     ]

@@ -596,7 +596,7 @@ class LevelTrainerView:
             body.append(self._segments(session.question_states()))
             body.append(ft.Row(spacing=8, controls=[
                 self._metric("First-try accuracy", f"{round(session.accuracy)}%", t["fg_primary"]),
-                self._metric("Target", f"{self.pass_mark}% {'✓' if passed else '✗'}",
+                self._metric("Target", f"{round(session.pass_mark)}% {'✓' if passed else '✗'}",
                              t["success"] if passed else t["danger"]),
             ]))
             items = session.review_items()
@@ -615,9 +615,12 @@ class LevelTrainerView:
                     body.append(self._text(f"You fixed {fixed} of {len(items)} on your second chance.",
                                            color=t["success"] if fixed == len(items) else t["warning"]))
             if not passed:
-                body.append(self._box("warning", "Not passed yet", [
-                    f"You need {self.pass_mark}% of the moves right on the first try to open the next level."
-                ]))
+                if session.pass_mark < self.pass_mark:  # a short quiz: the mistake allowance decides
+                    allowed = session.allowed_mistakes
+                    rule = f"In this short test you can make at most {allowed} mistake{'s' if allowed != 1 else ''}."
+                else:
+                    rule = f"You need {self.pass_mark}% of the moves right on the first try to open the next level."
+                body.append(self._box("warning", "Not passed yet", [rule]))
         else:
             body.append(self._text("You've seen every move of this level.", color=t["fg_secondary"]))
             body.extend(self._key_ideas())

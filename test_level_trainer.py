@@ -138,6 +138,8 @@ class ValidationTests(unittest.TestCase):
             "old format": lambda d: d.update(format_version=1),
             "bad colour": lambda d: d["chapter_meta"].update(player_color="red"),
             "bad pass mark": lambda d: d["chapter_meta"].update(min_accuracy_to_pass=120),
+            "negative allowed mistakes": lambda d: d["chapter_meta"].update(allowed_mistakes=-1),
+            "allowed mistakes as text": lambda d: d["chapter_meta"].update(allowed_mistakes="1"),
         }
         for name, mutate in cases.items():
             with self.subTest(name):
@@ -386,6 +388,48 @@ class RetryTests(unittest.TestCase):
             validate_level_chapter(data)
 
 
+class ShortQuizTests(unittest.TestCase):
+    """chapter_meta.allowed_mistakes = 1: one first-try mistake always passes a quiz."""
+
+    def setUp(self):
+        data = make_chapter()
+        data["chapter_meta"]["allowed_mistakes"] = 1
+        self.chapter = validate_level_chapter(data)
+
+    def test_one_mistake_passes_a_short_quiz(self):
+        session = LevelSession(self.chapter, 2)  # 3 questions
+        self.assertEqual(session.pass_mark, 66.7)
+        answer(session, ["e2e4"])
+        answer(session)
+        answer(session)
+        self.assertEqual((session.accuracy, session.mistake_count), (66.7, 1))
+        self.assertTrue(session.passed)
+
+    def test_two_mistakes_still_fail(self):
+        session = LevelSession(self.chapter, 2)
+        answer(session, ["e2e4"])
+        answer(session, ["b1c3"])
+        answer(session)
+        self.assertFalse(session.passed)
+
+    def test_a_one_question_quiz_still_needs_the_right_move(self):
+        data = make_chapter(levels=[quiz_level(1, 1, 2)])
+        data["chapter_meta"]["allowed_mistakes"] = 1
+        session = LevelSession(validate_level_chapter(data), 1)
+        self.assertEqual(session.pass_mark, 85)
+        answer(session, ["e2e4"])
+        self.assertFalse(session.passed)
+
+    def test_level_summary_uses_the_same_rule(self):
+        def row(accuracy=None):
+            return {"times_completed": 1, "best_accuracy": accuracy, "last_played_at": "2026-11-17T12:00:00Z"}
+
+        summary = summarize_levels(self.chapter, {"level_1": row(), "level_2": row(66.7)})
+        self.assertTrue(summary[1]["passed"] and summary[2]["unlocked"])
+        summary = summarize_levels(self.chapter, {"level_1": row(), "level_2": row(33.3)})
+        self.assertFalse(summary[1]["passed"] or summary[2]["unlocked"])
+
+
 class RealChapterQuizTests(unittest.TestCase):
     """Level 2 of catalan_ch01_v2.json: 9 questions, pass mark 85%."""
 
@@ -400,6 +444,7 @@ class RealChapterQuizTests(unittest.TestCase):
 
     def test_one_mistake_still_passes(self):
         self.assertEqual(self.session.question_count, 9)
+        self.assertEqual(self.session.pass_mark, 85)  # a long quiz keeps the chapter's mark
         self.play({15: ["f1d1"]})  # 8.Rd1 instead of 8.Nbd2
         self.assertEqual(self.session.accuracy, 88.9)
         self.assertTrue(self.session.passed)
@@ -410,6 +455,16 @@ class RealChapterQuizTests(unittest.TestCase):
         self.assertFalse(self.session.passed)
         days = {item["san"]: item["review_days"] for item in self.session.review_items()}
         self.assertEqual(days, {"Qc2": [1, 7], "Nbd2": [1, 3, 7]})
+
+    def test_level_6_allows_one_mistake(self):
+        session = LevelSession(self.chapter, 6)
+        self.assertEqual(session.question_count, 3)
+        while not session.is_complete:
+            question = session.current_question
+            first_pass_nd6 = question["san"] == "Nd6" and not session.in_retry
+            answer(session, ["d4c5"] if first_pass_nd6 else [])
+        self.assertEqual(session.accuracy, 66.7)
+        self.assertTrue(session.passed)
 
     def test_hint_comes_from_the_chapter(self):
         while self.session.current_question["ply"] != 15:

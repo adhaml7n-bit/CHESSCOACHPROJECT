@@ -88,6 +88,7 @@ class ImportTests(unittest.TestCase):
         self.assertEqual((meta["chapter_id"], meta["chapter_title"], meta["player_color"]),
                          ("test_ch", "Closed Catalan", "white"))
         self.assertEqual((meta["description"], meta["min_accuracy_to_pass"]), ("Black builds a solid center.", 85))
+        self.assertEqual(meta["allowed_mistakes"], 1)
         main_line = chapter["lines"]["main"]
         self.assertEqual(sans(main_line), ["d4", "Nf6", "c4", "e6", "g3", "d5"])
         self.assertEqual((main_line[0]["strategic_idea"], main_line[0]["hint"]), ("Take the center.", None))
