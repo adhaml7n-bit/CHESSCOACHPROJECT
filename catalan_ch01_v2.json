@@ -2433,6 +2433,339 @@
                     "hint": "Get your king to safety."
                 }
             ]
+        },
+        "bb4_bd6": {
+            "from_line": "bb4_be7",
+            "after_ply": 9,
+            "moves": [
+                {
+                    "ply": 10,
+                    "move_number": 5,
+                    "turn": "black",
+                    "san": "Bd6",
+                    "strategic_idea": "Your opponent's bishop goes back to d6.",
+                    "explanation": "Instead of e7, the bishop goes to d6, where it aims at your kingside along the b8-h2 diagonal.",
+                    "hint": null
+                },
+                {
+                    "ply": 11,
+                    "move_number": 6,
+                    "turn": "white",
+                    "san": "Nf3",
+                    "strategic_idea": "You develop your king's knight.",
+                    "explanation": "It protects d4 and your d2-bishop and gets you ready to castle.",
+                    "hint": "Develop your king's knight to its usual square."
+                },
+                {
+                    "ply": 12,
+                    "move_number": 6,
+                    "turn": "black",
+                    "san": "c6",
+                    "strategic_idea": "Your opponent supports d5 with ...c6.",
+                    "explanation": "A solid setup: the d5-pawn is now protected by the c-pawn as well.",
+                    "hint": null
+                },
+                {
+                    "ply": 13,
+                    "move_number": 7,
+                    "turn": "white",
+                    "san": "Qc2",
+                    "strategic_idea": "Your queen protects c4.",
+                    "explanation": "From c2 it guards your c4-pawn and eyes the h7-pawn.",
+                    "hint": "Protect your c4-pawn with your queen."
+                },
+                {
+                    "ply": 14,
+                    "move_number": 7,
+                    "turn": "black",
+                    "san": "Nbd7",
+                    "strategic_idea": "Your opponent develops the knight to d7.",
+                    "explanation": "It supports the f6-knight and a later ...e5.",
+                    "hint": null
+                },
+                {
+                    "ply": 15,
+                    "move_number": 8,
+                    "turn": "white",
+                    "san": "O-O",
+                    "strategic_idea": "You castle.",
+                    "explanation": "Your king is safe behind the g2-bishop.",
+                    "hint": "Get your king to safety."
+                },
+                {
+                    "ply": 16,
+                    "move_number": 8,
+                    "turn": "black",
+                    "san": "O-O",
+                    "strategic_idea": "Your opponent castles too.",
+                    "explanation": "Both kings are safe; now the fight for e4 begins.",
+                    "hint": null
+                },
+                {
+                    "ply": 17,
+                    "move_number": 9,
+                    "turn": "white",
+                    "san": "Bg5",
+                    "strategic_idea": "Your bishop pins the f6-knight.",
+                    "explanation": "It leaves d2 and pins the knight against Black's queen on d8.",
+                    "hint": "Pin the f6-knight with your dark-squared bishop."
+                },
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "h6",
+                    "strategic_idea": "Your opponent asks your bishop to decide.",
+                    "explanation": "Black attacks the g5-bishop: you take or retreat.",
+                    "hint": null
+                },
+                {
+                    "ply": 19,
+                    "move_number": 10,
+                    "turn": "white",
+                    "san": "Bxf6",
+                    "strategic_idea": "You take the f6-knight.",
+                    "explanation": "It was the piece guarding e4, so your e2-e4 push gets easier.",
+                    "hint": "Take the f6-knight with your bishop."
+                },
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "Nxf6",
+                    "strategic_idea": "Your opponent takes back with the knight.",
+                    "explanation": "The d7-knight comes to f6 and guards e4 again.",
+                    "hint": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "Nbd2",
+                    "strategic_idea": "Your knight develops to d2.",
+                    "explanation": "From d2 it protects c4 and supports the e2-e4 push.",
+                    "hint": "Develop your b1-knight to a square where it supports e4."
+                },
+                {
+                    "ply": 22,
+                    "move_number": 11,
+                    "turn": "black",
+                    "san": "b6",
+                    "strategic_idea": "Your opponent prepares to develop the light-squared bishop.",
+                    "explanation": "It can go to b7 or a6 next.",
+                    "hint": null
+                },
+                {
+                    "ply": 23,
+                    "move_number": 12,
+                    "turn": "white",
+                    "san": "e4",
+                    "strategic_idea": "You break in the center.",
+                    "explanation": "Your e-pawn attacks d5 and opens lines for your pieces.",
+                    "hint": "Push your e-pawn two squares."
+                },
+                {
+                    "ply": 24,
+                    "move_number": 12,
+                    "turn": "black",
+                    "san": "Be7",
+                    "strategic_idea": "Your opponent's bishop goes back to e7.",
+                    "explanation": "Black keeps the tension in the center and protects the f6-knight.",
+                    "hint": null
+                },
+                {
+                    "ply": 25,
+                    "move_number": 13,
+                    "turn": "white",
+                    "san": "e5",
+                    "strategic_idea": "You push forward and chase the f6-knight.",
+                    "explanation": "Your e5-pawn gains space, and the knight has to move.",
+                    "hint": "Push your e-pawn and attack the f6-knight."
+                },
+                {
+                    "ply": 26,
+                    "move_number": 13,
+                    "turn": "black",
+                    "san": "Nd7",
+                    "strategic_idea": "Your opponent's knight goes back to d7.",
+                    "explanation": "From d7 it attacks your e5-pawn, which your f3-knight and your d4-pawn protect.",
+                    "hint": null
+                },
+                {
+                    "ply": 27,
+                    "move_number": 14,
+                    "turn": "white",
+                    "san": "Rfc1",
+                    "strategic_idea": "Your rook comes to c1.",
+                    "explanation": "It stands behind your queen and gets ready for the c-file, which opens if the c-pawns are exchanged.",
+                    "hint": "Bring a rook to the c-file."
+                }
+            ]
+        },
+        "bb4_bd6_qxf6": {
+            "from_line": "bb4_bd6",
+            "after_ply": 19,
+            "moves": [
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "Qxf6",
+                    "strategic_idea": "Your opponent takes back with the queen.",
+                    "explanation": "The queen now attacks your f3-knight and your d4-pawn.",
+                    "hint": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "Nbd2",
+                    "strategic_idea": "Your knight develops to d2.",
+                    "explanation": "It protects c4 and supports e2-e4, and your f3-knight is now protected three times.",
+                    "hint": "Develop your b1-knight to a square where it supports e4."
+                }
+            ]
+        },
+        "nbd7_bd6": {
+            "from_line": "main",
+            "after_ply": 7,
+            "moves": [
+                {
+                    "ply": 8,
+                    "move_number": 4,
+                    "turn": "black",
+                    "san": "Nbd7",
+                    "strategic_idea": "Your opponent develops the queenside knight to d7.",
+                    "explanation": "Black plans ...c6 and ...Bd6, a solid setup.",
+                    "hint": null
+                },
+                {
+                    "ply": 9,
+                    "move_number": 5,
+                    "turn": "white",
+                    "san": "Nf3",
+                    "strategic_idea": "You develop your king's knight.",
+                    "explanation": "It protects d4 and gets you ready to castle.",
+                    "hint": "Develop your king's knight to its usual square."
+                },
+                {
+                    "ply": 10,
+                    "move_number": 5,
+                    "turn": "black",
+                    "san": "c6",
+                    "strategic_idea": "Your opponent supports d5 with ...c6.",
+                    "explanation": "The d5-pawn is now protected by the c-pawn as well.",
+                    "hint": null
+                },
+                {
+                    "ply": 11,
+                    "move_number": 6,
+                    "turn": "white",
+                    "san": "O-O",
+                    "strategic_idea": "You castle.",
+                    "explanation": "Your king is safe behind the g2-bishop.",
+                    "hint": "Get your king to safety."
+                },
+                {
+                    "ply": 12,
+                    "move_number": 6,
+                    "turn": "black",
+                    "san": "Bd6",
+                    "strategic_idea": "Your opponent's bishop goes to d6.",
+                    "explanation": "From there it aims at your kingside and supports a later ...e5.",
+                    "hint": null
+                },
+                {
+                    "ply": 13,
+                    "move_number": 7,
+                    "turn": "white",
+                    "san": "Nc3",
+                    "strategic_idea": "Your queenside knight develops.",
+                    "explanation": "It adds pressure on d5.",
+                    "hint": "Develop your queenside knight to its natural square."
+                },
+                {
+                    "ply": 14,
+                    "move_number": 7,
+                    "turn": "black",
+                    "san": "O-O",
+                    "strategic_idea": "Your opponent castles.",
+                    "explanation": "Black's king is safe.",
+                    "hint": null
+                },
+                {
+                    "ply": 15,
+                    "move_number": 8,
+                    "turn": "white",
+                    "san": "Nd2",
+                    "strategic_idea": "Your f3-knight steps back to d2.",
+                    "explanation": "It protects c4, supports e2-e4, and opens the long diagonal for your g2-bishop.",
+                    "hint": "Move your f3-knight to a square where it supports e2-e4."
+                },
+                {
+                    "ply": 16,
+                    "move_number": 8,
+                    "turn": "black",
+                    "san": "Re8",
+                    "strategic_idea": "Your opponent's rook goes to e8.",
+                    "explanation": "Black prepares ...e5.",
+                    "hint": null
+                },
+                {
+                    "ply": 17,
+                    "move_number": 9,
+                    "turn": "white",
+                    "san": "e4",
+                    "strategic_idea": "You strike in the center first.",
+                    "explanation": "Before Black can play ...e5, you attack d5.",
+                    "hint": "Push your e-pawn two squares."
+                },
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "dxe4",
+                    "strategic_idea": "Your opponent takes on e4.",
+                    "explanation": "Black opens the center.",
+                    "hint": null
+                },
+                {
+                    "ply": 19,
+                    "move_number": 10,
+                    "turn": "white",
+                    "san": "Ndxe4",
+                    "strategic_idea": "You take back with your d2-knight.",
+                    "explanation": "It attacks the d6-bishop and the f6-knight.",
+                    "hint": "Take back on e4 with a knight."
+                },
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "Nxe4",
+                    "strategic_idea": "Your opponent trades knights.",
+                    "explanation": "Black removes your active knight.",
+                    "hint": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "Nxe4",
+                    "strategic_idea": "Your other knight takes back.",
+                    "explanation": "Now this knight attacks the d6-bishop.",
+                    "hint": "Take back on e4."
+                },
+                {
+                    "ply": 22,
+                    "move_number": 11,
+                    "turn": "black",
+                    "san": "Be7",
+                    "strategic_idea": "Your opponent's bishop steps back to e7.",
+                    "explanation": "Black avoids the knight's attack.",
+                    "hint": null
+                }
+            ]
         }
     },
     "levels": [
@@ -3166,6 +3499,102 @@
             "line_id": "bb4_a5_oo",
             "from_ply": 12,
             "to_ply": 19,
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 33,
+            "type": "learn",
+            "title": "5...Bd6: the bishop goes to d6",
+            "parts": [
+                {
+                    "line_id": "bb4_bd6",
+                    "from_ply": 10,
+                    "to_ply": 27,
+                    "key_ideas": [
+                        "Your e5-pawn gives you space on the kingside, as in the other e5 structures of this chapter.",
+                        "Keep the e5-pawn protected: your f3-knight and your d4-pawn guard it.",
+                        "If the c-pawns are exchanged, your rook on c1 takes the open c-file."
+                    ]
+                },
+                {
+                    "line_id": "bb4_bd6_qxf6",
+                    "from_ply": 20,
+                    "to_ply": 21,
+                    "intro": "If your opponent takes back with the queen, 10...Qxf6:",
+                    "key_ideas": [
+                        "You traded your bishop for the knight: now play e2-e4 to open the center.",
+                        "If Black plays ...e5, exchange on d5 and push e2-e4."
+                    ]
+                }
+            ],
+            "intro": "After 4...Bb4+ 5.Bd2 your opponent can also retreat the bishop to d6."
+        },
+        {
+            "level": 34,
+            "type": "quiz",
+            "title": "Test: 5...Bd6",
+            "parts": [
+                {
+                    "line_id": "bb4_bd6",
+                    "from_ply": 10,
+                    "to_ply": 27
+                },
+                {
+                    "line_id": "bb4_bd6_qxf6",
+                    "from_ply": 20,
+                    "to_ply": 21
+                }
+            ],
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 35,
+            "type": "learn",
+            "title": "4...Nbd7 and ...Bd6",
+            "line_id": "nbd7_bd6",
+            "from_ply": 8,
+            "to_ply": 22,
+            "intro": "After 4.Bg2 your opponent can also develop with 4...Nbd7, then ...c6 and ...Bd6.",
+            "key_ideas": [
+                "You have more space: your c4- and d4-pawns against Black's c6 and e6.",
+                "Develop your c1-bishop to f4, its most active square."
+            ]
+        },
+        {
+            "level": 36,
+            "type": "quiz",
+            "title": "Test: 4...Nbd7 and ...Bd6",
+            "line_id": "nbd7_bd6",
+            "from_ply": 8,
+            "to_ply": 22,
             "question_type": "play_move",
             "show_explanations": false,
             "retry_mistakes": true,
