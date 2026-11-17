@@ -323,6 +323,15 @@ class QuizTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             self.session.next_step()
 
+    def test_peek_classifies_without_counting(self):
+        self.assertEqual(self.session.peek("d2d4"), {"status": "correct", "uci": "d2d4"})
+        self.assertEqual(self.session.peek("a1a5"), {"status": "illegal"})
+        off_book = self.session.peek("e2e4")
+        self.assertEqual((off_book["status"], off_book["label"], off_book["book_uci"]), ("off_book", "1. e4", "d2d4"))
+        self.assertEqual(off_book["fen"], chess.STARTING_FEN)
+        self.assertEqual(self.session.question_states(), ["current", "pending", "pending"])  # nothing counted
+        self.assertTrue(self.session.submit_move("d2d4")["first_try"])
+
 
 class RetryTests(unittest.TestCase):
     """Quiz levels with "retry_mistakes": missed positions come back at the end."""
@@ -533,6 +542,14 @@ class ReviewTests(unittest.TestCase):
         self.assertTrue(session.is_complete)
         self.assertEqual((session.question_states(), session.accuracy), (["shown", "ok"], 50.0))
         self.assertEqual(session.submit_move("d1c2")["status"], "complete")
+
+    def test_review_peek_classifies_without_counting(self):
+        session = ReviewSession(build_review_items([self.row("main", 15)], self.chapters))
+        check = session.peek("f1d1")
+        self.assertEqual((check["status"], check["label"]), ("off_book", "8. Rd1"))
+        self.assertEqual(session.question_states(), ["current"])
+        self.assertTrue(session.submit_move("b1d2")["first_try"])
+        self.assertEqual(session.peek("b1d2"), {"status": "complete"})
 
     def test_nothing_to_review(self):
         session = ReviewSession([])

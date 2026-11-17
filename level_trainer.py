@@ -68,6 +68,26 @@ DEFAULT_MISTAKE_RULES = (
 )
 
 
+def classify_move(fen: str, book_uci: str, move_text: str) -> dict:
+    """What a move would be, without counting anything: 'correct', 'illegal' or
+    'off_book' (legal but not the lesson's move). The screen can ask the engine
+    about an off-book move before it counts as a mistake."""
+    board = chess.Board(fen)
+    move = _parse_move(board, move_text)
+    if move is None:
+        return {"status": "illegal"}
+    if move.uci() == book_uci:
+        return {"status": "correct", "uci": move.uci()}
+    dots = "." if board.turn == chess.WHITE else "..."
+    return {
+        "status": "off_book",
+        "uci": move.uci(),
+        "label": f"{board.fullmove_number}{dots} {board.san(move)}",
+        "fen": fen,
+        "book_uci": book_uci,
+    }
+
+
 def rule_for(rules, wrong_attempt: int) -> dict:
     """The mistake rule for this wrong attempt; later attempts repeat the last rule."""
     return rules[min(wrong_attempt, len(rules)) - 1]
@@ -472,6 +492,14 @@ class LevelSession:
             return 100.0
         return round(100 * self.first_try_count / self.answered_count, 1)
 
+    def peek(self, move_text: str) -> dict:
+        """classify_move() for the current question; nothing is counted."""
+        self._require("quiz")
+        question = self.current_question
+        if question is None:
+            return {"status": "complete"}
+        return classify_move(question["fen_before"], question["uci"], move_text)
+
     def submit_move(self, move_text: str) -> dict:
         """Checks the player's move (UCI like 'g1f3' or SAN like 'Nf3').
 
@@ -703,6 +731,13 @@ class ReviewSession:
         if not self.answered_count:
             return 100.0
         return round(100 * self.first_try_count / self.answered_count, 1)
+
+    def peek(self, move_text: str) -> dict:
+        """classify_move() for the current position; nothing is counted."""
+        item = self.current
+        if item is None:
+            return {"status": "complete"}
+        return classify_move(item["step"]["fen_before"], item["step"]["uci"], move_text)
 
     def submit_move(self, move_text: str) -> dict:
         """Checks the player's move; the result looks like LevelSession.submit_move's."""
