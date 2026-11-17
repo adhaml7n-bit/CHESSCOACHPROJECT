@@ -28,7 +28,9 @@ Key Features:
 
 from board_pieces import ASSETS_DIR, piece_controls
 from level_view import LevelTrainerView
+from opening_hub import chapters_by_id
 from opening_hub_view import OpeningHubView
+from review_view import ReviewView
 from database import ChessCoachDB
 import asyncio
 import glob
@@ -262,6 +264,8 @@ class ChessCoachFletApp:
         # ---- Opening hub (OpeningHubView) and training screen (LevelTrainerView) ----
         self.opening_hub = None
         self.level_trainer = None
+        self.daily_review = None       # ReviewView, created when the Daily Revised card is opened
+        self._review_chapters = None   # {chapter_id: chapter} the review can open (loaded once)
         # (user id or None for a Guest, chapter id) -> levels passed while the app is open.
         # Shared by both screens, so a Guest keeps moving forward until the app closes.
         self.passed_now = {}
@@ -330,6 +334,8 @@ class ChessCoachFletApp:
         """Call after the signed-in user changed: load that user's settings and repaint."""
         self._load_user_settings()
         self.account_btn_text.value = self._account_label()
+        if self.daily_review is not None:  # the new user's positions, not the old user's
+            self.daily_review.start(update=False)
         self._apply_theme()  # re-colours every view and ends with page.update()
 
     def _switch_account(self, user_id: int) -> bool:
@@ -500,6 +506,7 @@ class ChessCoachFletApp:
         self.engine_view = ft.Container(expand=True, visible=False)
         self.opening_trainer_view = ft.Container(expand=True, visible=False)
         self.opening_hub_view = ft.Container(expand=True, visible=False)
+        self.review_view = ft.Container(expand=True, visible=False)
 
         self._build_homepage()
         self._build_engine_page()
@@ -514,6 +521,7 @@ class ChessCoachFletApp:
                     self.engine_view,
                     self.opening_trainer_view,
                     self.opening_hub_view,
+                    self.review_view,
                 ],
             ),
         )
@@ -545,6 +553,8 @@ class ChessCoachFletApp:
         self.hamburger_icon_text.color = "#FFFFFF" if self.sidebar_open else t["fg_primary"]
         if self.level_trainer is not None:  # more or less room: the board may change size
             self.level_trainer.relayout(update=False)
+        if self.daily_review is not None:
+            self.daily_review.relayout(update=False)
         self.page.update()
 
     # -----------------------------------------------------------------
@@ -756,10 +766,10 @@ class ChessCoachFletApp:
             controls=[
                 self._create_card(
                     title="Daily Revised",
-                    subtitle="Review recent training drills & tactical patterns",
-                    badge="Daily Training",
+                    subtitle="The positions you missed, back on their review days",
+                    badge=self._due_badge(),
                     is_small=True,
-                    on_click=lambda: self.show_card_placeholder("Daily Revised"),
+                    on_click=self.open_daily_review,
                 ),
                 self._create_card(
                     title="Daily Puzzles",
@@ -1098,6 +1108,7 @@ class ChessCoachFletApp:
         self.engine_view.visible = page_name == "engine"
         self.opening_trainer_view.visible = page_name == "opening_trainer"
         self.opening_hub_view.visible = page_name == "opening_hub"
+        self.review_view.visible = page_name == "daily_review"
         self._populate_sidebar()
         if page_name == "engine":
             self.draw_board(update_ui=False)
@@ -1166,10 +1177,52 @@ class ChessCoachFletApp:
         return width - (SIDEBAR_WIDTH if self.sidebar_open else 0), height - TOP_BAR_HEIGHT
 
     def _on_page_resized(self, e=None):
-        """The window changed size: the training screen resizes its board if needed."""
-        trainer = getattr(self, "level_trainer", None)
-        if trainer is not None:
-            trainer.relayout()
+        """The window changed size: the training and review screens resize their boards if needed."""
+        for screen in (getattr(self, "level_trainer", None), getattr(self, "daily_review", None)):
+            if screen is not None:
+                screen.relayout()
+
+    def _review_chapters_by_id(self) -> dict:
+        """{chapter_id: chapter} of every ready chapter, for the Daily review (loaded once)."""
+        if self._review_chapters is None:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            self._review_chapters = chapters_by_id([os.path.join(script_dir, "catalan_opening.json")])
+        return self._review_chapters
+
+    def _due_badge(self) -> str:
+        """Badge of the Daily Revised card: how many positions are due now."""
+        try:
+            due = self.db.count_due_mistakes(list(self._review_chapters_by_id()))
+        except Exception as exc:  # a broken chapter file or a locked database must not hide the homepage
+            print(f"[ChessCoach] Could not count the reviews: {exc}")
+            return "Daily Training"
+        return f"{due} due today" if due else "Nothing due"
+
+    def open_daily_review(self):
+        """Opens the Daily review: the positions you missed that are due today."""
+        try:
+            self.daily_review = ReviewView(
+                page=self.page,
+                chapters=self._review_chapters_by_id(),
+                theme=UI_THEMES[self.ui_mode],
+                board_colors=self._board_colors(),
+                db=self.db,
+                on_back=self.back_to_home,
+                area=self._content_area_size,
+            )
+            self.review_view.content = self.daily_review.root
+            self.show_page("daily_review")
+        except Exception as exc:
+            self.daily_review = None
+            self._show_info_dialog(
+                "Daily Review Error",
+                f"Could not open the daily review:\n{exc}",
+            )
+
+    def back_to_home(self):
+        """Back from the Daily review: the homepage shows the new number of due positions."""
+        self._build_homepage()
+        self.show_page("homepage")
 
     def back_to_hub(self):
         """Back from the training screen: the hub shows the updated progress."""
@@ -1196,6 +1249,8 @@ class ChessCoachFletApp:
             self.level_trainer.set_theme(UI_THEMES[self.ui_mode], self._board_colors(), update=False)
         if self.opening_hub is not None:
             self.opening_hub.set_theme(UI_THEMES[self.ui_mode], self._board_colors(), update=False)
+        if self.daily_review is not None:
+            self.daily_review.set_theme(UI_THEMES[self.ui_mode], self._board_colors(), update=False)
         self.page.update()
 
     # -----------------------------------------------------------------
@@ -1989,10 +2044,13 @@ class ChessCoachFletApp:
         self.engine_view.visible = self.current_page == "engine"
         self.opening_trainer_view.visible = self.current_page == "opening_trainer"
         self.opening_hub_view.visible = self.current_page == "opening_hub"
+        self.review_view.visible = self.current_page == "daily_review"
         if self.level_trainer is not None:  # also re-reads progress after an account change
             self.level_trainer.set_theme(t, self._board_colors(), update=False)
         if self.opening_hub is not None:
             self.opening_hub.set_theme(t, self._board_colors(), update=False)
+        if self.daily_review is not None:
+            self.daily_review.set_theme(t, self._board_colors(), update=False)
         self.page.update()
 
     # -----------------------------------------------------------------

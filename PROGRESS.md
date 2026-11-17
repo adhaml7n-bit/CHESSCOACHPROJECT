@@ -28,8 +28,9 @@ you learned, remembers the moves you get wrong, and includes a 2D board with **S
 | Saved settings | ✅ Done | Theme and board colours restored per profile |
 | Progress tracking | ✅ Done | Results per level; a Guest keeps progress until the app closes |
 | Mistake tracking | ✅ Done | Every wrong move stored with its position, ready for spaced repetition |
-| Review schedule & daily review | 🔜 Next | Review days shown in quizzes drive the schedule; the "Daily Revised" card drills due positions |
-| Engine-approved alternatives | 📋 Planned | Moves Stockfish rates almost as good as the book move count as correct |
+| Review schedule | ✅ Done | A missed position comes back tomorrow and on day 7 (after two mistakes: days 1, 3 and 7), then it is mastered |
+| Daily review | ✅ Done | The "Daily Revised" card shows how many positions are due and drills them, with the next review date after each answer |
+| Engine-approved alternatives | 🔜 Next | Moves Stockfish rates almost as good as the book move count as correct |
 | Chapters 2–6 | 📋 Planned | Open Catalan, and the Catalan against the King's Indian, Semi-Slav, Grünfeld and other defences |
 | Profile editing & online links | ⏸ Postponed | Rename profile, link Chess.com / Lichess accounts |
 
@@ -39,7 +40,7 @@ you learned, remembers the moves you get wrong, and includes a 2D board with **S
 
 | Layer | Files | Responsibility |
 |---|---|---|
-| Interface | `chesscoach_flet.py`, `opening_hub_view.py`, `level_view.py`, `board_pieces.py`, `flet_compat.py` | Windows, themes, dialogs, the opening page, the training screen, board pieces |
+| Interface | `chesscoach_flet.py`, `opening_hub_view.py`, `level_view.py`, `review_view.py`, `board_view.py`, `board_pieces.py`, `flet_compat.py` | Windows, themes, dialogs, the opening page, the training and review screens, the board and its pieces |
 | Training logic | `level_trainer.py`, `opening_hub.py` | Validates chapters and moves, runs learn / quiz levels, scores accuracy, unlocks levels; no UI, no database |
 | Curriculum | `catalan_opening.json`, `catalan_ch01_v2.json` | The opening page (intro, setup, chapter list) and chapter 1 (lines, ideas, hints, levels) |
 | Content tools | `pgn_import.py` | Lichess study PGN → chapter file |
@@ -60,14 +61,15 @@ Design principles:
 
 ## Spaced repetition
 
-Today:
-1. A wrong move is recorded and becomes due for review immediately.
-2. Answering that position correctly on the first try moves it back **1 day**, then **3 days**.
-3. The third correct answer in a row marks it as **mastered**.
-4. Any new mistake on the position resets its streak.
+1. A wrong move in a quiz is recorded with its review days: after one mistake **tomorrow and day 7**,
+   after two mistakes on the same position **days 1, 3 and 7**. Days are counted from the day of the
+   mistake, in your local time ("tomorrow" starts at midnight).
+2. On a review day, the position appears in the **Daily review**. Finding the move on the first try moves
+   it to its next review day; after the last one it is **mastered** and does not come back.
+3. A late review never brings a position back on the same day.
+4. A new mistake restarts the position's review days.
 
-Next: the review days a quiz shows you will drive this schedule: after one mistake **tomorrow and in 7 days**,
-after two mistakes **tomorrow, in 3 days and in 7 days**.
+Repeating the same line many times in one day does not count as a review.
 
 ---
 
@@ -89,7 +91,7 @@ The database file `chesscoach.db` is created automatically on first launch and i
 ```powershell
 .venv\Scripts\python.exe -m unittest
 ```
-129 unit tests: database (38), levels and quizzes (48), study import (23), opening page data (5), board layout (9) and piece pictures (6).
+142 unit tests: database (45), levels, quizzes and reviews (51), study import (23), opening page data (6), board layout (9), piece pictures (6) and review dates (2).
 
 ---
 
@@ -102,7 +104,9 @@ The database file `chesscoach.db` is created automatically on first launch and i
 - Lichess study importer for new chapters.
 - The board, the panel and the text grow with the window.
 - Pieces are now Merida pictures on every board (the black pawn no longer shows as an emoji on Windows).
-- 91 new unit tests (129 in total).
+- Review schedule: missed positions come back tomorrow and on day 7 (days 1, 3 and 7 after two mistakes); database schema version 2 (existing progress is kept).
+- Daily review screen behind the homepage's "Daily Revised" card.
+- 104 new unit tests (142 in total).
 
 ### 2026-11-15 — Persistence & profiles
 - Added the SQLite database layer with 38 unit tests.

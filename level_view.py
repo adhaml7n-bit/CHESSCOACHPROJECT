@@ -23,8 +23,9 @@ import os
 import chess
 import flet as ft
 
-from board_pieces import ASSETS_DIR, piece_controls
-from flet_compat import align_center, border_all, pad_symmetric
+from board_pieces import ASSETS_DIR
+from board_view import click_square, render_board
+from flet_compat import border_all, pad_symmetric
 from level_trainer import LevelSession, level_line_id, load_level_chapter, summarize_levels
 
 OPPONENT_DELAY_SECONDS = 0.6  # pause before the opponent's reply in a quiz
@@ -77,6 +78,21 @@ def move_label(step: dict) -> str:
     return f"{step['move_number']}{dots} {step['san']}"
 
 
+def feedback_marks(feedback: dict | None, busy: bool = False) -> dict:
+    """Squares to outline after a mistake: the correct move's squares once it is
+    shown, or the piece to move as an automatic hint when the move has no
+    written hint. feedback holds the submit result ("result") and the expected
+    move ("question" with its uci)."""
+    if not feedback or busy:
+        return {}
+    if feedback["kind"] == "shown":
+        move = chess.Move.from_uci(feedback["result"]["correct_uci"])
+        return {move.from_square: 3, move.to_square: 4}
+    if feedback["kind"] == "hint" and not feedback["result"]["hint"]:
+        return {chess.parse_square(feedback["question"]["uci"][:2]): 4}
+    return {}
+
+
 def review_days_text(days: list[int]) -> str:
     """[1, 7] -> 'tomorrow and in 7 days'; [1, 3, 7] -> 'tomorrow, in 3 days and in 7 days'."""
     parts = ["tomorrow" if day == 1 else f"in {day} days" for day in days]
@@ -85,7 +101,117 @@ def review_days_text(days: list[int]) -> str:
     return ", ".join(parts[:-1]) + " and " + parts[-1]
 
 
-class LevelTrainerView:
+class ScreenBase:
+    """What the training screen and the review screen share: sizing from the
+    window, theme changes and the panel's building blocks. A subclass sets
+    page, theme, board_colors, area and layout, and implements render()."""
+
+    def set_theme(self, theme: dict, board_colors: dict, update: bool = True) -> None:
+        """Called by the app after a theme, board colour or account change."""
+        self.theme = theme
+        self.board_colors = board_colors
+        self.render(update)
+
+    def relayout(self, update: bool = True) -> None:
+        """Called by the app when the window or the sidebar changes size; redraws
+        only when the board or panel size actually changes."""
+        if compute_layout(*self._area_size()) != self.layout:
+            self.render(update)
+
+    def _area_size(self) -> tuple[float, float]:
+        if self.area is None:
+            return DEFAULT_AREA
+        try:
+            width, height = self.area()
+            return float(width), float(height)
+        except Exception:  # an unknown window size must never break the screen
+            return DEFAULT_AREA
+
+    def _size(self, value: int) -> int:
+        """A size from the design (fonts, dots) scaled to the current layout."""
+        return round(value * self.layout["scale"])
+
+    def _text(self, value: str, size: int = 13, color: str | None = None, bold: bool = False) -> ft.Text:
+        return ft.Text(
+            value,
+            size=self._size(size),
+            color=color or self.theme["fg_primary"],
+            weight=ft.FontWeight.BOLD if bold else None,
+        )
+
+    def _label(self, value: str) -> ft.Text:
+        return self._text(value, size=12, color=self.theme["fg_secondary"])
+
+    def _button(self, label: str, on_click, primary: bool = False) -> ft.Container:
+        t = self.theme
+        return ft.Container(
+            bgcolor=t["accent"] if primary else t["btn_bg"],
+            border_radius=8,
+            padding=pad_symmetric(horizontal=self._size(14), vertical=self._size(8)),
+            on_click=on_click,
+            ink=True,
+            content=ft.Text(
+                label,
+                size=self._size(13),
+                weight=ft.FontWeight.W_600,
+                color=t["fg_on_accent"] if primary else t["btn_fg"],
+            ),
+        )
+
+    def _box(self, kind: str, title: str, lines: list[str]) -> ft.Container:
+        """A coloured message box; kind is 'success', 'warning' or 'danger'."""
+        t = self.theme
+        return ft.Container(
+            bgcolor=t[f"{kind}_bg"],
+            border=border_all(1, t[kind]),
+            border_radius=8,
+            padding=12,
+            content=ft.Column(
+                spacing=4,
+                controls=[self._text(title, color=t[kind], bold=True)] + [self._text(line) for line in lines],
+            ),
+        )
+
+    def _segments(self, states: list[str]) -> ft.Row:
+        """Progress of a quiz or review: one bar per question, coloured by its result."""
+        t = self.theme
+        colors = {"ok": t["success"], "hint": t["warning"], "shown": t["danger"],
+                  "current": t["accent"], "pending": t["border"]}
+        return ft.Row(
+            spacing=3,
+            controls=[ft.Container(expand=1, height=6, border_radius=3, bgcolor=colors[s]) for s in states],
+        )
+
+    def _progress(self, done: int, total: int) -> ft.Row:
+        t = self.theme
+        if done <= 0:
+            parts = [(1, t["border"])]
+        elif done >= total:
+            parts = [(1, t["accent"])]
+        else:
+            parts = [(done, t["accent"]), (total - done, t["border"])]
+        return ft.Row(spacing=0, controls=[ft.Container(expand=w, height=4, bgcolor=c) for w, c in parts])
+
+    def _metric(self, label: str, value: str, color: str) -> ft.Container:
+        return ft.Container(
+            expand=1,
+            bgcolor=self.theme["section_bar_bg"],
+            border_radius=8,
+            padding=10,
+            content=ft.Column(spacing=2, controls=[self._label(label), self._text(value, size=22, color=color, bold=True)]),
+        )
+
+    def _save(self, method_name: str, *args) -> None:
+        """Calls a ChessCoachDB method; a database problem never stops the lesson."""
+        if self.db is None:
+            return
+        try:
+            getattr(self.db, method_name)(*args)
+        except Exception as exc:  # e.g. the file is locked for longer than the timeout
+            print(f"[ChessCoach] Could not save progress ({method_name}): {exc}")
+
+
+class LevelTrainerView(ScreenBase):
     """The training screen of one format-2 chapter. Put `root` into the page.
 
     theme        - UI_THEMES[ui_mode] of the app
@@ -138,18 +264,6 @@ class LevelTrainerView:
         self.result_saved = False
         self.render(update)
 
-    def set_theme(self, theme: dict, board_colors: dict, update: bool = True) -> None:
-        """Called by the app after a theme, board colour or account change."""
-        self.theme = theme
-        self.board_colors = board_colors
-        self.render(update)
-
-    def relayout(self, update: bool = True) -> None:
-        """Called by the app when the window or the sidebar changes size; redraws
-        only when the board or panel size actually changes."""
-        if compute_layout(*self._area_size()) != self.layout:
-            self.render(update)
-
     def render(self, update: bool = True) -> None:
         self.layout = compute_layout(*self._area_size())
         self._levels = self._load_levels()
@@ -172,33 +286,11 @@ class LevelTrainerView:
         if update:
             self.page.update()
 
-    def _area_size(self) -> tuple[float, float]:
-        if self.area is None:
-            return DEFAULT_AREA
-        try:
-            width, height = self.area()
-            return float(width), float(height)
-        except Exception:  # an unknown window size must never break the screen
-            return DEFAULT_AREA
-
-    def _size(self, value: int) -> int:
-        """A size from the design (fonts, dots) scaled to the current layout."""
-        return round(value * self.layout["scale"])
-
     # -----------------------------------------------------------------
     # Progress
     # -----------------------------------------------------------------
     def _user_key(self):
         return getattr(self.db, "current_user_id", None)
-
-    def _save(self, method_name: str, *args) -> None:
-        """Calls a ChessCoachDB method; a database problem never stops the lesson."""
-        if self.db is None:
-            return
-        try:
-            getattr(self.db, method_name)(*args)
-        except Exception as exc:  # e.g. the file is locked for longer than the timeout
-            print(f"[ChessCoach] Could not save progress ({method_name}): {exc}")
 
     def _load_levels(self) -> list[dict]:
         rows = {}
@@ -249,20 +341,11 @@ class LevelTrainerView:
         session = self.session
         if self.busy or self.show_done or session.kind != "quiz" or session.is_complete:
             return
-        board = chess.Board(session.fen)
-        if self.selected is not None and square != self.selected:
-            moves = [m for m in board.legal_moves if m.from_square == self.selected and m.to_square == square]
-            if moves:
-                move = next((m for m in moves if m.promotion in (None, chess.QUEEN)), moves[0])
-                self.selected = None
-                self._submit(move.uci())
-                return
-        piece = board.piece_at(square)
-        if piece and piece.color == board.turn and square != self.selected:
-            self.selected = square
+        uci, self.selected = click_square(chess.Board(session.fen), self.selected, square)
+        if uci:
+            self._submit(uci)
         else:
-            self.selected = None
-        self.render()
+            self.render()
 
     def _submit(self, uci: str) -> None:
         session = self.session
@@ -271,8 +354,9 @@ class LevelTrainerView:
         result = session.submit_move(uci)
 
         if result["status"] == "incorrect":
-            # fen = position before the move, played_san = the wrong move.
-            self._save("record_mistake", self.chapter_id, line_id, result["ply"], result["fen"], result["played_san"])
+            # fen = position before the move, played_san = the wrong move; review_days restart its plan.
+            self._save("record_mistake", self.chapter_id, line_id, result["ply"], result["fen"],
+                       result["played_san"], result["review_days"])
             kind = "hint" if result["action"] == "show_hint" else "shown"
             self.feedback = {"kind": kind, "question": question, "result": result}
             self.render()
@@ -306,79 +390,6 @@ class LevelTrainerView:
         if self.session.is_complete:
             self._complete_level()
         self.render()
-
-    # -----------------------------------------------------------------
-    # Building blocks
-    # -----------------------------------------------------------------
-    def _text(self, value: str, size: int = 13, color: str | None = None, bold: bool = False) -> ft.Text:
-        return ft.Text(
-            value,
-            size=self._size(size),
-            color=color or self.theme["fg_primary"],
-            weight=ft.FontWeight.BOLD if bold else None,
-        )
-
-    def _label(self, value: str) -> ft.Text:
-        return self._text(value, size=12, color=self.theme["fg_secondary"])
-
-    def _button(self, label: str, on_click, primary: bool = False) -> ft.Container:
-        t = self.theme
-        return ft.Container(
-            bgcolor=t["accent"] if primary else t["btn_bg"],
-            border_radius=8,
-            padding=pad_symmetric(horizontal=self._size(14), vertical=self._size(8)),
-            on_click=on_click,
-            ink=True,
-            content=ft.Text(
-                label,
-                size=self._size(13),
-                weight=ft.FontWeight.W_600,
-                color=t["fg_on_accent"] if primary else t["btn_fg"],
-            ),
-        )
-
-    def _box(self, kind: str, title: str, lines: list[str]) -> ft.Container:
-        """A coloured message box; kind is 'success', 'warning' or 'danger'."""
-        t = self.theme
-        return ft.Container(
-            bgcolor=t[f"{kind}_bg"],
-            border=border_all(1, t[kind]),
-            border_radius=8,
-            padding=12,
-            content=ft.Column(
-                spacing=4,
-                controls=[self._text(title, color=t[kind], bold=True)] + [self._text(line) for line in lines],
-            ),
-        )
-
-    def _segments(self, states: list[str]) -> ft.Row:
-        """Quiz progress: one bar per question, coloured by its result."""
-        t = self.theme
-        colors = {"ok": t["success"], "hint": t["warning"], "shown": t["danger"],
-                  "current": t["accent"], "pending": t["border"]}
-        return ft.Row(
-            spacing=3,
-            controls=[ft.Container(expand=1, height=6, border_radius=3, bgcolor=colors[s]) for s in states],
-        )
-
-    def _progress(self, done: int, total: int) -> ft.Row:
-        t = self.theme
-        if done <= 0:
-            parts = [(1, t["border"])]
-        elif done >= total:
-            parts = [(1, t["accent"])]
-        else:
-            parts = [(done, t["accent"]), (total - done, t["border"])]
-        return ft.Row(spacing=0, controls=[ft.Container(expand=w, height=4, bgcolor=c) for w, c in parts])
-
-    def _metric(self, label: str, value: str, color: str) -> ft.Container:
-        return ft.Container(
-            expand=1,
-            bgcolor=self.theme["section_bar_bg"],
-            border_radius=8,
-            padding=10,
-            content=ft.Column(spacing=2, controls=[self._label(label), self._text(value, size=22, color=color, bold=True)]),
-        )
 
     # -----------------------------------------------------------------
     # Header and level bar
@@ -440,89 +451,19 @@ class LevelTrainerView:
         else:
             fen = session.fen
             last_uci = session.last_move["uci"] if session.last_move else None
-        board = chess.Board(fen)
-
-        last_squares = set()
-        if last_uci:
-            move = chess.Move.from_uci(last_uci)
-            last_squares = {move.from_square, move.to_square}
-
-        marked = {}  # square -> border width of the hint highlight
-        feedback = self.feedback
-        if feedback and not self.busy:
-            if feedback["kind"] == "shown":
-                move = chess.Move.from_uci(feedback["result"]["correct_uci"])
-                marked = {move.from_square: 3, move.to_square: 4}
-            elif feedback["kind"] == "hint" and not feedback["result"]["hint"]:
-                marked = {chess.parse_square(feedback["question"]["uci"][:2]): 4}  # automatic hint
-
-        targets = {}  # square -> True for a capture
-        if self.selected is not None:
-            for move in board.legal_moves:
-                if move.from_square == self.selected:
-                    targets[move.to_square] = board.is_capture(move)
-
-        white_bottom = self.player_color == "white"
         clickable = session.kind == "quiz" and not self.show_done
-        rows = []
-        for row in range(8):
-            rank = 7 - row if white_bottom else row
-            cells = []
-            for col in range(8):
-                file = col if white_bottom else 7 - col
-                square = chess.square(file, rank)
-                cells.append(self._square(board, square, row, col, last_squares, marked, targets, clickable))
-            rows.append(ft.Row(spacing=0, tight=True, controls=cells))
-        return ft.Container(
-            border_radius=4,
-            clip_behavior=ft.ClipBehavior.HARD_EDGE,
-            content=ft.Column(spacing=0, tight=True, controls=rows),
-        )
-
-    def _square(self, board, square, row, col, last_squares, marked, targets, clickable) -> ft.Container:
-        c = self.board_colors
-        size, piece_size = self.layout["square"], self.layout["piece"]
-        file, rank = chess.square_file(square), chess.square_rank(square)
-        is_light = (file + rank) % 2 == 1
-        fill = c["light_sq"] if is_light else c["dark_sq"]
-        if square == self.selected:
-            fill = c["selected"]
-        elif square in last_squares:
-            fill = c["last_move"]
-        coord_color = c["dark_sq"] if is_light else c["light_sq"]
-
-        items = []
-        coord_size = self._size(10)
-        if col == 0:
-            items.append(ft.Container(left=3, top=1, content=ft.Text(
-                str(rank + 1), size=coord_size, weight=ft.FontWeight.BOLD, color=coord_color)))
-        if row == 7:
-            items.append(ft.Container(right=3, bottom=1, content=ft.Text(
-                chess.FILE_NAMES[file], size=coord_size, weight=ft.FontWeight.BOLD, color=coord_color)))
-        if square in marked:
-            items.append(ft.Container(width=size, height=size, border_radius=4,
-                                      border=border_all(marked[square], c["hint_sq"])))
-
-        piece = board.piece_at(square)
-        if piece:  # a picture from assets/pieces (glyph as backup), see board_pieces.py
-            items.extend(piece_controls(piece, size, c, glyph_size=piece_size))
-
-        if square in targets:
-            if targets[square]:  # ring for a capture
-                ring = size - 8
-                marker = ft.Container(width=ring, height=ring, border_radius=ring // 2,
-                                      border=border_all(4, c["legal_capture"]))
-            else:                # dot for an empty square
-                dot = self._size(16)
-                marker = ft.Container(width=dot, height=dot, border_radius=dot // 2, bgcolor=c["legal_dot"])
-            items.append(ft.Container(width=size, height=size, alignment=align_center(), content=marker))
-
-        return ft.Container(
-            width=size,
-            height=size,
-            bgcolor=fill,
-            on_click=(lambda e, s=square: self._on_square(s)) if clickable else None,
-            content=ft.Stack(width=size, height=size, controls=items),
+        return render_board(
+            chess.Board(fen),
+            self.board_colors,
+            self.layout["square"],
+            piece_size=self.layout["piece"],
+            coord_size=self._size(10),
+            dot_size=self._size(16),
+            white_bottom=self.player_color == "white",
+            selected=self.selected,
+            last_move_uci=last_uci,
+            marked=feedback_marks(self.feedback, self.busy),
+            on_square=self._on_square if clickable else None,
         )
 
     # -----------------------------------------------------------------
