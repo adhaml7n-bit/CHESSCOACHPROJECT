@@ -30,7 +30,7 @@ you learned, remembers the moves you get wrong, and includes a 2D board with **S
 | Mistake tracking | ✅ Done | Every wrong move stored with its position, ready for spaced repetition |
 | Review schedule | ✅ Done | A missed position comes back tomorrow and on day 7 (after two mistakes: days 1, 3 and 7), then it is mastered |
 | Daily review | ✅ Done | The "Daily Revised" card shows how many positions are due and drills them, with the next review date after each answer |
-| Engine-approved alternatives | 🔜 Next | Moves Stockfish rates almost as good as the book move count as correct |
+| Engine second opinion | ✅ Done | A different move that Stockfish rates at most half a pawn worse than the lesson's move is praised, with no penalty; an optional "Use engine" card after each level shows where the engine agrees or prefers another move |
 | Chapters 2–6 | 📋 Planned | Open Catalan, and the Catalan against the King's Indian, Semi-Slav, Grünfeld and other defences |
 | Profile editing & online links | ⏸ Postponed | Rename profile, link Chess.com / Lichess accounts |
 
@@ -41,7 +41,7 @@ you learned, remembers the moves you get wrong, and includes a 2D board with **S
 | Layer | Files | Responsibility |
 |---|---|---|
 | Interface | `chesscoach_flet.py`, `opening_hub_view.py`, `level_view.py`, `review_view.py`, `board_view.py`, `board_pieces.py`, `flet_compat.py` | Windows, themes, dialogs, the opening page, the training and review screens, the board and its pieces |
-| Training logic | `level_trainer.py`, `opening_hub.py` | Validates chapters and moves, runs learn / quiz levels, scores accuracy, unlocks levels; no UI, no database |
+| Training logic | `level_trainer.py`, `opening_hub.py`, `engine_judge.py` | Validates chapters and moves, runs learn / quiz levels and reviews, scores accuracy, unlocks levels, asks Stockfish for a second opinion; no UI, no database |
 | Curriculum | `catalan_opening.json`, `catalan_ch01_v2.json` | The opening page (intro, setup, chapter list) and chapter 1 (lines, ideas, hints, levels) |
 | Content tools | `pgn_import.py` | Lichess study PGN → chapter file |
 | Persistence | `database.py` | Profiles, settings, progress and mistakes in a local SQLite file |
@@ -91,7 +91,7 @@ The database file `chesscoach.db` is created automatically on first launch and i
 ```powershell
 .venv\Scripts\python.exe -m unittest
 ```
-142 unit tests: database (45), levels, quizzes and reviews (51), study import (23), opening page data (6), board layout (9), piece pictures (6) and review dates (2).
+157 unit tests: database (45), levels, quizzes and reviews (53), study import (23), opening page data (6), board layout (9), piece pictures (6), review dates (2) and the engine's second opinion (13, two of them with the real Stockfish when it is installed).
 
 ---
 
@@ -106,7 +106,8 @@ The database file `chesscoach.db` is created automatically on first launch and i
 - Pieces are now Merida pictures on every board (the black pawn no longer shows as an emoji on Windows).
 - Review schedule: missed positions come back tomorrow and on day 7 (days 1, 3 and 7 after two mistakes); database schema version 2 (existing progress is kept).
 - Daily review screen behind the homepage's "Daily Revised" card.
-- 104 new unit tests (142 in total).
+- Stockfish as a second opinion: good alternative moves are accepted without penalty, and an optional "Use engine" card follows each level.
+- 119 new unit tests (157 in total).
 
 ### 2026-11-15 — Persistence & profiles
 - Added the SQLite database layer with 38 unit tests.

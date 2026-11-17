@@ -45,8 +45,9 @@ class ReviewView(ScreenBase):
     """
 
     def __init__(self, page, chapters: dict, theme: dict, board_colors: dict, db=None, on_back=None,
-                 area=None, pause: float = PAUSE_SECONDS):
+                 area=None, pause: float = PAUSE_SECONDS, assistant=None):
         self.page = page
+        self.assistant = assistant  # engine_judge.EngineAssistant, or None (no second opinion)
         self.chapters = chapters
         self.theme = theme
         self.board_colors = board_colors
@@ -107,7 +108,8 @@ class ReviewView(ScreenBase):
         else:
             self.render()
 
-    def _submit(self, uci: str) -> None:
+    def _answer(self, uci: str) -> None:
+        """Counts a move (ScreenBase._submit asks the engine first about off-book moves)."""
         session = self.session
         item = session.current
         step = item["step"]
@@ -225,7 +227,9 @@ class ReviewView(ScreenBase):
             self._text("You missed this position before. Find the move.", color=t["fg_secondary"]),
         ]
         feedback = self.feedback
-        if feedback:
+        if feedback and feedback["kind"] in ("checking", "alternative"):
+            body.extend(self._engine_feedback(feedback))
+        elif feedback:
             question, result = feedback["question"], feedback["result"]
             if feedback["kind"] == "hint":
                 tried = move_label({**question, "san": result["played_san"]})

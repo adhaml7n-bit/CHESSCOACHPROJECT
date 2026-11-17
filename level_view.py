@@ -25,6 +25,7 @@ import flet as ft
 
 from board_pieces import ASSETS_DIR
 from board_view import click_square, render_board
+from engine_judge import pawns
 from flet_compat import border_all, pad_symmetric
 from level_trainer import LevelSession, level_line_id, load_level_chapter, summarize_levels
 
@@ -210,6 +211,64 @@ class ScreenBase:
         except Exception as exc:  # e.g. the file is locked for longer than the timeout
             print(f"[ChessCoach] Could not save progress ({method_name}): {exc}")
 
+    # -----------------------------------------------------------------
+    # Engine second opinion (DESIGN.md section 5). A subclass has
+    # assistant, busy, feedback, _token and _answer(uci).
+    # -----------------------------------------------------------------
+    def _engine_ready(self) -> bool:
+        assistant = getattr(self, "assistant", None)
+        return assistant is not None and assistant.available
+
+    def _submit(self, uci: str) -> None:
+        """A move from the board. With an engine, a move that is not the lesson's
+        move is checked first: a good alternative is not a mistake."""
+        if self._engine_ready():
+            check = self.session.peek(uci)
+            if check["status"] == "off_book":
+                self._ask_engine(check)
+                return
+        self._answer(uci)
+
+    def _ask_engine(self, check: dict) -> None:
+        """Asks the engine about an off-book move, in the background."""
+        self.busy = True
+        self.feedback = {"kind": "checking", "check": check}
+        self.render()
+        token = self._token
+        if hasattr(self.page, "run_task"):
+            self.page.run_task(self._judge_later, token, check)
+        else:  # no async support: decide at once
+            self._apply_verdict(token, check, self.assistant.judge(check["fen"], check["book_uci"], check["uci"]))
+
+    async def _judge_later(self, token: int, check: dict) -> None:
+        verdict = await asyncio.to_thread(self.assistant.judge, check["fen"], check["book_uci"], check["uci"])
+        self._apply_verdict(token, check, verdict)
+
+    def _apply_verdict(self, token: int, check: dict, verdict: dict | None) -> None:
+        if token != self._token:  # the level or the review was restarted meanwhile
+            return
+        self.busy = False
+        if verdict and verdict["acceptable"]:
+            self.feedback = {"kind": "alternative", "check": check, "verdict": verdict}
+            self.render()
+        else:
+            self._answer(check["uci"])  # a real mistake (or no verdict): the usual rules
+
+    def _engine_feedback(self, feedback: dict) -> list:
+        """Panel lines while the engine checks a move, or after it accepted it."""
+        t = self.theme
+        if feedback["kind"] == "checking":
+            return [self._text("Checking your move with the engine…", color=t["fg_secondary"])]
+        check, verdict = feedback["check"], feedback["verdict"]
+        opinion = ("The engine likes it at least as much as the lesson's move."
+                   if verdict["loss_cp"] <= 0 else "The engine rates it almost as strong as the lesson's move.")
+        return [
+            self._box("success", f"Good move: {check['label']}",
+                      [opinion, "It isn't the move this lesson teaches, though. Find the lesson's move: no penalty."]),
+            self._label(f"Engine opinion: the lesson's move {pawns(verdict['book_cp'])}, "
+                        f"yours {pawns(verdict['played_cp'])}."),
+        ]
+
 
 class LevelTrainerView(ScreenBase):
     """The training screen of one format-2 chapter. Put `root` into the page.
@@ -224,7 +283,7 @@ class LevelTrainerView(ScreenBase):
 
     def __init__(self, page, chapter_path, theme: dict, board_colors: dict, db=None, on_back=None,
                  opponent_delay: float = OPPONENT_DELAY_SECONDS, passed_now: dict | None = None,
-                 area=None):
+                 area=None, assistant=None):
         self.page = page
         self.theme = theme
         self.board_colors = board_colors
@@ -232,6 +291,7 @@ class LevelTrainerView(ScreenBase):
         self.on_back = on_back
         self.opponent_delay = opponent_delay
         self.area = area
+        self.assistant = assistant  # engine_judge.EngineAssistant, or None (no second opinion)
         self.layout = compute_layout(*self._area_size())
 
         self.chapter = load_level_chapter(chapter_path)
@@ -262,6 +322,8 @@ class LevelTrainerView(ScreenBase):
         self.display = None       # (fen, uci) shown during that wait
         self.show_done = False
         self.result_saved = False
+        self.engine_rows = None   # [(step, opinion)] of the "Use engine" card, None = not asked
+        self.engine_running = False
         self.render(update)
 
     def render(self, update: bool = True) -> None:
@@ -347,7 +409,8 @@ class LevelTrainerView(ScreenBase):
         else:
             self.render()
 
-    def _submit(self, uci: str) -> None:
+    def _answer(self, uci: str) -> None:
+        """Counts a move: correct, or a mistake with the level's on_mistake rules."""
         session = self.session
         question = session.current_question
         line_id = session.level["line_id"]
@@ -563,7 +626,9 @@ class LevelTrainerView(ScreenBase):
                 self._text("Play your move on the board. Your opponent will answer.", color=t["fg_secondary"]),
             ]
         feedback = self.feedback
-        if feedback:
+        if feedback and feedback["kind"] in ("checking", "alternative"):
+            body.extend(self._engine_feedback(feedback))
+        elif feedback:
             question, result = feedback["question"], feedback["result"]
             when = review_days_text(result.get("review_days", []))  # empty after a correct answer
             if feedback["kind"] == "hint":
@@ -633,7 +698,75 @@ class LevelTrainerView(ScreenBase):
         if next_level is None:
             body.append(self._text("You've reached the last level of this chapter.", color=t["fg_secondary"]))
         body.append(ft.Row(wrap=True, spacing=8, controls=buttons))
+        if self._engine_ready():
+            body.append(self._engine_card())
         return body
+
+    # -----------------------------------------------------------------
+    # "Use engine" card (optional, after a level; DESIGN.md section 5)
+    # -----------------------------------------------------------------
+    def _engine_positions(self) -> list:
+        """The player's moves in this level: the positions the engine looks at."""
+        return [step for step in self.session.moves if step["turn"] == self.player_color]
+
+    def _start_engine_analysis(self) -> None:
+        self.engine_rows, self.engine_running = [], True
+        self.render()
+        token, positions = self._token, self._engine_positions()
+        if hasattr(self.page, "run_task"):
+            self.page.run_task(self._analyse_later, token, positions)
+        else:
+            for step in positions:
+                self.engine_rows.append((step, self.assistant.opinion(step["fen_before"], step["uci"])))
+            self.engine_running = False
+            self.render()
+
+    async def _analyse_later(self, token: int, positions: list) -> None:
+        for step in positions:
+            opinion = await asyncio.to_thread(self.assistant.opinion, step["fen_before"], step["uci"])
+            if token != self._token:  # another level was opened
+                return
+            self.engine_rows.append((step, opinion))
+            self.render()
+        self.engine_running = False
+        self.render()
+
+    def _engine_card(self) -> ft.Container:
+        t = self.theme
+        controls = [
+            self._text("Use engine (optional)", size=14, bold=True),
+            self._text("Stockfish's opinion on this level's positions. The lesson's moves come from human "
+                       "theory; the engine is a second opinion.", size=12, color=t["fg_secondary"]),
+        ]
+        if self.engine_rows is None:
+            controls.append(self._button("Analyse with Stockfish", lambda e: self._start_engine_analysis()))
+        else:
+            for step, opinion in self.engine_rows:
+                controls.extend(self._engine_row(step, opinion))
+            if self.engine_running:
+                total = len(self._engine_positions())
+                controls.append(self._label(f"Analysing position {len(self.engine_rows) + 1} of {total}…"))
+        return ft.Container(
+            border=border_all(1, t["card_border"]),
+            border_radius=8,
+            padding=12,
+            content=ft.Column(spacing=6, controls=controls),
+        )
+
+    def _engine_row(self, step: dict, opinion: dict | None) -> list:
+        t = self.theme
+        label = move_label(step)
+        if opinion is None:
+            return [self._text(f"{label}: the engine could not analyse this position.", size=12, color=t["fg_muted"])]
+        if opinion["agrees"]:
+            return [self._text(f"✓ {label}: the engine agrees ({pawns(opinion['book_cp'])}).",
+                               size=12, color=t["fg_secondary"])]
+        return [
+            self._text(f"{label}: the engine prefers {opinion['best_san']} "
+                       f"({pawns(opinion['best_cp'])} against {pawns(opinion['book_cp'])}).",
+                       size=12, color=t["warning"], bold=True),
+            self._text(f"Engine line: {opinion['line_san']}", size=12, color=t["fg_muted"]),
+        ]
 
 
 if __name__ == "__main__":

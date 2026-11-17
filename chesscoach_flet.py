@@ -27,6 +27,7 @@ Key Features:
 """
 
 from board_pieces import ASSETS_DIR, piece_controls
+from engine_judge import EngineAssistant
 from level_view import LevelTrainerView
 from opening_hub import chapters_by_id
 from opening_hub_view import OpeningHubView
@@ -253,6 +254,8 @@ class ChessCoachFletApp:
         # ---- Stockfish Engine State & Thread Synchronization ----
         self.engine = None
         self.engine_lock = threading.Lock()
+        # The lesson screens' second opinion: the same engine, behind the same lock.
+        self.assistant = EngineAssistant(lambda: self.engine, self.engine_lock, lambda: self.engine_time_limit)
         self.engine_path = self._auto_detect_stockfish()
         self.play_vs_engine = False
         self.best_move_arrow = None  # (from_sq, to_sq) tuple for best move hint
@@ -1149,6 +1152,7 @@ class ChessCoachFletApp:
                 on_back=self.back_to_hub,
                 passed_now=self.passed_now,
                 area=self._content_area_size,
+                assistant=self.assistant,
             )
             self.opening_trainer_view.content = self.level_trainer.root
             self.show_page("opening_trainer")
@@ -1209,6 +1213,7 @@ class ChessCoachFletApp:
                 db=self.db,
                 on_back=self.back_to_home,
                 area=self._content_area_size,
+                assistant=self.assistant,
             )
             self.review_view.content = self.daily_review.root
             self.show_page("daily_review")
