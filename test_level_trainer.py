@@ -23,6 +23,7 @@ from level_trainer import (
     LevelSession,
     level_line_id,
     load_level_chapter,
+    summarize_chapter,
     summarize_levels,
     validate_level_chapter,
 )
@@ -466,6 +467,17 @@ class RealChapterQuizTests(unittest.TestCase):
         self.assertEqual(session.accuracy, 66.7)
         self.assertTrue(session.passed)
 
+    def test_level_8_quizzes_the_second_line(self):
+        session = LevelSession(self.chapter, 8)
+        self.assertEqual(session.level["line_id"], "line_2")
+        self.assertEqual(session.last_move["san"], "b6")  # 7...b6 is played for the player
+        self.assertEqual((session.question_count, session.pass_mark), (6, 83.3))
+        while not session.is_complete:
+            question = session.current_question
+            answer(session, ["f1d1"] if question["san"] == "Nbd2" and not session.in_retry else [])
+        self.assertEqual(session.accuracy, 83.3)  # 5 of 6: one mistake still passes
+        self.assertTrue(session.passed)
+
     def test_hint_comes_from_the_chapter(self):
         while self.session.current_question["ply"] != 15:
             answer(self.session)
@@ -506,6 +518,19 @@ class LevelSummaryTests(unittest.TestCase):
 
     def test_level_line_id(self):
         self.assertEqual(level_line_id(2), "level_2")
+
+    def test_chapter_summary_for_the_hub(self):
+        def status(rows, extra=frozenset()):
+            summary = summarize_chapter(self.chapter, rows, extra)
+            return summary["status"], summary["percent"], summary["levels_passed"]
+
+        self.assertEqual(status({}), ("not_started", 0, 0))
+        self.assertEqual(status({"level_1": self.row()}), ("in_progress", 33, 1))
+        self.assertEqual(status({"level_1": self.row(), "level_2": self.row(best_accuracy=50.0)}),
+                         ("in_progress", 33, 1))  # a failed quiz is still "in progress"
+        everything = {"level_1": self.row(), "level_2": self.row(best_accuracy=100.0), "level_3": self.row()}
+        self.assertEqual(status(everything), ("completed", 100, 3))
+        self.assertEqual(status({}, extra={1}), ("in_progress", 33, 1))  # a Guest in this session
 
 
 class DatabaseIntegrationTest(unittest.TestCase):

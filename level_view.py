@@ -28,13 +28,51 @@ from level_trainer import LevelSession, level_line_id, load_level_chapter, summa
 
 PIECE_SYMBOLS = {
     "P": "♙", "N": "♘", "B": "♗", "R": "♖", "Q": "♕", "K": "♔",
-    "p": "♟", "n": "♞", "b": "♝", "r": "♜", "q": "♛", "k": "♚",
+    # U+FE0E asks for the plain text glyph: without it Windows draws the black pawn as a coloured emoji.
+    "p": "♟︎", "n": "♞", "b": "♝", "r": "♜", "q": "♛", "k": "♚",
 }
-SQUARE = 56
-PIECE_SIZE = 34
-PANEL_WIDTH = 360
 OPPONENT_DELAY_SECONDS = 0.6  # pause before the opponent's reply in a quiz
 LEVEL_ICONS = {"learn": "📖", "quiz": "✎"}
+
+# Layout: the board fills the height left by the header and the level bar, and
+# the panel and the text grow with it, so a big window is not wasted.
+BASE_SQUARE = 56            # square size the screen was designed at (scale 1.0)
+MIN_SQUARE, MAX_SQUARE = 48, 96
+MAX_SCALE = 1.35            # text and panel grow at most this much
+PANEL_BASE_WIDTH = 360
+CHROME_HEIGHT = 150         # page padding, header, level bar and spacing around the board
+SIDE_PADDING, GAP = 40, 20  # page padding (left + right); gap between board and panel
+DEFAULT_AREA = (925, 722)   # the app's start window (1180 x 780) minus the sidebar and the top bar
+
+
+def _clamp(value, low, high):
+    return max(low, min(high, value))
+
+
+def compute_layout(width: float, height: float) -> dict:
+    """Board and panel sizes for a content area of width x height pixels.
+
+    The board gets the biggest square size (a multiple of 4 between MIN_SQUARE
+    and MAX_SQUARE) that fits the height and still leaves room for the panel
+    beside it; the panel and the text grow with the board. When the area is too
+    narrow for both side by side, the panel goes under the board (the row wraps).
+    Returns square, piece (font size), panel (width) and scale (for text).
+    """
+    def panel_for(square: int) -> int:
+        return round(PANEL_BASE_WIDTH * _clamp(square / BASE_SQUARE, 1.0, MAX_SCALE))
+
+    tallest = int(_clamp((height - CHROME_HEIGHT) / 8, MIN_SQUARE, MAX_SQUARE)) // 4 * 4
+    square = next((size for size in range(tallest, MIN_SQUARE - 1, -4)
+                   if 8 * size + GAP + panel_for(size) <= width - SIDE_PADDING), None)
+    if square is None:  # too narrow for side by side: only height and width limit the board
+        widest = int(_clamp((width - SIDE_PADDING) / 8, MIN_SQUARE, MAX_SQUARE)) // 4 * 4
+        square = min(tallest, widest)
+    return {
+        "square": square,
+        "piece": round(square * 0.6),
+        "panel": panel_for(square),
+        "scale": round(_clamp(square / BASE_SQUARE, 1.0, MAX_SCALE), 2),
+    }
 
 
 def move_label(step: dict) -> str:
@@ -58,23 +96,30 @@ class LevelTrainerView:
     board_colors - a BOARD_THEMES preset with the user's light_sq / dark_sq and
                    the piece colours (piece_white, piece_black, piece_shadow)
     db           - the app's ChessCoachDB, or None to save nothing
+    area         - a function returning the (width, height) the screen may use;
+                   the board and panel are sized from it (DEFAULT_AREA if None)
     """
 
     def __init__(self, page, chapter_path, theme: dict, board_colors: dict, db=None, on_back=None,
-                 opponent_delay: float = OPPONENT_DELAY_SECONDS):
+                 opponent_delay: float = OPPONENT_DELAY_SECONDS, passed_now: dict | None = None,
+                 area=None):
         self.page = page
         self.theme = theme
         self.board_colors = board_colors
         self.db = db
         self.on_back = on_back
         self.opponent_delay = opponent_delay
+        self.area = area
+        self.layout = compute_layout(*self._area_size())
 
         self.chapter = load_level_chapter(chapter_path)
         meta = self.chapter["chapter_meta"]
         self.chapter_id = meta["chapter_id"]
         self.player_color = meta["player_color"]
         self.pass_mark = meta.get("min_accuracy_to_pass", 0)
-        self._passed_now: dict = {}  # user id (None = Guest) -> levels passed while the app is open
+        # (user id or None for a Guest, chapter id) -> levels passed while the app is open.
+        # The app shares one dict between screens, so the opening hub sees it too.
+        self._passed_now = passed_now if passed_now is not None else {}
 
         self.root = ft.Container(expand=True, padding=20)
         self.session: LevelSession | None = None
@@ -103,7 +148,14 @@ class LevelTrainerView:
         self.board_colors = board_colors
         self.render(update)
 
+    def relayout(self, update: bool = True) -> None:
+        """Called by the app when the window or the sidebar changes size; redraws
+        only when the board or panel size actually changes."""
+        if compute_layout(*self._area_size()) != self.layout:
+            self.render(update)
+
     def render(self, update: bool = True) -> None:
+        self.layout = compute_layout(*self._area_size())
         self._levels = self._load_levels()
         self.root.bgcolor = self.theme["bg_main"]
         self.root.content = ft.Column(
@@ -123,6 +175,19 @@ class LevelTrainerView:
         )
         if update:
             self.page.update()
+
+    def _area_size(self) -> tuple[float, float]:
+        if self.area is None:
+            return DEFAULT_AREA
+        try:
+            width, height = self.area()
+            return float(width), float(height)
+        except Exception:  # an unknown window size must never break the screen
+            return DEFAULT_AREA
+
+    def _size(self, value: int) -> int:
+        """A size from the design (fonts, dots) scaled to the current layout."""
+        return round(value * self.layout["scale"])
 
     # -----------------------------------------------------------------
     # Progress
@@ -146,7 +211,7 @@ class LevelTrainerView:
                 rows = self.db.get_chapter_progress(self.chapter_id)
             except Exception as exc:
                 print(f"[ChessCoach] Could not read progress: {exc}")
-        return summarize_levels(self.chapter, rows, self._passed_now.get(self._user_key(), set()))
+        return summarize_levels(self.chapter, rows, self._passed_now.get((self._user_key(), self.chapter_id), set()))
 
     def _starting_level(self) -> int:
         """The first open level not passed yet; the last level when all are passed."""
@@ -164,7 +229,7 @@ class LevelTrainerView:
         accuracy = session.accuracy if session.kind == "quiz" else None
         self._save("save_line_result", self.chapter_id, level_line_id(session.level_number), accuracy)
         if session.passed:
-            self._passed_now.setdefault(self._user_key(), set()).add(session.level_number)
+            self._passed_now.setdefault((self._user_key(), self.chapter_id), set()).add(session.level_number)
         self.show_done = True
 
     # -----------------------------------------------------------------
@@ -252,7 +317,7 @@ class LevelTrainerView:
     def _text(self, value: str, size: int = 13, color: str | None = None, bold: bool = False) -> ft.Text:
         return ft.Text(
             value,
-            size=size,
+            size=self._size(size),
             color=color or self.theme["fg_primary"],
             weight=ft.FontWeight.BOLD if bold else None,
         )
@@ -265,12 +330,12 @@ class LevelTrainerView:
         return ft.Container(
             bgcolor=t["accent"] if primary else t["btn_bg"],
             border_radius=8,
-            padding=pad_symmetric(horizontal=14, vertical=8),
+            padding=pad_symmetric(horizontal=self._size(14), vertical=self._size(8)),
             on_click=on_click,
             ink=True,
             content=ft.Text(
                 label,
-                size=13,
+                size=self._size(13),
                 weight=ft.FontWeight.W_600,
                 color=t["fg_on_accent"] if primary else t["btn_fg"],
             ),
@@ -352,7 +417,7 @@ class LevelTrainerView:
                     bgcolor=t["bg_panel"],
                     border=border_all(2 if current else 1, t["accent"] if current else t["card_border"]),
                     border_radius=8,
-                    padding=pad_symmetric(horizontal=10, vertical=5),
+                    padding=pad_symmetric(horizontal=self._size(10), vertical=self._size(5)),
                     tooltip=level["title"],
                     ink=clickable,
                     on_click=(lambda e, n=number: self.open_level(n)) if clickable else None,
@@ -360,8 +425,8 @@ class LevelTrainerView:
                         tight=True,
                         spacing=6,
                         controls=[
-                            ft.Text(icon, size=12, color=icon_color),
-                            ft.Text(f"{number} {level['type'].capitalize()}", size=12,
+                            ft.Text(icon, size=self._size(12), color=icon_color),
+                            ft.Text(f"{number} {level['type'].capitalize()}", size=self._size(12),
                                     weight=ft.FontWeight.W_600, color=color),
                         ],
                     ),
@@ -420,6 +485,7 @@ class LevelTrainerView:
 
     def _square(self, board, square, row, col, last_squares, marked, targets, clickable) -> ft.Container:
         c = self.board_colors
+        size, piece_size = self.layout["square"], self.layout["piece"]
         file, rank = chess.square_file(square), chess.square_rank(square)
         is_light = (file + rank) % 2 == 1
         fill = c["light_sq"] if is_light else c["dark_sq"]
@@ -430,41 +496,43 @@ class LevelTrainerView:
         coord_color = c["dark_sq"] if is_light else c["light_sq"]
 
         items = []
+        coord_size = self._size(10)
         if col == 0:
             items.append(ft.Container(left=3, top=1, content=ft.Text(
-                str(rank + 1), size=10, weight=ft.FontWeight.BOLD, color=coord_color)))
+                str(rank + 1), size=coord_size, weight=ft.FontWeight.BOLD, color=coord_color)))
         if row == 7:
             items.append(ft.Container(right=3, bottom=1, content=ft.Text(
-                chess.FILE_NAMES[file], size=10, weight=ft.FontWeight.BOLD, color=coord_color)))
+                chess.FILE_NAMES[file], size=coord_size, weight=ft.FontWeight.BOLD, color=coord_color)))
         if square in marked:
-            items.append(ft.Container(width=SQUARE, height=SQUARE, border_radius=4,
+            items.append(ft.Container(width=size, height=size, border_radius=4,
                                       border=border_all(marked[square], c["hint_sq"])))
 
         piece = board.piece_at(square)
         if piece:
             symbol = PIECE_SYMBOLS[piece.symbol()]
             color = c["piece_white"] if piece.color == chess.WHITE else c["piece_black"]
-            items.append(ft.Container(width=SQUARE, height=SQUARE, alignment=align_center(),
+            items.append(ft.Container(width=size, height=size, alignment=align_center(),
                                       padding=pad_only(left=2, top=3),
-                                      content=ft.Text(symbol, size=PIECE_SIZE, color=c["piece_shadow"])))
-            items.append(ft.Container(width=SQUARE, height=SQUARE, alignment=align_center(),
-                                      content=ft.Text(symbol, size=PIECE_SIZE, color=color)))
+                                      content=ft.Text(symbol, size=piece_size, color=c["piece_shadow"])))
+            items.append(ft.Container(width=size, height=size, alignment=align_center(),
+                                      content=ft.Text(symbol, size=piece_size, color=color)))
 
         if square in targets:
             if targets[square]:  # ring for a capture
-                ring = SQUARE - 8
+                ring = size - 8
                 marker = ft.Container(width=ring, height=ring, border_radius=ring // 2,
                                       border=border_all(4, c["legal_capture"]))
             else:                # dot for an empty square
-                marker = ft.Container(width=16, height=16, border_radius=8, bgcolor=c["legal_dot"])
-            items.append(ft.Container(width=SQUARE, height=SQUARE, alignment=align_center(), content=marker))
+                dot = self._size(16)
+                marker = ft.Container(width=dot, height=dot, border_radius=dot // 2, bgcolor=c["legal_dot"])
+            items.append(ft.Container(width=size, height=size, alignment=align_center(), content=marker))
 
         return ft.Container(
-            width=SQUARE,
-            height=SQUARE,
+            width=size,
+            height=size,
             bgcolor=fill,
             on_click=(lambda e, s=square: self._on_square(s)) if clickable else None,
-            content=ft.Stack(width=SQUARE, height=SQUARE, controls=items),
+            content=ft.Stack(width=size, height=size, controls=items),
         )
 
     # -----------------------------------------------------------------
@@ -479,7 +547,7 @@ class LevelTrainerView:
             body = self._quiz_panel()
         t = self.theme
         return ft.Container(
-            width=PANEL_WIDTH,
+            width=self.layout["panel"],
             bgcolor=t["bg_panel"],
             border=border_all(1, t["card_border"]),
             border_radius=12,
@@ -582,7 +650,8 @@ class LevelTrainerView:
                     lines.append("Now let's go back to the positions you missed.")
                 title = f"You fixed it! {move_label(question)}" if result.get("retry") else f"Well done! {move_label(question)}"
                 body.append(self._box("success", title, lines))
-        body.append(self._label(f"You got {session.first_try_count} of {session.answered_count} right on the first try."))
+        if session.answered_count:  # nothing to count before the first answer
+            body.append(self._label(f"You got {session.first_try_count} of {session.answered_count} right on the first try."))
         return body
 
     def _done_panel(self) -> list:

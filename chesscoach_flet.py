@@ -27,6 +27,7 @@ Key Features:
 """
 
 from level_view import LevelTrainerView
+from opening_hub_view import OpeningHubView
 from database import ChessCoachDB
 import asyncio
 import glob
@@ -185,7 +186,8 @@ BOARD_THEMES = {
 # Standard Unicode Chess Pieces
 PIECE_UNICODE = {
     "P": "♙", "N": "♘", "B": "♗", "R": "♖", "Q": "♕", "K": "♔",
-    "p": "♟", "n": "♞", "b": "♝", "r": "♜", "q": "♛", "k": "♚",
+    # U+FE0E asks for the plain text glyph: without it Windows draws the black pawn as a coloured emoji.
+    "p": "♟︎", "n": "♞", "b": "♝", "r": "♜", "q": "♛", "k": "♚",
 }
 
 # Piece colours of the training screen (same look as the engine board).
@@ -201,6 +203,10 @@ HEX_COLOR_RE = re.compile(r"^#(?:[0-9a-fA-F]{3}){1,2}$")
 DEFAULT_UI_MODE = "dark"
 DEFAULT_BOARD_PRESET = "classic"
 DEFAULT_ENGINE_TIME_LIMIT = 0.5
+
+# Fixed parts of the window; the training screen sizes its board from what is left.
+SIDEBAR_WIDTH = 255
+TOP_BAR_HEIGHT = 58
 
 
 # =====================================================================
@@ -221,6 +227,12 @@ class ChessCoachFletApp:
             self.page.window.on_event = self._on_window_event
         except Exception:
             pass
+        for event_name in ("on_resized", "on_resize"):  # the event's name differs between Flet versions
+            if hasattr(self.page, event_name):
+                try:
+                    setattr(self.page, event_name, self._on_page_resized)
+                except Exception:
+                    pass
 
         # ---- Database & Current User (Guest until a profile is chosen) ----
         # Creates chesscoach.db on the very first launch, then logs in as the last used profile.
@@ -253,8 +265,12 @@ class ChessCoachFletApp:
         self.file_picker = None
         self._init_file_picker()
 
-        # ---- Training screen (LevelTrainerView), created when the Catalan card is opened ----
+        # ---- Opening hub (OpeningHubView) and training screen (LevelTrainerView) ----
+        self.opening_hub = None
         self.level_trainer = None
+        # (user id or None for a Guest, chapter id) -> levels passed while the app is open.
+        # Shared by both screens, so a Guest keeps moving forward until the app closes.
+        self.passed_now = {}
 
         # ---- Build UI & Apply Theme ----
         self._build_layout()
@@ -455,7 +471,7 @@ class ChessCoachFletApp:
         )
 
         self.top_bar = ft.Container(
-            height=58,
+            height=TOP_BAR_HEIGHT,
             bgcolor=t["bg_header"],
             padding=_pad_symmetric(horizontal=18, vertical=0),
             content=ft.Row(
@@ -478,7 +494,7 @@ class ChessCoachFletApp:
 
         # 2. Collapsible Left Sidebar
         self.sidebar_container = ft.Container(
-            width=255,
+            width=SIDEBAR_WIDTH,
             bgcolor=t["bg_sidebar"],
             animate=_make_animation(220),
             clip_behavior=ft.ClipBehavior.HARD_EDGE,
@@ -489,6 +505,7 @@ class ChessCoachFletApp:
         self.homepage_view = ft.Container(expand=True)
         self.engine_view = ft.Container(expand=True, visible=False)
         self.opening_trainer_view = ft.Container(expand=True, visible=False)
+        self.opening_hub_view = ft.Container(expand=True, visible=False)
 
         self._build_homepage()
         self._build_engine_page()
@@ -502,6 +519,7 @@ class ChessCoachFletApp:
                     self.homepage_view,
                     self.engine_view,
                     self.opening_trainer_view,
+                    self.opening_hub_view,
                 ],
             ),
         )
@@ -527,10 +545,12 @@ class ChessCoachFletApp:
     # -----------------------------------------------------------------
     def toggle_sidebar(self, e=None):
         self.sidebar_open = not self.sidebar_open
-        self.sidebar_container.width = 255 if self.sidebar_open else 0
+        self.sidebar_container.width = SIDEBAR_WIDTH if self.sidebar_open else 0
         t = UI_THEMES[self.ui_mode]
         self.hamburger_btn.bgcolor = t["accent"] if self.sidebar_open else t["btn_bg"]
         self.hamburger_icon_text.color = "#FFFFFF" if self.sidebar_open else t["fg_primary"]
+        if self.level_trainer is not None:  # more or less room: the board may change size
+            self.level_trainer.relayout(update=False)
         self.page.update()
 
     # -----------------------------------------------------------------
@@ -767,9 +787,9 @@ class ChessCoachFletApp:
                     row_cards.append(
                         self._create_card(
                             title="Catalan Opening",
-                            subtitle="Chapter 1: An Introduction to the Closed Catalan (White)",
+                            subtitle="Introduction, ideal setup and chapters (White)",
                             badge="Chapter 1 • Ready",
-                            on_click=self.open_catalan_trainer,
+                            on_click=self.open_catalan_hub,
                         )
                     )
                 else:
@@ -1083,24 +1103,47 @@ class ChessCoachFletApp:
         self.homepage_view.visible = page_name == "homepage"
         self.engine_view.visible = page_name == "engine"
         self.opening_trainer_view.visible = page_name == "opening_trainer"
+        self.opening_hub_view.visible = page_name == "opening_hub"
         self._populate_sidebar()
         if page_name == "engine":
             self.draw_board(update_ui=False)
             self.update_status_and_history(update_ui=False)
         self.page.update()
 
-    def open_catalan_trainer(self):
-        """Opens the training screen (learn / quiz levels) of Catalan chapter 1."""
+    def open_catalan_hub(self):
+        """Opens the Catalan Opening page: introduction, ideal setup and the chapters."""
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        json_file = os.path.join(script_dir, "catalan_ch01_v2.json")
         try:
-            self.level_trainer = LevelTrainerView(
+            self.opening_hub = OpeningHubView(
                 page=self.page,
-                chapter_path=json_file,
+                opening_path=os.path.join(script_dir, "catalan_opening.json"),
                 theme=UI_THEMES[self.ui_mode],
                 board_colors=self._board_colors(),
                 db=self.db,
-                on_back=lambda: self.show_page("homepage"),
+                on_open_chapter=self.open_chapter,
+                passed_now=self.passed_now,
+            )
+            self.opening_hub_view.content = self.opening_hub.root
+            self.show_page("opening_hub")
+        except Exception as exc:
+            self.opening_hub = None
+            self._show_info_dialog(
+                "Opening Error",
+                f"Could not load the Catalan Opening page:\n{exc}",
+            )
+
+    def open_chapter(self, chapter_path: str):
+        """Opens the training screen (learn / quiz levels) of one chapter; called by the hub."""
+        try:
+            self.level_trainer = LevelTrainerView(
+                page=self.page,
+                chapter_path=chapter_path,
+                theme=UI_THEMES[self.ui_mode],
+                board_colors=self._board_colors(),
+                db=self.db,
+                on_back=self.back_to_hub,
+                passed_now=self.passed_now,
+                area=self._content_area_size,
             )
             self.opening_trainer_view.content = self.level_trainer.root
             self.show_page("opening_trainer")
@@ -1108,8 +1151,39 @@ class ChessCoachFletApp:
             self.level_trainer = None
             self._show_info_dialog(
                 "Opening Trainer Error",
-                f"Could not load Catalan Opening chapter:\n{exc}",
+                f"Could not load this chapter:\n{exc}",
             )
+
+    def _page_dimension(self, name: str, default: float) -> float:
+        """page.width / page.height when Flet knows them, else the window's size, else default."""
+        for source in (self.page, getattr(self.page, "window", None)):
+            try:
+                value = float(getattr(source, name))
+            except (TypeError, ValueError, AttributeError):
+                continue
+            if value > 0:
+                return value
+        return default
+
+    def _content_area_size(self) -> tuple[float, float]:
+        """Width and height a screen can use: the page minus the sidebar and the top bar."""
+        width = self._page_dimension("width", 1180)
+        height = self._page_dimension("height", 780)
+        return width - (SIDEBAR_WIDTH if self.sidebar_open else 0), height - TOP_BAR_HEIGHT
+
+    def _on_page_resized(self, e=None):
+        """The window changed size: the training screen resizes its board if needed."""
+        trainer = getattr(self, "level_trainer", None)
+        if trainer is not None:
+            trainer.relayout()
+
+    def back_to_hub(self):
+        """Back from the training screen: the hub shows the updated progress."""
+        if self.opening_hub is None:
+            self.show_page("homepage")
+            return
+        self.opening_hub.render(update=False)
+        self.show_page("opening_hub")
 
     def _board_colors(self) -> dict:
         """Board colours for the training screen: the preset's highlight colours,
@@ -1126,6 +1200,8 @@ class ChessCoachFletApp:
         self.draw_board(update_ui=False)
         if self.level_trainer is not None:
             self.level_trainer.set_theme(UI_THEMES[self.ui_mode], self._board_colors(), update=False)
+        if self.opening_hub is not None:
+            self.opening_hub.set_theme(UI_THEMES[self.ui_mode], self._board_colors(), update=False)
         self.page.update()
 
     # -----------------------------------------------------------------
@@ -1944,16 +2020,24 @@ class ChessCoachFletApp:
         self.homepage_view.visible = self.current_page == "homepage"
         self.engine_view.visible = self.current_page == "engine"
         self.opening_trainer_view.visible = self.current_page == "opening_trainer"
+        self.opening_hub_view.visible = self.current_page == "opening_hub"
         if self.level_trainer is not None:  # also re-reads progress after an account change
             self.level_trainer.set_theme(t, self._board_colors(), update=False)
+        if self.opening_hub is not None:
+            self.opening_hub.set_theme(t, self._board_colors(), update=False)
         self.page.update()
 
     # -----------------------------------------------------------------
     # Clean Shutdown on Window Close
     # -----------------------------------------------------------------
     def _on_window_event(self, e):
-        if getattr(e, "data", "") == "close":
+        # Flet 0.28 puts the event name in e.data; Flet 1.x in e.type (an enum).
+        kind = str(getattr(e, "data", "") or getattr(getattr(e, "type", None), "value", "") or "").lower()
+        if kind == "close":
             self.cleanup()
+        elif kind in ("resize", "resized", "maximize", "unmaximize", "restore",
+                      "enterfullscreen", "leavefullscreen"):
+            self._on_page_resized()
 
     def cleanup(self):
         with self.engine_lock:

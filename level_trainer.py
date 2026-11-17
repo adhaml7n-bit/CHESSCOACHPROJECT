@@ -281,6 +281,29 @@ def summarize_levels(chapter: dict, line_rows: dict, extra_passed=frozenset()) -
     return summary
 
 
+def summarize_chapter(chapter: dict, line_rows: dict, extra_passed=frozenset()) -> dict:
+    """Progress of a whole chapter, for its card on the opening hub.
+
+    Returns levels_total, levels_passed, percent (of levels passed) and status:
+    'not_started' (nothing played yet), 'in_progress' or 'completed'.
+    """
+    levels = summarize_levels(chapter, line_rows, extra_passed)
+    passed = sum(1 for level in levels if level["passed"])
+    played = passed > 0 or any(level_line_id(level["level"]) in line_rows for level in levels)
+    if passed == len(levels):
+        status = "completed"
+    elif played:
+        status = "in_progress"
+    else:
+        status = "not_started"
+    return {
+        "levels_total": len(levels),
+        "levels_passed": passed,
+        "percent": round(100 * passed / len(levels)),
+        "status": status,
+    }
+
+
 # =====================================================================
 # 3. LevelSession
 # =====================================================================

@@ -1,0 +1,28 @@
+{
+    "format_version": 1,
+    "opening_id": "catalan",
+    "title": "Catalan Opening",
+    "subtitle": "Chapters & theory",
+    "player_color": "white",
+    "intro": "Welcome to the Catalan Opening (1.d4 Nf6 2.c4 e6 3.g3). You fianchetto your light-squared bishop on g2, where it presses down the long h1-a8 diagonal against your opponent's queenside. Your king stays safe behind it while you prepare the central breaks.",
+    "strategic_focus": [
+        "The pressure of your g2-bishop",
+        "Your king's safety",
+        "Control of the center"
+    ],
+    "setup": {
+        "title": "Ideal Catalan setup",
+        "moves": ["d4", "Nf6", "c4", "e6", "g3", "d5", "Bg2", "Be7", "Nf3", "O-O", "O-O"],
+        "focus_square": "g2",
+        "path": ["f3", "e4", "d5", "c6", "b7", "a8"]
+    },
+    "release_note": "This version covers the Closed Catalan. The other chapters are coming soon.",
+    "chapters": [
+        {"number": 1, "title": "Closed Catalan", "file": "catalan_ch01_v2.json"},
+        {"number": 2, "title": "Open Catalan", "file": null},
+        {"number": 3, "title": "Catalan against the King's Indian", "file": null},
+        {"number": 4, "title": "Catalan against the Semi-Slav", "file": null},
+        {"number": 5, "title": "Catalan against the Grünfeld", "file": null},
+        {"number": 6, "title": "Catalan against other defences", "file": null}
+    ]
+}
