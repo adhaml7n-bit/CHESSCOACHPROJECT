@@ -46,7 +46,9 @@ def move_label(step: dict) -> str:
 def review_days_text(days: list[int]) -> str:
     """[1, 7] -> 'tomorrow and in 7 days'; [1, 3, 7] -> 'tomorrow, in 3 days and in 7 days'."""
     parts = ["tomorrow" if day == 1 else f"in {day} days" for day in days]
-    return parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
+    if len(parts) <= 1:
+        return "".join(parts)
+    return ", ".join(parts[:-1]) + " and " + parts[-1]
 
 
 class LevelTrainerView:
@@ -535,35 +537,35 @@ class LevelTrainerView:
     def _quiz_panel(self) -> list:
         session, t = self.session, self.theme
         number = min(session.answered_count + 1, session.question_count)
-        opponent = "Black" if self.player_color == "white" else "White"
         body = [
             self._label(f"Quiz · question {number} of {session.question_count}"),
             self._segments(session.question_states()),
-            self._text(f"{self.player_color.capitalize()} to move", size=16, bold=True),
-            self._text(f"Play the move on the board. {opponent}'s replies play by themselves.", color=t["fg_secondary"]),
+            self._text("Your move", size=16, bold=True),
+            self._text("Play your move on the board. Your opponent will answer.", color=t["fg_secondary"]),
         ]
         feedback = self.feedback
         if feedback:
             question, result = feedback["question"], feedback["result"]
+            when = review_days_text(result.get("review_days", []))  # empty after a correct answer
             if feedback["kind"] == "hint":
                 tried = move_label({**question, "san": result["played_san"]})
-                hint = result["hint"] or "the highlighted piece is the one to move."
-                body.append(self._box("warning", f"{tried} isn't the move here", [f"Hint: {hint}"]))
-                body.append(self._label(f"Added to review: {review_days_text(result['review_days'])}"))
+                hint = result["hint"] or "move the highlighted piece."
+                body.append(self._box("warning", f"Not quite: {tried} isn't the move here.", [f"Hint: {hint}"]))
+                body.append(self._label(f"We'll review this position {when}."))
             elif feedback["kind"] == "shown":
-                body.append(self._box("danger", f"The move is {move_label(question)}", ["Play it on the board to continue."]))
-                body.append(self._label(f"Review updated: {review_days_text(result['review_days'])}"))
+                body.append(self._box("danger", f"The move here is {move_label(question)}.", ["Play it yourself to continue."]))
+                body.append(self._label(f"We'll review this position {when}."))
             else:
                 idea = result["strategic_idea"] if session.show_explanations else None
-                body.append(self._box("success", f"✓ {move_label(question)}", [idea] if idea else []))
-        body.append(self._label(f"First try: {session.first_try_count} of {session.answered_count}"))
+                body.append(self._box("success", f"Well done! {move_label(question)}", [idea] if idea else []))
+        body.append(self._label(f"You got {session.first_try_count} of {session.answered_count} right on the first try."))
         return body
 
     def _done_panel(self) -> list:
         session, t = self.session, self.theme
         number = session.level_number
         next_level = self._levels[number] if number < len(self._levels) else None
-        body = [self._text(f"Level {number} complete", size=18, bold=True)]
+        body = [self._text(f"You finished level {number}!", size=18, bold=True)]
 
         if session.kind == "quiz":
             passed = session.passed
@@ -575,7 +577,7 @@ class LevelTrainerView:
             ]))
             items = session.review_items()
             if items:
-                body.append(self._label("Review list"))
+                body.append(self._label("We'll review these positions with you:"))
                 for item in items:
                     label = move_label({**item, "turn": self.player_color})
                     body.append(self._text(f"{label} · {review_days_text(item['review_days'])}",
@@ -593,7 +595,7 @@ class LevelTrainerView:
                                         lambda e, n=next_level["level"]: self.open_level(n), primary=True))
         buttons.append(self._button("↻ Repeat level", lambda e: self.open_level(number), primary=not buttons))
         if next_level is None:
-            body.append(self._text("That was the last level of this chapter.", color=t["fg_secondary"]))
+            body.append(self._text("You've reached the last level of this chapter.", color=t["fg_secondary"]))
         body.append(ft.Row(wrap=True, spacing=8, controls=buttons))
         return body
 
