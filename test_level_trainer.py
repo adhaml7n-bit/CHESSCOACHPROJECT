@@ -159,7 +159,7 @@ class ValidationTests(unittest.TestCase):
         main, line_2 = chapter["lines"]["main"], chapter["lines"]["line_2"]
         self.assertIs(line_2[4]["purpose"], main[4]["purpose"])          # 3.g3: written once, on main
         self.assertNotEqual(line_2[14]["purpose"], main[14]["purpose"])  # 8.Nbd2 in two different positions
-        steps = main + line_2[:25]  # levels 1-8; the questions for the newer lines come later
+        steps = main + line_2  # the two first lines; the questions for the other lines come in batches
         self.assertTrue(all(step["purpose"] for step in steps if step["turn"] == "white"))
         self.assertTrue(all(step["purpose"] is None for line in chapter["lines"].values() for step in line
                             if step["turn"] == "black"))
@@ -188,6 +188,7 @@ class ValidationTests(unittest.TestCase):
         self.assertEqual(lines["nbd7_bb7"][18]["fen_before"].split()[:4], lines["b6_nbd7"][18]["fen_before"].split()[:4])
         self.assertEqual(lines["nbd7_bb7"][18]["explanation"], lines["b6_nbd7"][18]["explanation"])
         self.assertEqual(lines["nbd7_bb7"][18]["hint"], "Push your e-pawn and attack the f6-knight.")
+        self.assertIs(lines["nbd7_bb7"][18]["purpose"], lines["b6_nbd7"][18]["purpose"])  # and the same day-7 question
 
     def test_rejects_illegal_move(self):
         data = make_chapter()
