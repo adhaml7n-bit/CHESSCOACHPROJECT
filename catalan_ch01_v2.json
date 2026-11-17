@@ -254,6 +254,233 @@
                 "explanation": "On e2 your queen is out of the knight's reach and still watches the center. If Black takes your knight with ...Bxd6, you recapture with exd6 and keep an advanced pawn in Black's camp.",
                 "hint": "Move your queen to a safe square on the e-file."
             }
+        ],
+        "line_2": [
+            {
+                "ply": 1,
+                "move_number": 1,
+                "turn": "white",
+                "san": "d4",
+                "strategic_idea": "You take control of the center.",
+                "explanation": "You put your queen's pawn in the middle of the board: your first foothold in the center.",
+                "hint": "Start by claiming the center with a pawn."
+            },
+            {
+                "ply": 2,
+                "move_number": 1,
+                "turn": "black",
+                "san": "Nf6",
+                "strategic_idea": "Your opponent stops you from playing e4.",
+                "explanation": "Your opponent develops flexibly and controls e4, so you can't easily build a full pawn center with e2-e4.",
+                "hint": null
+            },
+            {
+                "ply": 3,
+                "move_number": 2,
+                "turn": "white",
+                "san": "c4",
+                "strategic_idea": "You attack d5 and open lines for your queenside pieces.",
+                "explanation": "Your c-pawn fights for d5 and makes room for your queenside pieces.",
+                "hint": "Use your c-pawn to fight for d5."
+            },
+            {
+                "ply": 4,
+                "move_number": 2,
+                "turn": "black",
+                "san": "e6",
+                "strategic_idea": "Your opponent supports the center and frees the dark-squared bishop.",
+                "explanation": "Your opponent prepares ...d5 and opens the f8-bishop's path to e7, d6 or b4.",
+                "hint": null
+            },
+            {
+                "ply": 5,
+                "move_number": 3,
+                "turn": "white",
+                "san": "g3",
+                "strategic_idea": "You prepare to fianchetto your king's bishop.",
+                "explanation": "You make room on g2 for your light-squared bishop, which will aim down the long diagonal h1-a8.",
+                "hint": "Prepare a home for your king's bishop on the long diagonal."
+            },
+            {
+                "ply": 6,
+                "move_number": 3,
+                "turn": "black",
+                "san": "d5",
+                "strategic_idea": "Your opponent sets up a solid anchor in the center.",
+                "explanation": "Your opponent plants a pawn in the middle of the board and blocks your long diagonal for now.",
+                "hint": null
+            },
+            {
+                "ply": 7,
+                "move_number": 4,
+                "turn": "white",
+                "san": "Bg2",
+                "strategic_idea": "You put your bishop on its strongest square.",
+                "explanation": "From g2 your bishop puts long-range pressure on your opponent's queenside.",
+                "hint": "Develop your bishop onto the long diagonal."
+            },
+            {
+                "ply": 8,
+                "move_number": 4,
+                "turn": "black",
+                "san": "Be7",
+                "strategic_idea": "Your opponent develops calmly and keeps the center closed.",
+                "explanation": "Instead of taking your c4-pawn (the Open Catalan), your opponent keeps the pawn on d5 and gets ready to castle.",
+                "hint": null
+            },
+            {
+                "ply": 9,
+                "move_number": 5,
+                "turn": "white",
+                "san": "Nf3",
+                "strategic_idea": "You control d4 and e5 and get ready to castle.",
+                "explanation": "Your knight goes to its natural square, watches d4 and e5, and clears the way for castling.",
+                "hint": "Develop your king's knight and get ready to castle."
+            },
+            {
+                "ply": 10,
+                "move_number": 5,
+                "turn": "black",
+                "san": "O-O",
+                "strategic_idea": "Your opponent makes the king safe before the center opens.",
+                "explanation": "Your opponent castles short quickly, before any fight in the center begins.",
+                "hint": null
+            },
+            {
+                "ply": 11,
+                "move_number": 6,
+                "turn": "white",
+                "san": "O-O",
+                "strategic_idea": "You tuck your king away behind the fianchetto.",
+                "explanation": "Your king is safe behind the g2-bishop and the pawns, and your h1-rook joins the game.",
+                "hint": "Bring your king to safety."
+            },
+            {
+                "ply": 12,
+                "move_number": 6,
+                "turn": "black",
+                "san": "c6",
+                "strategic_idea": "Your opponent builds the c6-d5-e6 triangle against your g2-bishop.",
+                "explanation": "This solid pawn triangle absorbs the pressure of your bishop on the long diagonal.",
+                "hint": null
+            },
+            {
+                "ply": 13,
+                "move_number": 7,
+                "turn": "white",
+                "san": "Qc2",
+                "strategic_idea": "You protect c4, watch the c-file and prepare e2-e4.",
+                "explanation": "Your queen defends the c4-pawn, controls the c-file and supports your coming push e2-e4.",
+                "hint": "Place your queen where it guards c4 and supports e4."
+            },
+            {
+                "ply": 14,
+                "move_number": 7,
+                "turn": "black",
+                "san": "b6",
+                "strategic_idea": "Your opponent prepares ...Bb7 right away.",
+                "explanation": "This time Black doesn't play ...Nbd7 first. The c8-bishop is shut in by the e6-pawn, so Black brings it out via b7 at once and keeps the b8-knight's options open.",
+                "hint": null
+            },
+            {
+                "ply": 15,
+                "move_number": 8,
+                "turn": "white",
+                "san": "Nbd2",
+                "strategic_idea": "You develop your knight to support e4 and protect c4.",
+                "explanation": "Just like in the main line, from d2 the knight supports the coming e2-e4 and guards your c4-pawn.",
+                "hint": "Develop your queen's knight so it supports e4 and guards c4."
+            },
+            {
+                "ply": 16,
+                "move_number": 8,
+                "turn": "black",
+                "san": "Bb7",
+                "strategic_idea": "Your opponent finishes the fianchetto.",
+                "explanation": "The bishop takes the long diagonal, but for now Black's own pawns on c6 and d5 block it.",
+                "hint": null
+            },
+            {
+                "ply": 17,
+                "move_number": 9,
+                "turn": "white",
+                "san": "e4",
+                "strategic_idea": "You break open the center.",
+                "explanation": "As in the main line, e2-e4 attacks the d5-pawn and opens lines for your pieces, including your g2-bishop.",
+                "hint": "Your pieces are ready: strike in the center."
+            },
+            {
+                "ply": 18,
+                "move_number": 9,
+                "turn": "black",
+                "san": "Na6",
+                "strategic_idea": "Your opponent's knight goes to a6.",
+                "explanation": "It looks strange on the edge, but it has a plan: from a6 it can jump to b4 to hit your queen, or support the ...c5 break.",
+                "hint": null
+            },
+            {
+                "ply": 19,
+                "move_number": 10,
+                "turn": "white",
+                "san": "a3",
+                "strategic_idea": "You take the b4-square away from the knight.",
+                "explanation": "Now ...Nb4 would simply lose the knight to axb4. Your a3-pawn also prepares b2-b4 later.",
+                "hint": "Stop the a6-knight from jumping to b4."
+            },
+            {
+                "ply": 20,
+                "move_number": 10,
+                "turn": "black",
+                "san": "c5",
+                "strategic_idea": "Your opponent strikes at your center.",
+                "explanation": "Black attacks your d4-pawn. The knight on a6 supports the c5-square, so Black is ready to recapture there.",
+                "hint": null
+            },
+            {
+                "ply": 21,
+                "move_number": 11,
+                "turn": "white",
+                "san": "exd5",
+                "strategic_idea": "You clear the center by taking on d5.",
+                "explanation": "You swap your e-pawn for Black's d-pawn and open lines in the center.",
+                "hint": "Take on d5 with your e-pawn."
+            },
+            {
+                "ply": 22,
+                "move_number": 11,
+                "turn": "black",
+                "san": "exd5",
+                "strategic_idea": "Your opponent recaptures with the e-pawn.",
+                "explanation": "Black now has two pawns side by side on c5 and d5. They control the center, but they can also become targets.",
+                "hint": null
+            },
+            {
+                "ply": 23,
+                "move_number": 12,
+                "turn": "white",
+                "san": "dxc5",
+                "strategic_idea": "You break up Black's pawn pair.",
+                "explanation": "You take on c5. When Black recaptures with the knight, the d5-pawn has no neighbours left on the c- or e-file: it becomes an isolated pawn.",
+                "hint": "Capture on c5 with your d-pawn."
+            },
+            {
+                "ply": 24,
+                "move_number": 12,
+                "turn": "black",
+                "san": "Nxc5",
+                "strategic_idea": "Your opponent's knight finally joins the game.",
+                "explanation": "From c5 the knight eyes your d3 and e4 squares. But Black's d5-pawn is now isolated, a long-term weakness you can play against.",
+                "hint": null
+            },
+            {
+                "ply": 25,
+                "move_number": 13,
+                "turn": "white",
+                "san": "b4",
+                "strategic_idea": "You chase the knight away and gain space.",
+                "explanation": "Your b-pawn, supported by a3, attacks the c5-knight, and your c4-pawn stays protected by your queen and your d2-knight. Once the knight moves, your c1-bishop can come to b2 and aim along the long dark diagonal toward Black's king.",
+                "hint": "Attack the c5-knight with a pawn."
+            }
         ]
     },
     "levels": [
@@ -355,6 +582,21 @@
                     "action": "show_correct_move",
                     "review_days": [1, 3, 7]
                 }
+            ]
+        },
+        {
+            "level": 7,
+            "type": "learn",
+            "title": "A new branch: 7...b6",
+            "line_id": "line_2",
+            "from_ply": 14,
+            "to_ply": 25,
+            "intro": "A new branch: this time your opponent answers 7.Qc2 with 7...b6 instead of 7...Nbd7. The first seven moves are the ones you already know.",
+            "key_ideas": [
+                "Bring your bishop to b2: from there it aims along the long dark diagonal at Black's king.",
+                "Black's d5-pawn is isolated. Keep it under pressure, and use the d4-square in front of it as a home for your knight (Nd4).",
+                "Put your rooks on the open files: one on c1, one on d1.",
+                "Exchanges usually help you: the fewer pieces Black has, the weaker the isolated pawn becomes."
             ]
         }
     ]
