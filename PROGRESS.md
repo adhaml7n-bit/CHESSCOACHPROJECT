@@ -87,3 +87,9 @@ The database file `chesscoach.db` is created automatically on first launch and i
 - Accuracy is now scored separately for every run.
 - Light mode now uses a light sidebar.
 - Compatibility layer for Flet 0.28 and 1.0+.
+
+---
+
+## Credits
+
+- Chess pieces: **Merida** by Armando Hernandez Marroquin, GNU General Public License v2 or later. The unmodified files and the license are in `assets/pieces/merida/`.

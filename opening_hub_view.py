@@ -13,15 +13,11 @@ colours come from UI_THEMES and the board colours the app passes in.
 import chess
 import flet as ft
 
-from flet_compat import align_center, border_all, pad_only, pad_symmetric
+from board_pieces import piece_controls
+from flet_compat import border_all, pad_symmetric
 from level_trainer import summarize_chapter
 from opening_hub import load_hub_chapters, load_opening
 
-PIECE_SYMBOLS = {
-    "P": "♙", "N": "♘", "B": "♗", "R": "♖", "Q": "♕", "K": "♔",
-    # U+FE0E asks for the plain text glyph: without it Windows draws the black pawn as a coloured emoji.
-    "p": "♟︎", "n": "♞", "b": "♝", "r": "♜", "q": "♛", "k": "♚",
-}
 SETUP_SQUARE = 38
 SETUP_PIECE = 24
 SETUP_CARD_WIDTH = 350
@@ -173,14 +169,8 @@ class OpeningHubView:
                     items.append(ft.Container(width=size, height=size, border_radius=3,
                                               border=border_all(3, c["hint_sq"])))
                 piece = board.piece_at(square)
-                if piece:
-                    symbol = PIECE_SYMBOLS[piece.symbol()]
-                    color = c["piece_white"] if piece.color == chess.WHITE else c["piece_black"]
-                    items.append(ft.Container(width=size, height=size, alignment=align_center(),
-                                              padding=pad_only(left=1, top=2),
-                                              content=ft.Text(symbol, size=SETUP_PIECE, color=c["piece_shadow"])))
-                    items.append(ft.Container(width=size, height=size, alignment=align_center(),
-                                              content=ft.Text(symbol, size=SETUP_PIECE, color=color)))
+                if piece:  # a picture from assets/pieces (glyph as backup), see board_pieces.py
+                    items.extend(piece_controls(piece, size, c, glyph_size=SETUP_PIECE))
                 cells.append(ft.Container(width=size, height=size, bgcolor=fill,
                                           content=ft.Stack(width=size, height=size, controls=items)))
             rows.append(ft.Row(spacing=0, tight=True, controls=cells))

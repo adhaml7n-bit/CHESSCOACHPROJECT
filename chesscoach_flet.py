@@ -26,6 +26,7 @@ Key Features:
 
 """
 
+from board_pieces import ASSETS_DIR, piece_controls
 from level_view import LevelTrainerView
 from opening_hub_view import OpeningHubView
 from database import ChessCoachDB
@@ -183,14 +184,7 @@ BOARD_THEMES = {
     },
 }
 
-# Standard Unicode Chess Pieces
-PIECE_UNICODE = {
-    "P": "♙", "N": "♘", "B": "♗", "R": "♖", "Q": "♕", "K": "♔",
-    # U+FE0E asks for the plain text glyph: without it Windows draws the black pawn as a coloured emoji.
-    "p": "♟︎", "n": "♞", "b": "♝", "r": "♜", "q": "♛", "k": "♚",
-}
-
-# Piece colours of the training screen (same look as the engine board).
+# Colours of the backup piece glyphs (used only when the piece pictures can't be shown).
 PIECE_COLORS = {
     "piece_white": "#FFFFFF",
     "piece_black": "#0F172A",
@@ -1280,36 +1274,10 @@ class ChessCoachFletApp:
                         )
                     )
 
-                # Piece rendering with subtle shadow
+                # Piece: a picture from assets/pieces (glyph as backup), see board_pieces.py
                 piece = self.board.piece_at(square)
                 if piece:
-                    symbol = PIECE_UNICODE[piece.symbol()]
-                    piece_fg = "#FFFFFF" if piece.color == chess.WHITE else "#0F172A"
-                    stack_items.append(
-                        ft.Container(
-                            width=sq,
-                            height=sq,
-                            alignment=_align_center(),
-                            padding=_pad_only(left=2, top=3),
-                            content=ft.Text(
-                                symbol,
-                                size=36,
-                                color="#475569",
-                            ),
-                        )
-                    )
-                    stack_items.append(
-                        ft.Container(
-                            width=sq,
-                            height=sq,
-                            alignment=_align_center(),
-                            content=ft.Text(
-                                symbol,
-                                size=36,
-                                color=piece_fg,
-                            ),
-                        )
-                    )
+                    stack_items.extend(piece_controls(piece, sq, PIECE_COLORS, glyph_size=36))
 
                 # Legal move indicators (ring for captures, dot for empty squares)
                 if square in legal_target_squares and self.selected_square is not None:
@@ -2054,8 +2022,9 @@ def main(page: ft.Page):
 
 
 if __name__ == "__main__":
-    # Compatible with both Flet 1.0+ (`ft.run(main)`) and legacy Flet 0.28 (`ft.app(target=main)`)
+    # Compatible with both Flet 1.0+ (`ft.run(main)`) and legacy Flet 0.28 (`ft.app(target=main)`).
+    # assets_dir: the piece pictures live in assets/pieces (see board_pieces.py).
     if hasattr(ft, "run"):
-        ft.run(main)
+        ft.run(main, assets_dir=ASSETS_DIR)
     else:
-        ft.app(target=main)
+        ft.app(target=main, assets_dir=ASSETS_DIR)

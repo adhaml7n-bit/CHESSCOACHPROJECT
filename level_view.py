@@ -23,14 +23,10 @@ import os
 import chess
 import flet as ft
 
-from flet_compat import align_center, border_all, pad_only, pad_symmetric
+from board_pieces import ASSETS_DIR, piece_controls
+from flet_compat import align_center, border_all, pad_symmetric
 from level_trainer import LevelSession, level_line_id, load_level_chapter, summarize_levels
 
-PIECE_SYMBOLS = {
-    "P": "♙", "N": "♘", "B": "♗", "R": "♖", "Q": "♕", "K": "♔",
-    # U+FE0E asks for the plain text glyph: without it Windows draws the black pawn as a coloured emoji.
-    "p": "♟︎", "n": "♞", "b": "♝", "r": "♜", "q": "♛", "k": "♚",
-}
 OPPONENT_DELAY_SECONDS = 0.6  # pause before the opponent's reply in a quiz
 LEVEL_ICONS = {"learn": "📖", "quiz": "✎"}
 
@@ -508,14 +504,8 @@ class LevelTrainerView:
                                       border=border_all(marked[square], c["hint_sq"])))
 
         piece = board.piece_at(square)
-        if piece:
-            symbol = PIECE_SYMBOLS[piece.symbol()]
-            color = c["piece_white"] if piece.color == chess.WHITE else c["piece_black"]
-            items.append(ft.Container(width=size, height=size, alignment=align_center(),
-                                      padding=pad_only(left=2, top=3),
-                                      content=ft.Text(symbol, size=piece_size, color=c["piece_shadow"])))
-            items.append(ft.Container(width=size, height=size, alignment=align_center(),
-                                      content=ft.Text(symbol, size=piece_size, color=color)))
+        if piece:  # a picture from assets/pieces (glyph as backup), see board_pieces.py
+            items.extend(piece_controls(piece, size, c, glyph_size=piece_size))
 
         if square in targets:
             if targets[square]:  # ring for a capture
@@ -719,6 +709,6 @@ if __name__ == "__main__":
         page.add(view.root)
 
     if hasattr(ft, "run"):
-        ft.run(main)
+        ft.run(main, assets_dir=ASSETS_DIR)
     else:
-        ft.app(target=main)
+        ft.app(target=main, assets_dir=ASSETS_DIR)
