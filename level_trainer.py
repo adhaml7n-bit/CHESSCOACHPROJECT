@@ -14,6 +14,7 @@ catalan_ch01.json still use opening_trainer.py.
 """
 
 import json
+import random
 import re
 from pathlib import Path
 
@@ -147,6 +148,7 @@ def validate_level_chapter(data: dict) -> dict:
         raise ChapterFormatError("The chapter needs at least one line in 'lines'.")
     for line_id, moves in lines.items():
         _validate_line(line_id, moves)
+    _share_purposes(lines, meta["player_color"])
 
     levels = data.get("levels")
     if not isinstance(levels, list) or not levels:
@@ -185,10 +187,44 @@ def _validate_line(line_id: str, moves) -> None:
 
         for key in TEXT_FIELDS:  # moves without explanations (e.g. level 3) are allowed
             step.setdefault(key, None)
+        if step.setdefault("purpose", None) is not None:
+            _check_purpose(step["purpose"], where)
         step["fen_before"] = board.fen()
         step["uci"] = move.uci()
         board.push(move)
         step["fen_after"] = board.fen()
+
+
+def _check_purpose(purpose, where: str) -> None:
+    """The day-7 question of a move (DESIGN.md section 3):
+    {"answer": "the move's idea", "wrong": ["a wrong idea", ...]}."""
+    answer = purpose.get("answer") if isinstance(purpose, dict) else None
+    wrong = purpose.get("wrong") if isinstance(purpose, dict) else None
+    if (not isinstance(answer, str) or not answer.strip() or not isinstance(wrong, list) or not wrong
+            or not all(isinstance(text, str) and text.strip() for text in wrong)):
+        raise ChapterFormatError(f"{where}: 'purpose' needs an 'answer' text and a 'wrong' list of texts.")
+    texts = [answer, *wrong]
+    if len({text.strip().lower() for text in texts}) != len(texts):
+        raise ChapterFormatError(f"{where}: the purpose answers must all be different.")
+
+
+def _share_purposes(lines: dict, player_color: str) -> None:
+    """A purpose question belongs to a position: lines that share their first
+    moves write it once, and every copy of that position (same fen and move) gets it."""
+    by_position = {}
+    for line_id, moves in lines.items():
+        for step in moves:
+            if step["purpose"] is None:
+                continue
+            if step["turn"] != player_color:
+                raise ChapterFormatError(
+                    f"Line '{line_id}', ply {step['ply']}: a 'purpose' question is only for {player_color}'s moves."
+                )
+            by_position.setdefault((step["fen_before"], step["uci"]), step["purpose"])
+    for moves in lines.values():
+        for step in moves:
+            if step["purpose"] is None:
+                step["purpose"] = by_position.get((step["fen_before"], step["uci"]))
 
 
 def _validate_level(level, number: int, lines: dict, player_color: str) -> None:
@@ -641,6 +677,18 @@ class LevelSession:
 # 4. Review sessions (Daily review)
 # =====================================================================
 
+def _is_last_review(row: dict) -> bool:
+    """True when this review would master the position: the last day of its plan (day 7)."""
+    days = row.get("review_days")
+    return bool(days) and row.get("streak_correct", 0) + 1 >= len(str(days).split(","))
+
+
+def asks_purpose(item: dict) -> bool:
+    """True when a first-try move on this review question is followed by the
+    purpose question: its last review, and the move has one written."""
+    return bool(item.get("final_keys")) and item.get("purpose") is not None
+
+
 def build_review_items(rows: list[dict], chapters: dict) -> list[dict]:
     """Turns due database rows (ChessCoachDB.get_due_mistakes) into review questions.
 
@@ -648,7 +696,8 @@ def build_review_items(rows: list[dict], chapters: dict) -> list[dict]:
     when its chapter, line or position no longer matches the chapter file (the
     lesson has changed) or when it is not the player's move. Rows for the same
     position (lines share their first moves) become one question; its "keys"
-    list every (line_id, ply) so the screen can update all of them.
+    list every (line_id, ply) so the screen can update all of them, and
+    "final_keys" the rows for which this is the last review (see asks_purpose).
     """
     items, by_position = [], {}
     for row in rows:
@@ -664,8 +713,11 @@ def build_review_items(rows: list[dict], chapters: dict) -> list[dict]:
         if step["fen_before"] != row["fen"] or step["turn"] != meta["player_color"]:
             continue
         position = (row["chapter_id"], row["fen"])
+        key = (row["line_id"], ply)
+        final = [key] if _is_last_review(row) else []
         if position in by_position:
-            by_position[position]["keys"].append((row["line_id"], ply))
+            by_position[position]["keys"].append(key)
+            by_position[position]["final_keys"].extend(final)
             continue
         item = {
             "chapter_id": row["chapter_id"],
@@ -675,7 +727,9 @@ def build_review_items(rows: list[dict], chapters: dict) -> list[dict]:
             "ply": ply,
             "step": step,
             "previous": line[ply - 2] if ply > 1 else None,
-            "keys": [(row["line_id"], ply)],
+            "keys": [key],
+            "final_keys": final,
+            "purpose": step.get("purpose"),
         }
         by_position[position] = item
         items.append(item)
@@ -688,14 +742,24 @@ class ReviewSession:
     The rules are the quizzes': the hint first, then the correct move, which
     the player then plays. Each incorrect result carries the review_days that
     restart that position's plan.
+
+    On a position's last review (day 7), a first-try move is followed by the
+    purpose question ("Why do you play 9. e4?", owner's decision 2026-11-17):
+    submit_move() then returns ask_purpose=True and the session waits for
+    answer_purpose() before it moves on. The screen masters the position only
+    when that answer is right too.
     """
 
-    def __init__(self, items: list[dict], rules=DEFAULT_MISTAKE_RULES):
+    def __init__(self, items: list[dict], rules=DEFAULT_MISTAKE_RULES, rng: random.Random | None = None):
         self.items = items
         self.rules = list(rules)
         self.index = 0
         self._wrong: dict[int, int] = {}  # item index -> wrong attempts
         self.first_try_count = 0
+        self.awaiting_purpose = False     # True between a first-try move and its purpose answer
+        self._rng = rng or random.Random()
+        self._choices: dict[int, list[tuple[str, bool]]] = {}  # item index -> answers in shown order
+        self._purpose_right: dict[int, bool] = {}             # item index -> purpose answered right
 
     @property
     def count(self) -> int:
@@ -711,7 +775,22 @@ class ReviewSession:
 
     @property
     def answered_count(self) -> int:
-        return self.index
+        """Positions whose move is found (one may still wait for its purpose answer)."""
+        return self.index + (1 if self.awaiting_purpose else 0)
+
+    @property
+    def purpose_asked(self) -> int:
+        return len(self._purpose_right)
+
+    @property
+    def purpose_right_count(self) -> int:
+        return sum(self._purpose_right.values())
+
+    @property
+    def purpose_choices(self) -> list[str]:
+        """The answers of the open purpose question, in a shuffled order that stays
+        the same until it is answered; [] when no purpose question is open."""
+        return [text for text, _ in self._shuffled()] if self.awaiting_purpose else []
 
     @property
     def fen(self) -> str:
@@ -737,6 +816,8 @@ class ReviewSession:
         item = self.current
         if item is None:
             return {"status": "complete"}
+        if self.awaiting_purpose:
+            return {"status": "purpose_pending"}
         return classify_move(item["step"]["fen_before"], item["step"]["uci"], move_text)
 
     def submit_move(self, move_text: str) -> dict:
@@ -744,6 +825,8 @@ class ReviewSession:
         item = self.current
         if item is None:
             return {"status": "complete", "fen": self.fen}
+        if self.awaiting_purpose:
+            return {"status": "purpose_pending", "fen": item["step"]["fen_after"]}
         step = item["step"]
         board = chess.Board(step["fen_before"])
         move = _parse_move(board, move_text)
@@ -774,7 +857,11 @@ class ReviewSession:
         wrong = self._wrong.get(self.index, 0)
         if wrong == 0:
             self.first_try_count += 1
-        self.index += 1
+        ask = wrong == 0 and asks_purpose(item)
+        if ask:
+            self.awaiting_purpose = True  # the same position stays current until answer_purpose()
+        else:
+            self.index += 1
         return {
             "status": "correct",
             "item": item,
@@ -783,16 +870,57 @@ class ReviewSession:
             "uci": step["uci"],
             "first_try": wrong == 0,
             "wrong_attempts": wrong,
+            "ask_purpose": ask,
             "is_complete": self.is_complete,
         }
 
+    def answer_purpose(self, choice: int) -> dict:
+        """The player picks answer number `choice` (0-based, in purpose_choices order).
+
+        Returns status 'right' or 'wrong' with the answers as shown ("choices"),
+        "chosen", "answer_index" and the right "answer" text; then the next
+        position is current.
+        """
+        if not self.awaiting_purpose:
+            return {"status": "no_question"}
+        choices = self._shuffled()
+        if not (_is_int(choice) and 0 <= choice < len(choices)):
+            return {"status": "invalid", "message": f"Pick an answer from 1 to {len(choices)}."}
+        item = self.current
+        right = choices[choice][1]
+        self._purpose_right[self.index] = right
+        self.awaiting_purpose = False
+        self.index += 1
+        return {
+            "status": "right" if right else "wrong",
+            "item": item,
+            "choices": [text for text, _ in choices],
+            "chosen": choice,
+            "answer_index": next(number for number, (_, ok) in enumerate(choices) if ok),
+            "answer": item["purpose"]["answer"],
+            "is_complete": self.is_complete,
+        }
+
+    def _shuffled(self) -> list[tuple[str, bool]]:
+        """(text, is_right) for the current position's purpose answers, shuffled once."""
+        if self.index not in self._choices:
+            purpose = self.current["purpose"]
+            choices = [(purpose["answer"], True)] + [(text, False) for text in purpose["wrong"]]
+            self._rng.shuffle(choices)
+            self._choices[self.index] = choices
+        return self._choices[self.index]
+
     def question_states(self) -> list[str]:
-        """'ok', 'hint', 'shown', 'current' or 'pending' for each position."""
+        """'ok', 'hint', 'shown', 'current' or 'pending' for each position.
+        A wrong purpose answer after a right move shows as 'hint'."""
         states = []
         for number in range(len(self.items)):
             if number < self.index:
                 wrong = self._wrong.get(number, 0)
-                states.append("ok" if wrong == 0 else mistake_state(self.rules, wrong))
+                if wrong:
+                    states.append(mistake_state(self.rules, wrong))
+                else:
+                    states.append("hint" if self._purpose_right.get(number) is False else "ok")
             else:
                 states.append("current" if number == self.index else "pending")
         return states

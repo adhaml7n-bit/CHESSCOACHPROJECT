@@ -12,6 +12,7 @@ uses a throw-away database in a temporary folder, never chesscoach.db.
 
 import copy
 import os
+import random
 import tempfile
 import unittest
 
@@ -22,6 +23,7 @@ from level_trainer import (
     ChapterFormatError,
     LevelSession,
     ReviewSession,
+    asks_purpose,
     build_review_items,
     level_line_id,
     load_level_chapter,
@@ -124,6 +126,41 @@ class ValidationTests(unittest.TestCase):
         step = validate_level_chapter(data)["lines"]["main"][0]
         self.assertIsNone(step["hint"])
         self.assertIsNone(step["explanation"])
+
+    def test_purpose_questions_are_optional(self):
+        data = make_chapter()
+        data["lines"]["main"][2]["purpose"] = {"answer": "right idea", "wrong": ["wrong idea 1", "wrong idea 2"]}
+        main = validate_level_chapter(data)["lines"]["main"]
+        self.assertEqual((main[2]["purpose"]["answer"], main[0]["purpose"]), ("right idea", None))
+
+    def test_rejects_broken_purpose_questions(self):
+        cases = {
+            "not an object": "right idea",
+            "no answer": {"wrong": ["a", "b"]},
+            "empty answer": {"answer": " ", "wrong": ["a"]},
+            "no wrong answers": {"answer": "right", "wrong": []},
+            "wrong answers as text": {"answer": "right", "wrong": "a"},
+            "the same answer twice": {"answer": "Right", "wrong": ["right "]},
+        }
+        for name, purpose in cases.items():
+            with self.subTest(name):
+                data = make_chapter()
+                data["lines"]["main"][0]["purpose"] = purpose
+                with self.assertRaisesRegex(ChapterFormatError, "ply 1"):
+                    validate_level_chapter(data)
+        data = make_chapter()
+        data["lines"]["main"][1]["purpose"] = {"answer": "right", "wrong": ["a"]}  # a Black move
+        with self.assertRaisesRegex(ChapterFormatError, "only for white"):
+            validate_level_chapter(data)
+
+    def test_lines_share_the_purpose_question_of_a_position(self):
+        chapter = load_level_chapter(REAL_CHAPTER_PATH)
+        main, line_2 = chapter["lines"]["main"], chapter["lines"]["line_2"]
+        self.assertIs(line_2[4]["purpose"], main[4]["purpose"])          # 3.g3: written once, on main
+        self.assertNotEqual(line_2[14]["purpose"], main[14]["purpose"])  # 8.Nbd2 in two different positions
+        steps = main + line_2
+        self.assertTrue(all(step["purpose"] for step in steps if step["turn"] == "white"))
+        self.assertTrue(all(step["purpose"] is None for step in steps if step["turn"] == "black"))
 
     def test_rejects_illegal_move(self):
         data = make_chapter()
@@ -555,6 +592,53 @@ class ReviewTests(unittest.TestCase):
         session = ReviewSession([])
         self.assertTrue(session.is_complete)
         self.assertEqual((session.fen, session.last_move), (chess.STARTING_FEN, None))
+
+    def last_review_row(self, line_id, ply, streak=1, days="1,7"):
+        """A row whose next review masters the position (day 7)."""
+        return {**self.row(line_id, ply), "review_days": days, "streak_correct": streak}
+
+    def test_last_review_asks_why_after_a_first_try_move(self):
+        items = build_review_items([self.last_review_row("main", 17), self.row("main", 15)], self.chapters)
+        self.assertEqual(([asks_purpose(item) for item in items], items[0]["final_keys"]), ([True, False], [("main", 17)]))
+        session = ReviewSession(items, rng=random.Random(7))
+        result = session.submit_move("e2e4")  # 9.e4 on the first try
+        self.assertEqual((result["status"], result["ask_purpose"], session.awaiting_purpose), ("correct", True, True))
+        self.assertIs(session.current, items[0])  # the position stays until the purpose answer
+        self.assertEqual((session.question_states(), session.answered_count), (["current", "pending"], 1))
+        purpose = items[0]["purpose"]
+        choices = session.purpose_choices
+        self.assertEqual(sorted(choices), sorted([purpose["answer"], *purpose["wrong"]]))
+        self.assertEqual(session.purpose_choices, choices)  # the order stays while the question is open
+        self.assertEqual(session.submit_move("e2e4")["status"], "purpose_pending")
+        self.assertEqual(session.peek("e2e4"), {"status": "purpose_pending"})
+        self.assertEqual(session.answer_purpose(5)["status"], "invalid")
+
+        answer = session.answer_purpose(choices.index(purpose["answer"]))
+        self.assertEqual((answer["status"], answer["is_complete"]), ("right", False))
+        self.assertEqual(answer["choices"][answer["answer_index"]], purpose["answer"])
+        self.assertEqual((session.current, session.purpose_choices), (items[1], []))
+        self.assertEqual(session.answer_purpose(0)["status"], "no_question")
+        self.assertFalse(session.submit_move("b1d2")["ask_purpose"])  # not its last review: no question
+        self.assertEqual((session.question_states(), session.purpose_right_count, session.purpose_asked),
+                         (["ok", "ok"], 1, 1))
+
+    def test_a_wrong_purpose_answer_shows_as_a_warning(self):
+        row = self.last_review_row("main", 17, streak=2, days="1,3,7")
+        session = ReviewSession(build_review_items([row], self.chapters))
+        session.submit_move("e2e4")
+        wrong = session.current["purpose"]["wrong"][0]
+        answer = session.answer_purpose(session.purpose_choices.index(wrong))
+        self.assertEqual((answer["status"], answer["chosen"] == answer["answer_index"], answer["is_complete"]),
+                         ("wrong", False, True))
+        self.assertEqual((session.question_states(), session.accuracy, session.purpose_right_count),
+                         (["hint"], 100.0, 0))
+
+    def test_no_purpose_question_after_a_wrong_move(self):
+        session = ReviewSession(build_review_items([self.last_review_row("main", 17)], self.chapters))
+        self.assertEqual(session.submit_move("b2b3")["status"], "incorrect")  # the plan restarts instead
+        result = session.submit_move("e2e4")
+        self.assertEqual((result["first_try"], result["ask_purpose"], session.is_complete), (False, False, True))
+        self.assertEqual(session.purpose_asked, 0)
 
 
 class LevelSummaryTests(unittest.TestCase):

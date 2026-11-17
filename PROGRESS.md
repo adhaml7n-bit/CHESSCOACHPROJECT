@@ -30,6 +30,7 @@ you learned, remembers the moves you get wrong, and includes a 2D board with **S
 | Mistake tracking | ✅ Done | Every wrong move stored with its position, ready for spaced repetition |
 | Review schedule | ✅ Done | A missed position comes back tomorrow and on day 7 (after two mistakes: days 1, 3 and 7), then it is mastered |
 | Daily review | ✅ Done | The "Daily Revised" card shows how many positions are due and drills them, with the next review date after each answer |
+| "Why this move?" | ✅ Done | On a position's last review (day 7) you also pick the move's purpose from three answers; it is mastered only when both are right |
 | Engine second opinion | ✅ Done | A different move that Stockfish rates at most half a pawn worse than the lesson's move is praised, with no penalty; an optional "Use engine" card after each level shows where the engine agrees or prefers another move |
 | Chapters 2–6 | 📋 Planned | Open Catalan, and the Catalan against the King's Indian, Semi-Slav, Grünfeld and other defences |
 | Profile editing & online links | ⏸ Postponed | Rename profile, link Chess.com / Lichess accounts |
@@ -66,8 +67,10 @@ Design principles:
    mistake, in your local time ("tomorrow" starts at midnight).
 2. On a review day, the position appears in the **Daily review**. Finding the move on the first try moves
    it to its next review day; after the last one it is **mastered** and does not come back.
-3. A late review never brings a position back on the same day.
-4. A new mistake restarts the position's review days.
+3. On the last review day, finding the move is followed by **"Why do you play this move?"** with three answers.
+   A wrong answer shows the right idea, and the position comes back **3 days** later with both questions.
+4. A late review never brings a position back on the same day.
+5. A new mistake restarts the position's review days.
 
 Repeating the same line many times in one day does not count as a review.
 
@@ -91,7 +94,7 @@ The database file `chesscoach.db` is created automatically on first launch and i
 ```powershell
 .venv\Scripts\python.exe -m unittest
 ```
-159 unit tests: database (45), levels, quizzes and reviews (53), study import (23), opening page data (6), board layout (9), piece pictures (6), review dates (2) and the engine (15, two of them with the real Stockfish when it is installed).
+167 unit tests: database (47), levels, quizzes and reviews (59), study import (23), opening page data (6), board layout (9), piece pictures (6), review dates (2) and the engine (15, two of them with the real Stockfish when it is installed).
 
 ---
 
@@ -106,9 +109,10 @@ The database file `chesscoach.db` is created automatically on first launch and i
 - Pieces are now Merida pictures on every board (the black pawn no longer shows as an emoji on Windows).
 - Review schedule: missed positions come back tomorrow and on day 7 (days 1, 3 and 7 after two mistakes); database schema version 2 (existing progress is kept).
 - Daily review screen behind the homepage's "Daily Revised" card.
+- "Why this move?": on the last review of a position, a multiple-choice question about the move's purpose (every White move of chapter 1 has one).
 - Stockfish as a second opinion: good alternative moves are accepted without penalty, and an optional "Use engine" card follows each level.
 - Fixed: with several Stockfish downloads, the app could pick a build for another processor and silently run without the engine. It now tries every binary it finds, builds for another processor last.
-- 121 new unit tests (159 in total).
+- 129 new unit tests (167 in total).
 
 ### 2026-11-15 — Persistence & profiles
 - Added the SQLite database layer with 38 unit tests.

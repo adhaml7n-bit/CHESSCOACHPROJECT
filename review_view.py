@@ -5,7 +5,10 @@ The homepage's "Daily Revised" card opens this screen. It drills the positions
 that are due today, from every chapter, one after another (DESIGN.md section 3):
 first the hint, then the correct move, which the player then plays. A first-try
 answer moves the position to the next day of its plan, or masters it after the
-last day; a mistake restarts its plan. The board and the sizing are the
+last day; a mistake restarts its plan. On the last day (day 7) a first-try move
+is followed by "Why do you play 9. e4?" with three answers: a right answer
+masters the position, a wrong one brings it back in 3 days with the same
+questions (ChessCoachDB.postpone_review). The board and the sizing are the
 training screen's (board_view.py, level_view.ScreenBase).
 """
 
@@ -16,7 +19,7 @@ import chess
 import flet as ft
 
 from board_view import click_square, render_board
-from flet_compat import border_all
+from flet_compat import border_all, pad_symmetric
 from level_trainer import ReviewSession, build_review_items
 from level_view import ScreenBase, compute_layout, feedback_marks, move_label, review_days_text
 
@@ -74,7 +77,8 @@ class ReviewView(ScreenBase):
         self.session = ReviewSession(build_review_items(rows, self.chapters))
         self._token += 1      # a pending pause of the old session is dropped
         self.selected = None  # square of the selected piece
-        self.feedback = None  # {"kind": "correct" | "hint" | "shown", "question": step, "result": ..., "status": ...}
+        # {"kind": "correct" | "hint" | "shown" | "purpose" | "purpose_done", "question": step, "result": ..., ...}
+        self.feedback = None
         self.busy = False     # True while the answer stays on the board
         self.display = None   # (fen, uci) shown during that pause
         self.mastered = 0
@@ -100,7 +104,7 @@ class ReviewView(ScreenBase):
     # Moves
     # -----------------------------------------------------------------
     def _on_square(self, square: int) -> None:
-        if self.busy or self.session.is_complete:
+        if self.busy or self._holding() or self.session.is_complete:
             return
         uci, self.selected = click_square(chess.Board(self.session.fen), self.selected, square)
         if uci:
@@ -124,6 +128,11 @@ class ReviewView(ScreenBase):
             self.render()
             return
         if result["status"] != "correct":
+            self.render()
+            return
+        if result["ask_purpose"]:  # the last review: the purpose answer decides (_choose_purpose)
+            self.feedback = {"kind": "purpose", "question": step, "item": item, "result": result}
+            self.display = (step["fen_after"], step["uci"])
             self.render()
             return
 
@@ -151,6 +160,44 @@ class ReviewView(ScreenBase):
         self.busy = False
         self.display = None
         self.render()
+
+    def _choose_purpose(self, choice: int) -> None:
+        """The player picked answer `choice` of the purpose question."""
+        feedback = self.feedback
+        if not feedback or feedback["kind"] != "purpose":
+            return
+        answer = self.session.answer_purpose(choice)
+        if answer["status"] not in ("right", "wrong"):
+            return
+        item = answer["item"]
+        for key in item["keys"]:
+            line_id, ply = key
+            if answer["status"] == "wrong" and key in item["final_keys"]:
+                self._save("postpone_review", item["chapter_id"], line_id, ply)  # back in 3 days
+            else:
+                self._save("record_correct", item["chapter_id"], line_id, ply)
+        status = self._status(item)
+        if status == "mastered":
+            self.mastered += 1
+        self.feedback = {**feedback, "kind": "purpose_done", "answer": answer, "status": status}
+        self.render()
+
+    def _continue(self) -> None:
+        """'Next position' after the purpose answer has been read."""
+        if self.feedback and self.feedback["kind"] == "purpose_done":
+            self.feedback = None
+            self.display = None
+            self.render()
+
+    def _holding(self) -> bool:
+        """True while the purpose question or its answer is on screen (the board waits)."""
+        return bool(self.feedback) and self.feedback["kind"] in ("purpose", "purpose_done")
+
+    def _shown_item(self) -> dict:
+        """The position on screen: the one just answered while its purpose result is shown."""
+        if self._holding():
+            return self.feedback["item"]
+        return self.session.current or self.session.items[-1]  # the last one during the final pause
 
     def _status(self, item: dict) -> str | None:
         """'mastered', or when the position comes back ('in 6 days (...)'); None if unknown."""
@@ -183,8 +230,8 @@ class ReviewView(ScreenBase):
         else:
             fen = session.fen
             last_uci = session.last_move["uci"] if session.last_move else None
-        item = session.current or session.items[-1]
-        clickable = not session.is_complete and not self.busy
+        item = self._shown_item()
+        clickable = not session.is_complete and not self.busy and not self._holding()
         return render_board(
             chess.Board(fen),
             self.board_colors,
@@ -211,23 +258,28 @@ class ReviewView(ScreenBase):
         )
 
     def _panel(self) -> ft.Container:
-        finished = self.session.is_complete and not self.busy  # the last answer is shown first
+        # The last answer (and a purpose result) is shown before the done card.
+        finished = self.session.is_complete and not self.busy and not self._holding()
         body = self._done_panel() if finished else self._question_panel()
         return self._card(body, self.layout["panel"])
 
     def _question_panel(self) -> list:
         session, t = self.session, self.theme
-        item = session.current or session.items[-1]  # during the pause after the last answer
-        number = min(session.index + 1, session.count)
+        item = self._shown_item()
+        number = next(n for n, other in enumerate(session.items, start=1) if other is item)
+        holding = self._holding()
         body = [
             self._label(f"Daily review · position {number} of {session.count}"),
             self._segments(session.question_states()),
             self._text(f"{item['chapter_title']} · move {item['step']['move_number']}", size=12, color=t["fg_muted"]),
-            self._text("Your move", size=16, bold=True),
-            self._text("You missed this position before. Find the move.", color=t["fg_secondary"]),
+            self._text("Why this move?" if holding else "Your move", size=16, bold=True),
+            self._text("Last review of this position: show that you know its idea." if holding
+                       else "You missed this position before. Find the move.", color=t["fg_secondary"]),
         ]
         feedback = self.feedback
-        if feedback and feedback["kind"] in ("checking", "alternative"):
+        if holding:
+            body.extend(self._purpose_panel(feedback))
+        elif feedback and feedback["kind"] in ("checking", "alternative"):
             body.extend(self._engine_feedback(feedback))
         elif feedback:
             question, result = feedback["question"], feedback["result"]
@@ -250,15 +302,72 @@ class ReviewView(ScreenBase):
                 body.append(self._box("success", f"Well done! {move_label(question)}", lines))
         return body
 
+    def _purpose_panel(self, feedback: dict) -> list:
+        """The day-7 question "Why do you play 9. e4?" and, once answered, its result."""
+        step = feedback["question"]
+        label = move_label(step)
+        answer = feedback.get("answer")  # None while the question is open
+        body = [
+            self._box("success", f"Well done! {label}", ["One more question before this position is mastered."]),
+            self._text(f"Why do you play {label}?", size=15, bold=True),
+        ]
+        choices = answer["choices"] if answer else self.session.purpose_choices
+        body.extend(self._choice(number, text, answer) for number, text in enumerate(choices))
+        if answer is None:
+            return body
+
+        lines = [step["explanation"]] if step.get("explanation") else []
+        status = feedback.get("status")
+        if answer["status"] == "right":
+            if status == "mastered":
+                lines.append("Mastered! This position won't come back.")
+            elif status:
+                lines.append(f"Next review: {status}.")
+            body.append(self._box("success", "Right! That's the idea of the move.", lines))
+        else:
+            if status:
+                lines.append(f"We'll ask you again {status}.")
+            body.append(self._box("warning", f"Not quite: that isn't why you play {label}.", lines))
+        body.append(self._button("See your results →" if answer["is_complete"] else "Next position →",
+                                 lambda e: self._continue(), primary=True))
+        return body
+
+    def _choice(self, number: int, text: str, answer: dict | None) -> ft.Container:
+        """One answer of the purpose question: clickable while open, then marked ✓ / ✗."""
+        t = self.theme
+        mark, color, border = "ABCDEFGH"[number], t["fg_primary"], t["card_border"]
+        if answer is not None:
+            if number == answer["answer_index"]:
+                mark, color, border = "✓", t["success"], t["success"]
+            elif number == answer["chosen"]:
+                mark, color, border = "✗", t["danger"], t["danger"]
+            else:
+                color = t["fg_muted"]
+        words = self._text(text, color=color)
+        words.expand = True  # long answers wrap inside the panel
+        return ft.Container(
+            border=border_all(1, border),
+            border_radius=8,
+            padding=pad_symmetric(horizontal=self._size(12), vertical=self._size(8)),
+            ink=answer is None,
+            on_click=(lambda e, n=number: self._choose_purpose(n)) if answer is None else None,
+            content=ft.Row(spacing=10, vertical_alignment=ft.CrossAxisAlignment.START,
+                           controls=[self._text(mark, color=color, bold=True), words]),
+        )
+
     def _done_panel(self) -> list:
         session, t = self.session, self.theme
+        metrics = [
+            self._metric("First try", f"{session.first_try_count} of {session.count}", t["fg_primary"]),
+            self._metric("Mastered today", str(self.mastered), t["success"]),
+        ]
+        if session.purpose_asked:
+            metrics.append(self._metric("Why questions", f"{session.purpose_right_count} of {session.purpose_asked}",
+                                        t["fg_primary"]))
         body = [
             self._text("You finished today's review!", size=18, bold=True),
             self._segments(session.question_states()),
-            ft.Row(spacing=8, controls=[
-                self._metric("First try", f"{session.first_try_count} of {session.count}", t["fg_primary"]),
-                self._metric("Mastered today", str(self.mastered), t["success"]),
-            ]),
+            ft.Row(spacing=8, controls=metrics),
         ]
         next_due = self._next_review()
         if next_due:
