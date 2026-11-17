@@ -94,7 +94,7 @@ The database file `chesscoach.db` is created automatically on first launch and i
 ```powershell
 .venv\Scripts\python.exe -m unittest
 ```
-167 unit tests: database (47), levels, quizzes and reviews (59), study import (23), opening page data (6), board layout (9), piece pictures (6), review dates (2) and the engine (15, two of them with the real Stockfish when it is installed).
+176 unit tests: database (47), levels, quizzes and reviews (68), study import (23), opening page data (6), board layout (9), piece pictures (6), review dates (2) and the engine (15, two of them with the real Stockfish when it is installed).
 
 ---
 
@@ -112,7 +112,8 @@ The database file `chesscoach.db` is created automatically on first launch and i
 - "Why this move?": on the last review of a position, a multiple-choice question about the move's purpose (every White move of chapter 1 has one).
 - Stockfish as a second opinion: good alternative moves are accepted without penalty, and an optional "Use engine" card follows each level.
 - Fixed: with several Stockfish downloads, the app could pick a build for another processor and silently run without the engine. It now tries every binary it finds, builds for another processor last.
-- 129 new unit tests (167 in total).
+- Chapter format: a line can branch from another line, each move's explanation is written once for its position, and a level can cover several lines one after another (preparing the full Closed Catalan).
+- 138 new unit tests (176 in total).
 
 ### 2026-11-15 — Persistence & profiles
 - Added the SQLite database layer with 38 unit tests.

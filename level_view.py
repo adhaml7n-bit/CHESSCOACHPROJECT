@@ -413,8 +413,8 @@ class LevelTrainerView(ScreenBase):
         """Counts a move: correct, or a mistake with the level's on_mistake rules."""
         session = self.session
         question = session.current_question
-        line_id = session.level["line_id"]
         result = session.submit_move(uci)
+        line_id = result.get("line_id")  # each question's own line (a level can hold several)
 
         if result["status"] == "incorrect":
             # fen = position before the move, played_san = the wrong move; review_days restart its plan.
@@ -556,13 +556,19 @@ class LevelTrainerView(ScreenBase):
             self._label(f"Learn · step {session.step_index} of {session.step_count}"),
             self._progress(session.step_index, session.step_count),
         ]
-        if step is None:
-            body.append(self._text(session.level["title"], size=18, bold=True))
-            intro = session.level.get("intro")
-            if not intro and session.level_number == 1:
-                intro = self.chapter["chapter_meta"].get("description")
-            if intro:
-                body.append(self._text(intro, color=t["fg_secondary"]))
+        part, parts = session.current_part, len(session.parts)
+        if step is None:  # the start of the level, or of its next line
+            if session.part_index == 0:
+                body.append(self._text(session.level["title"], size=18, bold=True))
+                intro = session.level.get("intro")
+                if not intro and session.level_number == 1:
+                    intro = self.chapter["chapter_meta"].get("description")
+                if intro:
+                    body.append(self._text(intro, color=t["fg_secondary"]))
+            else:
+                body.append(self._text(f"Next line · {session.part_index + 1} of {parts}", size=18, bold=True))
+            if part.get("intro"):
+                body.append(self._text(part["intro"], color=t["fg_secondary"]))
             body.append(self._text("Press Next to see the first move.", size=12, color=t["fg_muted"]))
         else:
             side = "White" if step["turn"] == "white" else "Black"
@@ -575,7 +581,9 @@ class LevelTrainerView(ScreenBase):
             if step["explanation"]:
                 body.append(self._text(step["explanation"], color=t["fg_secondary"]))
             body.append(self._move_list(step["ply"]))
-            if session.is_complete:  # the end of the line: how to play on
+            if session.at_part_end and part.get("key_ideas"):  # the end of one line of the level
+                body.extend(self._key_ideas(part["key_ideas"]))
+            if session.is_complete:  # the end of the level: how to play on
                 body.extend(self._key_ideas())
         body.append(ft.Row(spacing=8, controls=[
             self._button("← Back", lambda e: self._learn_back()),
@@ -584,9 +592,9 @@ class LevelTrainerView(ScreenBase):
         ]))
         return body
 
-    def _key_ideas(self) -> list:
-        """The level's short 'how to play on' messages (key_ideas in the JSON), if any."""
-        ideas = self.session.level.get("key_ideas") or []
+    def _key_ideas(self, ideas=None) -> list:
+        """Short 'how to play on' messages: the level's key_ideas, or the given ones (a part's)."""
+        ideas = (self.session.level.get("key_ideas") or []) if ideas is None else ideas
         if not ideas:
             return []
         t = self.theme
@@ -597,8 +605,9 @@ class LevelTrainerView(ScreenBase):
     def _move_list(self, upto_ply: int) -> ft.Row:
         """The line up to the current move: earlier levels muted, the current move highlighted."""
         session, t = self.session, self.theme
-        line = self.chapter["lines"][session.level["line_id"]]
-        first = session.level["from_ply"]
+        part = session.current_part
+        line = self.chapter["lines"][part["line_id"]]
+        first = part["from_ply"]
         tokens = []
         for step in line[:upto_ply]:
             text = (f"{step['move_number']}." if step["turn"] == "white" else "") + step["san"]
@@ -625,6 +634,10 @@ class LevelTrainerView(ScreenBase):
                 self._text("Your move", size=16, bold=True),
                 self._text("Play your move on the board. Your opponent will answer.", color=t["fg_secondary"]),
             ]
+        if len(session.parts) > 1:  # a level with several lines: which one is on the board
+            part = session.current_part
+            body.insert(2, self._label(f"Line {session.part_index + 1} of {len(session.parts)}"
+                                       + (f" · {part['intro']}" if part.get("intro") else "")))
         feedback = self.feedback
         if feedback and feedback["kind"] in ("checking", "alternative"):
             body.extend(self._engine_feedback(feedback))

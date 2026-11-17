@@ -25,6 +25,7 @@ from level_trainer import (
     ReviewSession,
     asks_purpose,
     build_review_items,
+    question_count,
     level_line_id,
     load_level_chapter,
     summarize_chapter,
@@ -221,6 +222,167 @@ class ValidationTests(unittest.TestCase):
                 mutate(data)
                 with self.assertRaises(ChapterFormatError):
                     validate_level_chapter(data)
+
+
+def branch(after_ply, sans, parent=SANS):
+    """A branch of the main line: its own moves after `after_ply` plies of the parent."""
+    own = make_moves(tuple(parent[:after_ply]) + tuple(sans))[after_ply:]
+    for step in own:
+        step["strategic_idea"] = f"branch idea {step['ply']}"
+    return {"from_line": "main", "after_ply": after_ply, "moves": own}
+
+
+class BranchLineTests(unittest.TestCase):
+    """Lines written as branches, texts shared by position, one move per position."""
+
+    def test_a_branch_becomes_a_full_line(self):
+        data = make_chapter()
+        data["lines"]["g6"] = branch(3, ("g6", "Nc3"))  # 1.d4 Nf6 2.c4 g6 3.Nc3
+        lines = validate_level_chapter(data)["lines"]
+        self.assertEqual([step["san"] for step in lines["g6"]], ["d4", "Nf6", "c4", "g6", "Nc3"])
+        self.assertEqual(lines["g6"][2]["strategic_idea"], "idea 3")       # copied with the parent's texts
+        self.assertIsNot(lines["g6"][0], lines["main"][0])                  # copies, not the same objects
+        self.assertEqual(lines["g6"][4]["fen_before"].split()[0], "rnbqkb1r/pppppp1p/5np1/8/2PP4/8/PP2PPPP/RNBQKBNR")
+
+    def test_a_branch_of_a_branch(self):
+        data = make_chapter()
+        data["lines"]["g6"] = branch(3, ("g6", "Nc3"))
+        data["lines"]["g6_bg7"] = {"from_line": "g6", "after_ply": 5,
+                                   "moves": make_moves(("d4", "Nf6", "c4", "g6", "Nc3", "Bg7"))[5:]}
+        lines = validate_level_chapter(data)["lines"]
+        self.assertEqual([step["san"] for step in lines["g6_bg7"]][3:], ["g6", "Nc3", "Bg7"])
+
+    def test_rejects_broken_branches(self):
+        cases = {
+            "unknown parent": {"from_line": "nowhere", "after_ply": 2, "moves": make_moves()[2:3]},
+            "after_ply too far": {"from_line": "main", "after_ply": 7, "moves": make_moves()[2:3]},
+            "no moves": {"from_line": "main", "after_ply": 2, "moves": []},
+            "not an object": "main",
+            "wrong ply in its moves": {"from_line": "main", "after_ply": 3, "moves": make_moves()[2:3]},
+        }
+        for name, spec in cases.items():
+            with self.subTest(name):
+                data = make_chapter()
+                data["lines"]["side"] = spec
+                with self.assertRaisesRegex(ChapterFormatError, "side"):
+                    validate_level_chapter(data)
+        data = make_chapter()
+        data["lines"]["a"] = {"from_line": "b", "after_ply": 1, "moves": make_moves()[1:2]}
+        data["lines"]["b"] = {"from_line": "a", "after_ply": 1, "moves": make_moves()[1:2]}
+        with self.assertRaisesRegex(ChapterFormatError, "branches from itself"):
+            validate_level_chapter(data)
+
+    def test_a_transposition_gets_the_texts_of_the_same_position(self):
+        data = make_chapter()
+        other = make_moves(("d4", "e6", "c4", "Nf6", "g3", "d5"))  # 1...e6 2...Nf6: the same position as main after 2...e6
+        for step in other[2:]:
+            step["strategic_idea"] = step["explanation"] = step["hint"] = None
+        data["lines"]["other"] = other
+        lines = validate_level_chapter(data)["lines"]
+        self.assertEqual(lines["other"][4]["strategic_idea"], "idea 5")  # 3.g3 explained once, on main
+        self.assertIsNone(lines["other"][2]["strategic_idea"])           # 2.c4 here is a different position
+
+    def test_rejects_two_moves_for_the_player_in_one_position(self):
+        data = make_chapter()
+        data["lines"]["nf3"] = make_moves(("d4", "Nf6", "Nf3", "e6"))  # 2.Nf3 where main plays 2.c4
+        with self.assertRaisesRegex(ChapterFormatError, "plays Nf3 where line 'main', ply 3 plays c4"):
+            validate_level_chapter(data)
+
+
+def parts_chapter(learn_parts=None, quiz_parts=None, retry=False):
+    """Main line 1.d4 Nf6 2.c4 e6 3.g3 d5 and the branch 2...g6 3.Nc3, with a learn
+    level and a quiz level that each cover both lines."""
+    data = make_chapter(levels=[])
+    data["lines"]["g6"] = branch(3, ("g6", "Nc3"))
+    learn_parts = learn_parts or [{"line_id": "main", "from_ply": 4, "to_ply": 6, "intro": "First: 2...e6."},
+                                  {"line_id": "g6", "from_ply": 4, "to_ply": 5, "intro": "Now: 2...g6.",
+                                   "key_ideas": ["Play e4 next."]}]
+    quiz = quiz_level(2, 1, 1)
+    for key in ("line_id", "from_ply", "to_ply"):
+        del quiz[key]
+    quiz["parts"] = quiz_parts or [{"line_id": "main", "from_ply": 4, "to_ply": 6},
+                                   {"line_id": "g6", "from_ply": 4, "to_ply": 5}]
+    quiz["retry_mistakes"] = retry
+    data["levels"] = [{"level": 1, "type": "learn", "title": "Two lines", "parts": learn_parts}, quiz]
+    return validate_level_chapter(data)
+
+
+class PartsTests(unittest.TestCase):
+    """Levels that cover several lines one after another."""
+
+    def test_rejects_broken_parts(self):
+        def with_parts(parts, **extra):
+            data = make_chapter(levels=[])
+            data["lines"]["g6"] = branch(3, ("g6", "Nc3"))
+            data["levels"] = [{"level": 1, "type": "learn", "title": "x", "parts": parts, **extra}]
+            return data
+
+        ok = {"line_id": "main", "from_ply": 1, "to_ply": 2}
+        cases = {
+            "parts and line_id": with_parts([ok], line_id="main"),
+            "empty parts": with_parts([]),
+            "unknown line": with_parts([{"line_id": "nope", "from_ply": 1, "to_ply": 2}]),
+            "bad range": with_parts([{"line_id": "g6", "from_ply": 3, "to_ply": 9}]),
+            "overlap on one line": with_parts([ok, {"line_id": "main", "from_ply": 2, "to_ply": 3}]),
+            "empty intro": with_parts([{**ok, "intro": " "}]),
+            "bad key ideas": with_parts([{**ok, "key_ideas": "plan"}]),
+        }
+        for name, data in cases.items():
+            with self.subTest(name):
+                with self.assertRaises(ChapterFormatError):
+                    validate_level_chapter(data)
+        validate_level_chapter(with_parts([ok, {"line_id": "g6", "from_ply": 2, "to_ply": 5}]))  # same plies, other line: fine
+
+    def test_learn_level_steps_through_both_lines(self):
+        chapter = parts_chapter()
+        session = LevelSession(chapter, 1)
+        main, g6 = chapter["lines"]["main"], chapter["lines"]["g6"]
+        self.assertEqual((session.current_step, session.at_part_start, session.part_index), (None, True, 0))
+        self.assertEqual((session.fen, session.step_count, session.current_part["intro"]), (main[3]["fen_before"], 5, "First: 2...e6."))
+        self.assertEqual([session.next_step()["san"] for _ in range(3)], ["e6", "g3", "d5"])
+        self.assertTrue(session.at_part_end and not session.is_complete)
+        self.assertIsNone(session.next_step())  # the start of the second line
+        self.assertEqual((session.at_part_start, session.part_index, session.fen, session.last_move, session.step_index),
+                         (True, 1, g6[3]["fen_before"], None, 3))
+        self.assertEqual(session.current_part["key_ideas"], ["Play e4 next."])
+        self.assertEqual([session.next_step()["san"] for _ in range(2)], ["g6", "Nc3"])
+        self.assertTrue(session.is_complete and session.at_part_end and session.passed)
+        self.assertEqual((session.fen, session.step_index), (g6[4]["fen_after"], 5))
+        self.assertIsNone(session.next_step())
+        session.previous_step()
+        session.previous_step()
+        self.assertEqual((session.at_part_start, session.fen), (True, g6[3]["fen_before"]))
+        self.assertEqual(session.previous_step()["san"], "d5")  # back across the boundary
+        self.assertEqual((session.part_index, session.fen), (0, main[5]["fen_after"]))
+
+    def test_quiz_crosses_to_the_next_line(self):
+        chapter = parts_chapter(retry=True)
+        main, g6 = chapter["lines"]["main"], chapter["lines"]["g6"]
+        session = LevelSession(chapter, 2)
+        self.assertEqual((question_count(chapter, chapter["levels"][1]), session.question_count), (2, 2))
+        self.assertEqual((session.fen, session.last_move["san"]), (main[3]["fen_after"], "e6"))  # 2...e6 played for you
+        wrong = session.submit_move("b1c3")
+        self.assertEqual((wrong["status"], wrong["line_id"], wrong["ply"]), ("incorrect", "main", 5))
+        result = session.submit_move("g2g3")
+        self.assertEqual([step["san"] for step in result["opponent_moves"]], ["d5", "g6"])  # end of line 1, start of line 2
+        self.assertEqual((session.part_index, session.fen, session.last_move["san"]), (1, g6[3]["fen_after"], "g6"))
+        self.assertEqual(session.question_states(), ["hint", "current"])  # same ply 5 on both lines, counted apart
+        result = session.submit_move("b1c3")
+        self.assertEqual((result["line_id"], result["first_try"], result["starts_retry"]), ("g6", True, True))
+        self.assertEqual((session.in_retry, session.part_index, session.fen), (True, 0, main[4]["fen_before"]))
+        self.assertEqual(session.last_move["san"], "e6")
+        session.submit_move("g2g3")
+        self.assertTrue(session.is_complete)
+        self.assertEqual([(i["line_id"], i["ply"], i["fixed"]) for i in session.review_items()], [("main", 5, True)])
+
+    def test_a_line_that_starts_with_your_move(self):
+        chapter = parts_chapter(quiz_parts=[{"line_id": "main", "from_ply": 4, "to_ply": 6},
+                                            {"line_id": "g6", "from_ply": 5, "to_ply": 5}])
+        session = LevelSession(chapter, 2)
+        result = session.submit_move("g2g3")
+        self.assertEqual([step["san"] for step in result["opponent_moves"]], ["d5"])
+        g6 = chapter["lines"]["g6"]
+        self.assertEqual((session.fen, session.last_move, session.current_question["san"]), (g6[4]["fen_before"], None, "Nc3"))
 
 
 class LearnTests(unittest.TestCase):

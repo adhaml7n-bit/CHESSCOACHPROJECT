@@ -146,9 +146,11 @@ def validate_level_chapter(data: dict) -> dict:
     lines = data.get("lines")
     if not isinstance(lines, dict) or not lines:
         raise ChapterFormatError("The chapter needs at least one line in 'lines'.")
+    _expand_branch_lines(lines)
     for line_id, moves in lines.items():
         _validate_line(line_id, moves)
-    _share_purposes(lines, meta["player_color"])
+    _share_texts(lines, meta["player_color"])
+    _check_one_move_per_position(lines, meta["player_color"])
 
     levels = data.get("levels")
     if not isinstance(levels, list) or not levels:
@@ -156,6 +158,51 @@ def validate_level_chapter(data: dict) -> dict:
     for number, level in enumerate(levels, start=1):
         _validate_level(level, number, lines, meta["player_color"])
     return data
+
+
+def _position_key(fen: str) -> str:
+    """A position without its move counters: the same position reached by
+    another move order (a transposition) gets the same key."""
+    return " ".join(fen.split()[:4])
+
+
+def _expand_branch_lines(lines: dict) -> None:
+    """A line can be written as a branch of another line, so long shared
+    starts are not copied by hand:
+
+        "line_id": {"from_line": "main", "after_ply": 17, "moves": [{"ply": 18, ...}, ...]}
+
+    It becomes a full line from move 1: the parent's first after_ply moves
+    (copied, with their texts) followed by its own moves. A parent can be a
+    branch too."""
+    full: dict[str, list] = {}
+
+    def resolve(line_id: str, chain: tuple) -> list:
+        if line_id in full:
+            return full[line_id]
+        spec = lines[line_id]
+        if isinstance(spec, list):
+            full[line_id] = spec
+            return spec
+        if not isinstance(spec, dict):
+            raise ChapterFormatError(f"Line '{line_id}' must be a list of moves or a branch object.")
+        if line_id in chain:
+            raise ChapterFormatError(f"Line '{line_id}' branches from itself ({' -> '.join(chain + (line_id,))}).")
+        parent_id, after, moves = spec.get("from_line"), spec.get("after_ply"), spec.get("moves")
+        if parent_id not in lines:
+            raise ChapterFormatError(f"Line '{line_id}' branches from unknown line {parent_id!r}.")
+        parent = resolve(parent_id, chain + (line_id,))
+        if not (_is_int(after) and 1 <= after <= len(parent)):
+            raise ChapterFormatError(
+                f"Line '{line_id}': 'after_ply' must be between 1 and {len(parent)} (the length of '{parent_id}'), got {after!r}."
+            )
+        if not isinstance(moves, list) or not moves:
+            raise ChapterFormatError(f"Line '{line_id}' has no moves of its own.")
+        full[line_id] = [dict(step) for step in parent[:after]] + moves
+        return full[line_id]
+
+    for line_id in list(lines):
+        lines[line_id] = resolve(line_id, ())
 
 
 def _validate_line(line_id: str, moves) -> None:
@@ -208,23 +255,62 @@ def _check_purpose(purpose, where: str) -> None:
         raise ChapterFormatError(f"{where}: the purpose answers must all be different.")
 
 
-def _share_purposes(lines: dict, player_color: str) -> None:
-    """A purpose question belongs to a position: lines that share their first
-    moves write it once, and every copy of that position (same fen and move) gets it."""
-    by_position = {}
+SHARED_FIELDS = TEXT_FIELDS + ("purpose",)
+
+
+def _share_texts(lines: dict, player_color: str) -> None:
+    """Texts belong to a position and its move. Lines that share their first
+    moves, or reach the same position by another move order, write them once:
+    every copy of that position and move gets the texts it leaves empty. A
+    purpose question is only for the player's moves."""
+    by_move: dict[tuple, dict] = {}
     for line_id, moves in lines.items():
         for step in moves:
-            if step["purpose"] is None:
-                continue
-            if step["turn"] != player_color:
+            if step["purpose"] is not None and step["turn"] != player_color:
                 raise ChapterFormatError(
                     f"Line '{line_id}', ply {step['ply']}: a 'purpose' question is only for {player_color}'s moves."
                 )
-            by_position.setdefault((step["fen_before"], step["uci"]), step["purpose"])
+            found = by_move.setdefault((_position_key(step["fen_before"]), step["uci"]), {})
+            for field in SHARED_FIELDS:
+                if step[field] is not None:
+                    found.setdefault(field, step[field])
     for moves in lines.values():
         for step in moves:
-            if step["purpose"] is None:
-                step["purpose"] = by_position.get((step["fen_before"], step["uci"]))
+            found = by_move[(_position_key(step["fen_before"]), step["uci"])]
+            for field in SHARED_FIELDS:
+                if step[field] is None and field in found:
+                    step[field] = found[field]
+
+
+def _check_one_move_per_position(lines: dict, player_color: str) -> None:
+    """Wherever the player moves, every line must play the same move: a quiz
+    accepts one move per position, and the Daily review asks a position once."""
+    seen: dict[str, tuple] = {}
+    for line_id, moves in lines.items():
+        for step in moves:
+            if step["turn"] != player_color:
+                continue
+            key = _position_key(step["fen_before"])
+            uci, other_line, other_ply, other_san = seen.setdefault(key, (step["uci"], line_id, step["ply"], step["san"]))
+            if uci != step["uci"]:
+                raise ChapterFormatError(
+                    f"Line '{line_id}', ply {step['ply']} plays {step['san']} where line '{other_line}', "
+                    f"ply {other_ply} plays {other_san} in the same position: a position needs one move for you."
+                )
+
+
+def level_parts(level: dict) -> list[dict]:
+    """The line ranges a level covers, in order. A level names one range with
+    line_id / from_ply / to_ply, or several with "parts" (each with its own
+    line_id, from_ply, to_ply and an optional intro and key_ideas)."""
+    if "parts" in level:
+        return level["parts"]
+    return [{"line_id": level["line_id"], "from_ply": level["from_ply"], "to_ply": level["to_ply"]}]
+
+
+def _check_ideas(ideas, where: str) -> None:
+    if not isinstance(ideas, list) or not all(isinstance(idea, str) and idea.strip() for idea in ideas):
+        raise ChapterFormatError(f"{where}: 'key_ideas' must be a list of short texts.")
 
 
 def _validate_level(level, number: int, lines: dict, player_color: str) -> None:
@@ -240,21 +326,39 @@ def _validate_level(level, number: int, lines: dict, player_color: str) -> None:
     if not level.get("title"):
         raise ChapterFormatError(f"{where}: 'title' is missing.")
 
-    line = lines.get(level.get("line_id"))
-    if line is None:
-        raise ChapterFormatError(f"{where}: unknown line_id {level.get('line_id')!r}.")
-    first, last = level.get("from_ply"), level.get("to_ply")
-    if not (_is_int(first) and _is_int(last) and 1 <= first <= last <= len(line)):
-        raise ChapterFormatError(
-            f"{where}: need 1 <= from_ply <= to_ply <= {len(line)}, got from_ply={first!r}, to_ply={last!r}."
-        )
+    parts = level.get("parts")
+    if parts is None:
+        ranges = [(where, {"line_id": level.get("line_id"), "from_ply": level.get("from_ply"), "to_ply": level.get("to_ply")})]
+    else:
+        if any(key in level for key in ("line_id", "from_ply", "to_ply")):
+            raise ChapterFormatError(f"{where}: use either 'parts' or line_id / from_ply / to_ply, not both.")
+        if not isinstance(parts, list) or not parts or not all(isinstance(part, dict) for part in parts):
+            raise ChapterFormatError(f"{where}: 'parts' must be a list of {{line_id, from_ply, to_ply}} objects.")
+        ranges = [(f"{where}, part {n}", part) for n, part in enumerate(parts, start=1)]
 
-    ideas = level.get("key_ideas", [])
-    if not isinstance(ideas, list) or not all(isinstance(idea, str) and idea.strip() for idea in ideas):
-        raise ChapterFormatError(f"{where}: 'key_ideas' must be a list of short texts.")
+    moves, used = [], {}
+    for part_where, part in ranges:
+        line = lines.get(part.get("line_id"))
+        if line is None:
+            raise ChapterFormatError(f"{part_where}: unknown line_id {part.get('line_id')!r}.")
+        first, last = part.get("from_ply"), part.get("to_ply")
+        if not (_is_int(first) and _is_int(last) and 1 <= first <= last <= len(line)):
+            raise ChapterFormatError(
+                f"{part_where}: need 1 <= from_ply <= to_ply <= {len(line)}, got from_ply={first!r}, to_ply={last!r}."
+            )
+        if parts is not None:
+            if "intro" in part and not (isinstance(part["intro"], str) and part["intro"].strip()):
+                raise ChapterFormatError(f"{part_where}: 'intro' must be a short text.")
+            _check_ideas(part.get("key_ideas", []), part_where)
+        plies = set(range(first, last + 1))
+        if used.get(part["line_id"], set()) & plies:
+            raise ChapterFormatError(f"{part_where}: overlaps an earlier part on line '{part['line_id']}'.")
+        used.setdefault(part["line_id"], set()).update(plies)
+        moves.extend(line[first - 1:last])
 
+    _check_ideas(level.get("key_ideas", []), where)
     if level["type"] == "quiz":
-        _validate_quiz(level, where, line[first - 1:last], player_color)
+        _validate_quiz(level, where, moves, player_color)
 
 
 def _validate_quiz(level: dict, where: str, moves: list, player_color: str) -> None:
@@ -297,8 +401,9 @@ def _validate_quiz(level: dict, where: str, moves: list, player_color: str) -> N
 def question_count(chapter: dict, level: dict) -> int:
     """How many of the player's moves a level contains (the questions of a quiz)."""
     color = chapter["chapter_meta"]["player_color"]
-    line = chapter["lines"][level["line_id"]]
-    return sum(1 for step in line[level["from_ply"] - 1:level["to_ply"]] if step["turn"] == color)
+    return sum(1 for part in level_parts(level)
+               for step in chapter["lines"][part["line_id"]][part["from_ply"] - 1:part["to_ply"]]
+               if step["turn"] == color)
 
 
 def quiz_pass_mark(chapter: dict, level: dict) -> float:
@@ -393,6 +498,11 @@ class LevelSession:
     A quiz level with "retry_mistakes": true ends with a second-chance round:
     every position the player got wrong is asked once more (in_retry is True
     meanwhile). The level's accuracy still counts only the first pass.
+
+    A level can hold several parts (line ranges, see level_parts). `moves` is
+    all of them in order; the board jumps to each part's first position. In a
+    learn level each part starts with its own "start" step (current_step is
+    None, at_part_start is True), where the screen shows the part's intro.
     """
 
     def __init__(self, chapter: dict, level_number: int):
@@ -413,9 +523,20 @@ class LevelSession:
         self.show_explanations = self.level.get("show_explanations", self.kind == "learn")
         self.retry_mistakes = self.kind == "quiz" and self.level.get("retry_mistakes", False)
 
-        line = chapter["lines"][self.level["line_id"]]
-        self.moves = line[self.level["from_ply"] - 1:self.level["to_ply"]]
-        self.questions = [step for step in self.moves if step["turn"] == self.player_color]
+        self.parts: list[dict] = []   # level_parts() with "start" / "end" indexes into moves
+        self.moves: list[dict] = []
+        self._line_ids: list[str] = []  # the line of each move (mistakes are saved per line)
+        for part in level_parts(self.level):
+            steps = chapter["lines"][part["line_id"]][part["from_ply"] - 1:part["to_ply"]]
+            self.parts.append({**part, "start": len(self.moves), "end": len(self.moves) + len(steps)})
+            self.moves.extend(steps)
+            self._line_ids.extend([part["line_id"]] * len(steps))
+        self._part_starts = {part["start"] for part in self.parts}
+        self._question_indexes = [i for i, step in enumerate(self.moves) if step["turn"] == self.player_color]
+        self.questions = [self.moves[i] for i in self._question_indexes]
+        # Learn levels step through frames: (move index, part) after a move, (None, part) at a part's start.
+        self._frames = [(index, number) for number, part in enumerate(self.parts)
+                        for index in [None, *range(part["start"], part["end"])]]
         self.start_fen = self.moves[0]["fen_before"]
         self.restart()
 
@@ -425,14 +546,14 @@ class LevelSession:
         Returns the opponent moves played automatically before the first
         question (quiz levels that start with an opponent move), else [].
         """
-        self.cursor = 0                   # self.moves[:cursor] are on the board
-        self._wrong: dict[int, int] = {}  # ply -> wrong attempts in this run (quiz)
+        self.cursor = 0                   # quiz: self.moves[:cursor] are played; learn: index into _frames
+        self._wrong: dict[int, int] = {}  # move index -> wrong attempts in this run (quiz)
         self.first_try_count = 0
         self.answered_count = 0
-        self.retry_queue: list[dict] = []     # positions asked again after the first pass
+        self.retry_queue: list[int] = []      # move indexes asked again after the first pass
         self.retry_index = 0
         self._retry_wrong: dict[int, int] = {}
-        self.retry_results: dict[int, bool] = {}  # ply -> solved on the first try of the second chance
+        self.retry_results: dict[int, bool] = {}  # move index -> solved on the first try of the second chance
         return self._play_opponent_moves() if self.kind == "quiz" else []
 
     # -----------------------------------------------------------------
@@ -440,6 +561,8 @@ class LevelSession:
     # -----------------------------------------------------------------
     @property
     def _main_done(self) -> bool:
+        if self.kind == "learn":
+            return self.cursor >= len(self._frames) - 1
         return self.cursor >= len(self.moves)
 
     @property
@@ -449,17 +572,25 @@ class LevelSession:
 
     @property
     def fen(self) -> str:
+        if self.kind == "learn":
+            index, number = self._frames[self.cursor]
+            return self.moves[self.parts[number]["start"]]["fen_before"] if index is None else self.moves[index]["fen_after"]
         if self.in_retry:
             return self.current_question["fen_before"]
-        return self.moves[self.cursor - 1]["fen_after"] if self.cursor else self.start_fen
+        if self.cursor < len(self.moves) and self.cursor in self._part_starts:
+            return self.moves[self.cursor]["fen_before"]  # a part's first position
+        return self.moves[self.cursor - 1]["fen_after"]
 
     @property
     def last_move(self) -> dict | None:
-        """The last move on the board (for highlighting); None at the start."""
-        if self.in_retry:
-            index = self.moves.index(self.current_question)
-            return self.moves[index - 1] if index else None
-        return self.moves[self.cursor - 1] if self.cursor else None
+        """The last move on the board (for highlighting); None at the start of a part."""
+        if self.kind == "learn":
+            index = self._frames[self.cursor][0]
+            return None if index is None else self.moves[index]
+        index = self.retry_queue[self.retry_index] if self.in_retry else self.cursor
+        if index in self._part_starts:
+            return None
+        return self.moves[index - 1]
 
     @property
     def is_complete(self) -> bool:
@@ -482,6 +613,9 @@ class LevelSession:
 
     @property
     def step_index(self) -> int:
+        """Moves shown so far (learn levels)."""
+        if self.kind == "learn":
+            return sum(1 for index, _ in self._frames[1:self.cursor + 1] if index is not None)
         return self.cursor
 
     @property
@@ -489,7 +623,8 @@ class LevelSession:
         return len(self.moves)
 
     def next_step(self) -> dict | None:
-        """Plays the next move of the line. Returns it, or None when the line is finished."""
+        """Plays the next move. Returns it; None at the start of the next part
+        or when the level is finished."""
         self._require("learn")
         if self.is_complete:
             return None
@@ -497,10 +632,39 @@ class LevelSession:
         return self.last_move
 
     def previous_step(self) -> dict | None:
-        """Takes the last move back. Returns the move now being explained (None at the start)."""
+        """Takes the last move back. Returns the move now being explained (None at a part's start)."""
         self._require("learn")
         self.cursor = max(0, self.cursor - 1)
         return self.last_move
+
+    # -----------------------------------------------------------------
+    # Parts (levels with several lines)
+    # -----------------------------------------------------------------
+    @property
+    def part_index(self) -> int:
+        """The part on the board now (0 in a level with one line)."""
+        if self.kind == "learn":
+            return self._frames[self.cursor][1]
+        index = self.retry_queue[self.retry_index] if self.in_retry else min(self.cursor, len(self.moves) - 1)
+        return next(number for number, part in enumerate(self.parts) if part["start"] <= index < part["end"])
+
+    @property
+    def current_part(self) -> dict:
+        """The part on the board now: line_id, from_ply, to_ply and its intro / key_ideas if any."""
+        return self.parts[self.part_index]
+
+    @property
+    def at_part_start(self) -> bool:
+        """Learn levels: True before a part's first move (the screen shows its intro)."""
+        return self.kind == "learn" and self._frames[self.cursor][0] is None
+
+    @property
+    def at_part_end(self) -> bool:
+        """Learn levels: True on a part's last move (the screen shows its key ideas)."""
+        if self.kind != "learn":
+            return False
+        index, number = self._frames[self.cursor]
+        return index is not None and index == self.parts[number]["end"] - 1
 
     # -----------------------------------------------------------------
     # Quiz levels
@@ -513,7 +677,7 @@ class LevelSession:
     def current_question(self) -> dict | None:
         """The move the player must find now; None when the quiz is finished."""
         if self.in_retry:
-            return self.retry_queue[self.retry_index]
+            return self.moves[self.retry_queue[self.retry_index]]
         return None if self._main_done else self.moves[self.cursor]
 
     @property
@@ -563,15 +727,18 @@ class LevelSession:
 
         ply = expected["ply"]
         retrying = self.in_retry
+        index = self.retry_queue[self.retry_index] if retrying else self.cursor
+        line_id = self._line_ids[index]
         if move.uci() != expected["uci"]:
             counter = self._retry_wrong if retrying else self._wrong
-            wrong = counter.get(ply, 0) + 1
-            counter[ply] = wrong
+            wrong = counter.get(index, 0) + 1
+            counter[index] = wrong
             rule = self._rule_for(wrong)
             reveal = rule["action"] == "show_correct_move"
             return {
                 "status": "incorrect",
                 "retry": retrying,
+                "line_id": line_id,
                 "ply": ply,
                 "fen": expected["fen_before"],
                 "played_san": board.san(move),
@@ -585,23 +752,24 @@ class LevelSession:
             }
 
         if retrying:
-            wrong = self._retry_wrong.get(ply, 0)
-            self.retry_results[ply] = wrong == 0
+            wrong = self._retry_wrong.get(index, 0)
+            self.retry_results[index] = wrong == 0
             self.retry_index += 1
             opponent_moves = []
         else:
-            wrong = self._wrong.get(ply, 0)
+            wrong = self._wrong.get(index, 0)
             self.answered_count += 1
             if wrong == 0:
                 self.first_try_count += 1
             self.cursor += 1
             opponent_moves = self._play_opponent_moves()
             if self._main_done and self.retry_mistakes:
-                self.retry_queue = [step for step in self.questions if self._wrong.get(step["ply"])]
+                self.retry_queue = [i for i in self._question_indexes if self._wrong.get(i)]
         return {
             "status": "correct",
             "retry": retrying,
             "starts_retry": not retrying and self.in_retry,
+            "line_id": line_id,
             "ply": ply,
             "san": expected["san"],
             "uci": expected["uci"],
@@ -619,15 +787,13 @@ class LevelSession:
         """One entry per question, for the progress bar: 'ok' (first try),
         'hint' (solved after the hint), 'shown' (the correct move was shown),
         'current' (being asked now) or 'pending'."""
-        current_ply = None if self._main_done else self.moves[self.cursor]["ply"]
+        current = None if self._main_done else self.cursor
         states = []
-        for step in self.questions:
-            ply = step["ply"]
-            answered = current_ply is None or ply < current_ply
-            if answered:
-                wrong = self._wrong.get(ply, 0)
+        for index in self._question_indexes:
+            if current is None or index < current:
+                wrong = self._wrong.get(index, 0)
                 states.append("ok" if wrong == 0 else self._mistake_state(wrong))
-            elif ply == current_ply:
+            elif index == current:
                 states.append("current")
             else:
                 states.append("pending")
@@ -637,10 +803,12 @@ class LevelSession:
         """Positions the player got wrong in this run, with their review days
         (taken from the on_mistake rule of the last wrong attempt)."""
         items = []
-        for step in self.questions:
-            wrong = self._wrong.get(step["ply"], 0)
+        for index in self._question_indexes:
+            step = self.moves[index]
+            wrong = self._wrong.get(index, 0)
             if wrong:
                 items.append({
+                    "line_id": self._line_ids[index],
                     "ply": step["ply"],
                     "move_number": step["move_number"],
                     "san": step["san"],
@@ -648,7 +816,7 @@ class LevelSession:
                     "wrong_attempts": wrong,
                     "review_days": list(self._rule_for(wrong)["review_days"]),
                     # second chance: True = solved at once, False = not, None = no second chance (yet)
-                    "fixed": self.retry_results.get(step["ply"]),
+                    "fixed": self.retry_results.get(index),
                 })
         return items
 
@@ -938,8 +1106,11 @@ if __name__ == "__main__":
     print(f"{chapter['chapter_meta']['chapter_title']} - level {number} ({session.kind}): {session.level['title']}")
 
     if session.kind == "learn":
-        while session.next_step() is not None:
-            step = session.current_step
+        while not session.is_complete:
+            step = session.next_step()
+            if step is None:  # the next line of a level with several lines
+                print(f"--- {session.current_part.get('intro') or 'next line'}")
+                continue
             dots = "." if step["turn"] == "white" else "..."
             print(f"{step['move_number']}{dots}{step['san']}  {step['strategic_idea'] or ''}")
     else:
