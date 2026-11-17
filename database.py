@@ -7,11 +7,12 @@ Stores everything that belongs to a USER: profiles, settings, training progress
 and recorded mistakes. Opening theory stays in the *.json chapter files and is
 never copied into the database.
 
-Tables (schema version 1)
+Tables (schema version 2)
     users           one row per local profile (no passwords)
     user_settings   one row per user: UI theme, board colours, engine time
-    line_progress   one row per user + chapter + line ("core", "review" or a branch id)
-    move_mistakes   one row per user + position where a wrong move was played
+    line_progress   one row per user + chapter + line ("core", "review", a branch id or "level_N")
+    move_mistakes   one row per user + position where a wrong move was played, with its
+                    review plan (review_days) and mastered_at once it is learned
 
 Guest mode
     While nobody is logged in (current_user_id is None) the app is in Guest mode
@@ -25,18 +26,26 @@ Guest mode
     of Guest mode.
 
 Values that can be calculated are not stored: chapter status and completion %
-come from summarize_chapter_progress(), and "mastered" means
-streak_correct >= MASTERY_STREAK.
+come from summarize_chapter_progress(). A position is mastered once its last
+review day was answered correctly (mastered_at is then set).
+
+Spaced repetition (DESIGN.md section 3)
+    A mistake comes back on the days of its review plan, counted in local
+    calendar days from the day of the mistake: one mistake -> tomorrow and
+    day 7; two mistakes in one go -> days 1, 3 and 7. A first-try correct
+    answer on a due day moves on to the next day of the plan (never to the
+    same day again); after the last one the position is mastered and does
+    not come back. A new mistake restarts the plan.
 """
 
 import os
 import sqlite3
 import sys
 from contextlib import contextmanager
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
 
 DB_FILENAME = "chesscoach.db"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 MIN_SQLITE_VERSION = (3, 37, 0)  # STRICT tables need SQLite 3.37+
 
 # Line identifiers. A branch uses its own "branch_id" from the chapter JSON.
@@ -45,10 +54,10 @@ LINE_REVIEW = "review"
 
 MAX_USERNAME_LENGTH = 32  # keep in sync with the CHECK on users.username
 
-# Spaced repetition for recorded mistakes: after the 1st correct answer the
-# position comes back in 1 day, after the 2nd in 3 days; the 3rd masters it.
-MASTERY_STREAK = 3
-REVIEW_INTERVALS_DAYS = (1, 3, 7)
+# Review plans for recorded mistakes, in days after the mistake (see the module docstring).
+# The quiz levels pass their own plan from the chapter JSON ("on_mistake"); these are the defaults.
+ONE_MISTAKE_DAYS = (1, 7)
+TWO_MISTAKES_DAYS = (1, 3, 7)
 
 
 class UsernameTakenError(ValueError):
@@ -133,7 +142,20 @@ _SCHEMA_V1 = (
     "PRAGMA user_version = 1",
 )
 
-MIGRATIONS = (_SCHEMA_V1,)
+# Version 2: the review plan of each mistake. Existing rows keep the old
+# schedule's three steps (1, 3, 7) and their due dates; rows the old rule
+# counted as mastered (3 correct answers) get mastered_at.
+_SCHEMA_V2 = (
+    """
+    ALTER TABLE move_mistakes ADD COLUMN review_days TEXT NOT NULL DEFAULT '1,3,7'
+        CHECK (length(review_days) >= 1 AND review_days NOT GLOB '*[^0-9,]*')
+    """,
+    "ALTER TABLE move_mistakes ADD COLUMN mastered_at TEXT",  # NULL = still being reviewed
+    "UPDATE move_mistakes SET mastered_at = next_due_at WHERE streak_correct >= 3",
+    "PRAGMA user_version = 2",
+)
+
+MIGRATIONS = (_SCHEMA_V1, _SCHEMA_V2)
 
 
 # =====================================================================
@@ -151,6 +173,36 @@ def _format_time(moment: datetime) -> str:
 
 def _timestamp() -> str:
     return _format_time(_utc_now())
+
+
+def _parse_time(text: str) -> datetime:
+    return datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+
+
+def _local_timezone():
+    """The computer's time zone ("tomorrow" means the player's next calendar day)."""
+    return datetime.now().astimezone().tzinfo
+
+
+def _day_start_after(moment: datetime, days: int) -> datetime:
+    """Local midnight `days` calendar days after `moment`, in UTC."""
+    local = moment.astimezone(_local_timezone())
+    start = datetime.combine(local.date() + timedelta(days=days), time.min, tzinfo=local.tzinfo)
+    return start.astimezone(timezone.utc)
+
+
+def _check_review_days(days) -> tuple[int, ...]:
+    """A review plan must be increasing whole days above 0, e.g. (1, 7)."""
+    days = tuple(days)
+    if (not days or not all(isinstance(d, int) and not isinstance(d, bool) and d > 0 for d in days)
+            or any(a >= b for a, b in zip(days, days[1:]))):
+        raise ValueError(f"review_days must be increasing whole days above 0, e.g. (1, 7); got {days!r}.")
+    return days
+
+
+def parse_review_days(text: str) -> tuple[int, ...]:
+    """The review_days column ('1,3,7') as a tuple of ints."""
+    return tuple(int(part) for part in text.split(","))
 
 
 def _open_connection(path: str) -> sqlite3.Connection:
@@ -475,28 +527,42 @@ class ChessCoachDB:
     # -----------------------------------------------------------------
     # Mistakes & spaced repetition
     # -----------------------------------------------------------------
-    def record_mistake(self, chapter_id: str, line_id: str | None, ply: int, fen: str, wrong_san: str) -> bool:
+    def record_mistake(
+        self,
+        chapter_id: str,
+        line_id: str | None,
+        ply: int,
+        fen: str,
+        wrong_san: str,
+        review_days=ONE_MISTAKE_DAYS,
+    ) -> bool:
         """Call each time the player plays a wrong move.
 
         line_id may be OpeningSession.active_branch_id as it is (None in core
-        and review mode). fen is the position before the move. The position
-        becomes due for review immediately and its correct streak restarts.
+        and review mode). fen is the position before the move. review_days is
+        the review plan in days after today (the quiz's on_mistake rule, e.g.
+        (1, 7) after one mistake, (1, 3, 7) after two). The plan restarts: the
+        position is due from tomorrow (its first day) and is no longer mastered.
         """
-        now = _timestamp()
+        days = _check_review_days(review_days)
+        now = _utc_now()
         return self._write(
             """
             INSERT INTO move_mistakes
-                (user_id, chapter_id, line_id, ply, fen, last_wrong_san, last_mistake_at, next_due_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (user_id, chapter_id, line_id, ply, fen, last_wrong_san, last_mistake_at, next_due_at, review_days)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT (user_id, chapter_id, line_id, ply) DO UPDATE SET
                 fen = excluded.fen,
                 last_wrong_san = excluded.last_wrong_san,
                 wrong_count = wrong_count + 1,
                 streak_correct = 0,
                 last_mistake_at = excluded.last_mistake_at,
-                next_due_at = excluded.next_due_at
+                next_due_at = excluded.next_due_at,
+                review_days = excluded.review_days,
+                mastered_at = NULL
             """,
-            (self.current_user_id, chapter_id, _position_line(line_id), ply, fen, wrong_san, now, now),
+            (self.current_user_id, chapter_id, _position_line(line_id), ply, fen, wrong_san,
+             _format_time(now), _format_time(_day_start_after(now, days[0])), ",".join(map(str, days))),
         )
 
     def record_correct(self, chapter_id: str, line_id: str | None, ply: int) -> bool:
@@ -504,34 +570,76 @@ class ChessCoachDB:
 
         Only counts when a mistake is recorded for this position and it is due:
         repeating a line many times on the same day does not fake mastery.
-        Returns True if the streak moved forward.
+        The position then moves to the next day of its plan (counted from the
+        mistake, but never earlier than tomorrow), or is mastered after the last
+        one. Returns True if the review counted.
         """
         now = _utc_now()
         mistake = self._fetch_one(
-            "SELECT mistake_id, streak_correct FROM move_mistakes "
+            "SELECT mistake_id, streak_correct, review_days, last_mistake_at FROM move_mistakes "
             "WHERE user_id = ? AND chapter_id = ? AND line_id = ? AND ply = ? "
-            "AND streak_correct < ? AND next_due_at <= ?",
-            (self.current_user_id, chapter_id, _position_line(line_id), ply, MASTERY_STREAK, _format_time(now)),
+            "AND mastered_at IS NULL AND next_due_at <= ?",
+            (self.current_user_id, chapter_id, _position_line(line_id), ply, _format_time(now)),
         )
         if mistake is None:
             return False
+        days = parse_review_days(mistake["review_days"])
         streak = mistake["streak_correct"] + 1
-        wait_days = REVIEW_INTERVALS_DAYS[min(streak, len(REVIEW_INTERVALS_DAYS)) - 1]
+        if streak >= len(days):
+            return self._write(
+                "UPDATE move_mistakes SET streak_correct = ?, mastered_at = ? WHERE mistake_id = ? AND user_id = ?",
+                (streak, _format_time(now), mistake["mistake_id"], self.current_user_id),
+            )
+        planned = _day_start_after(_parse_time(mistake["last_mistake_at"]), days[streak])
+        next_due = max(planned, _day_start_after(now, 1))
         return self._write(
             "UPDATE move_mistakes SET streak_correct = ?, next_due_at = ? WHERE mistake_id = ? AND user_id = ?",
-            (streak, _format_time(now + timedelta(days=wait_days)), mistake["mistake_id"], self.current_user_id),
+            (streak, _format_time(next_due), mistake["mistake_id"], self.current_user_id),
         )
 
-    def get_due_mistakes(self, limit: int = 20) -> list[dict]:
+    def _due_filter(self, chapter_ids) -> tuple[str, list]:
+        """SQL condition and parameters: the current user's positions that are not mastered."""
+        sql = "user_id = ? AND mastered_at IS NULL"
+        params: list = [self.current_user_id]
+        if chapter_ids is not None:
+            ids = list(chapter_ids)
+            sql += f" AND chapter_id IN ({', '.join('?' * len(ids)) or 'NULL'})"
+            params += ids
+        return sql, params
+
+    def get_due_mistakes(self, limit: int = 20, chapter_ids=None) -> list[dict]:
         """Mistakes of the current user that should be drilled now, oldest due first.
 
-        Each row points at a position (chapter_id, line_id, ply); the expected
-        move, hint and explanation are read from the chapter JSON. If the row's
-        fen no longer matches the JSON's fen_before, the lesson has changed.
+        chapter_ids limits the list to those chapters (e.g. the chapters the app
+        can still open). Each row points at a position (chapter_id, line_id, ply);
+        the expected move, hint and explanation are read from the chapter JSON.
+        If the row's fen no longer matches the JSON's fen_before, the lesson has changed.
         """
+        condition, params = self._due_filter(chapter_ids)
         return self._fetch_all(
-            "SELECT * FROM move_mistakes "
-            "WHERE user_id = ? AND streak_correct < ? AND next_due_at <= ? "
-            "ORDER BY next_due_at, wrong_count DESC LIMIT ?",
-            (self.current_user_id, MASTERY_STREAK, _timestamp(), limit),
+            f"SELECT * FROM move_mistakes WHERE {condition} AND next_due_at <= ? "
+            "ORDER BY next_due_at, wrong_count DESC, last_mistake_at, mistake_id LIMIT ?",
+            (*params, _timestamp(), limit),
+        )
+
+    def count_due_mistakes(self, chapter_ids=None) -> int:
+        """How many positions are due now (for the Daily review card)."""
+        condition, params = self._due_filter(chapter_ids)
+        row = self._fetch_one(
+            f"SELECT COUNT(*) AS due FROM move_mistakes WHERE {condition} AND next_due_at <= ?",
+            (*params, _timestamp()),
+        )
+        return row["due"] if row else 0
+
+    def get_next_review_at(self, chapter_ids=None) -> str | None:
+        """When the earliest position not yet mastered is due (UTC text), or None."""
+        condition, params = self._due_filter(chapter_ids)
+        row = self._fetch_one(f"SELECT MIN(next_due_at) AS next_due FROM move_mistakes WHERE {condition}", tuple(params))
+        return row["next_due"] if row else None
+
+    def get_mistake(self, chapter_id: str, line_id: str | None, ply: int) -> dict | None:
+        """The current user's row for one position (e.g. to show its next review), or None."""
+        return self._fetch_one(
+            "SELECT * FROM move_mistakes WHERE user_id = ? AND chapter_id = ? AND line_id = ? AND ply = ?",
+            (self.current_user_id, chapter_id, _position_line(line_id), ply),
         )

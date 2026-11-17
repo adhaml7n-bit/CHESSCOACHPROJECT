@@ -56,6 +56,10 @@ class DatabaseTestCase(unittest.TestCase):
         patcher = mock.patch.object(database, "_utc_now", self.clock)
         patcher.start()
         self.addCleanup(patcher.stop)
+        # Review days are local calendar days; tests use UTC unless they say otherwise.
+        tz_patcher = mock.patch.object(database, "_local_timezone", lambda: timezone.utc)
+        tz_patcher.start()
+        self.addCleanup(tz_patcher.stop)
 
         self.db = ChessCoachDB(self.db_path)
 
@@ -355,6 +359,9 @@ class ProgressTests(DatabaseTestCase):
 
 
 class MistakeTests(DatabaseTestCase):
+    """Review plans (DESIGN.md section 3). The clock starts on 2026-11-15 at 12:00
+    and local time is UTC here, so "tomorrow" starts at 2026-11-16T00:00:00Z."""
+
     def setUp(self):
         super().setUp()
         self.db.create_user("adham")
@@ -362,6 +369,16 @@ class MistakeTests(DatabaseTestCase):
     def mistake_rows(self):
         return self.raw("SELECT line_id, ply, wrong_count, streak_correct, last_wrong_san FROM move_mistakes "
                         "ORDER BY line_id, ply")
+
+    def row(self):
+        return self.db.get_mistake("catalan_ch01", None, 7)
+
+    def due_plies(self):
+        return [m["ply"] for m in self.db.get_due_mistakes()]
+
+    def go_to(self, day, hour=0):
+        """Moves the clock to a day of November 2026 (UTC)."""
+        self.clock.now = datetime(2026, 11, day, hour, tzinfo=timezone.utc)
 
     def test_same_position_is_one_row_even_when_line_id_is_none(self):
         # The NULL trap: with a NULL line id, UNIQUE would never match and rows would pile up.
@@ -378,46 +395,82 @@ class MistakeTests(DatabaseTestCase):
         self.db.record_mistake("catalan_ch01", "branch_01", 15, START_FEN, "e4")
         self.assertEqual([row["line_id"] for row in self.mistake_rows()], ["branch_01", "core"])
 
-    def test_new_mistake_is_due_immediately(self):
+    def test_new_mistake_comes_back_tomorrow(self):
         self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "e4")
+        self.assertEqual(self.due_plies(), [])  # not today
+        self.assertEqual((self.row()["next_due_at"], self.row()["review_days"]), ("2026-11-16T00:00:00Z", "1,7"))
+        self.go_to(16)
         due = self.db.get_due_mistakes()
-        self.assertEqual(len(due), 1)
-        self.assertEqual((due[0]["chapter_id"], due[0]["line_id"], due[0]["ply"]), ("catalan_ch01", "core", 7))
-        self.assertEqual(due[0]["fen"], START_FEN)
+        self.assertEqual((due[0]["chapter_id"], due[0]["line_id"], due[0]["ply"], due[0]["fen"]),
+                         ("catalan_ch01", "core", 7, START_FEN))
 
-    def test_spaced_repetition_schedule_and_mastery(self):
+    def test_one_mistake_comes_back_tomorrow_and_on_day_7(self):
         self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "e4")
-
-        self.assertTrue(self.db.record_correct("catalan_ch01", None, 7))   # streak 1, back in 1 day
-        self.assertEqual(self.db.get_due_mistakes(), [])
-        self.assertFalse(self.db.record_correct("catalan_ch01", None, 7))  # same day: does not count
-
-        self.clock.advance(hours=23)
-        self.assertEqual(self.db.get_due_mistakes(), [])
-        self.clock.advance(hours=1)
-        self.assertEqual(len(self.db.get_due_mistakes()), 1)
-
-        self.assertTrue(self.db.record_correct("catalan_ch01", LINE_REVIEW, 7))  # streak 2, back in 3 days
-        self.clock.advance(days=2)
-        self.assertEqual(self.db.get_due_mistakes(), [])
-        self.clock.advance(days=1)
-        self.assertEqual(len(self.db.get_due_mistakes()), 1)
-
-        self.assertTrue(self.db.record_correct("catalan_ch01", None, 7))   # streak 3 = mastered
-        self.clock.advance(days=365)
-        self.assertEqual(self.db.get_due_mistakes(), [])
+        self.assertFalse(self.db.record_correct("catalan_ch01", None, 7))  # replaying today does not count
+        self.go_to(16, 9)
+        self.assertTrue(self.db.record_correct("catalan_ch01", LINE_REVIEW, 7))  # day 1 done (review = core)
+        self.assertEqual(self.row()["next_due_at"], "2026-11-22T00:00:00Z")      # day 7 after the mistake
+        self.go_to(21, 23)
+        self.assertEqual(self.due_plies(), [])
         self.assertFalse(self.db.record_correct("catalan_ch01", None, 7))
-        self.assertEqual(self.mistake_rows()[0]["streak_correct"], database.MASTERY_STREAK)
+        self.go_to(22)
+        self.assertEqual(self.due_plies(), [7])
+        self.assertTrue(self.db.record_correct("catalan_ch01", None, 7))         # day 7 done: mastered
+        self.assertEqual(self.row()["mastered_at"], "2026-11-22T00:00:00Z")
+        self.go_to(30)
+        self.assertEqual(self.due_plies(), [])                                   # no maintenance reviews
+        self.assertFalse(self.db.record_correct("catalan_ch01", None, 7))
 
-    def test_a_new_mistake_resets_the_streak(self):
+    def test_two_mistakes_come_back_on_days_1_3_and_7(self):
         self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "e4")
-        self.db.record_correct("catalan_ch01", None, 7)
-        self.clock.advance(days=1)
+        self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "d4", review_days=database.TWO_MISTAKES_DAYS)
+        self.assertEqual((self.row()["wrong_count"], self.row()["review_days"]), (2, "1,3,7"))
+        for day, next_due in ((16, "2026-11-18T00:00:00Z"), (18, "2026-11-22T00:00:00Z")):
+            self.go_to(day)
+            self.assertTrue(self.db.record_correct("catalan_ch01", None, 7))
+            self.assertEqual(self.row()["next_due_at"], next_due)
+        self.go_to(22)
+        self.assertTrue(self.db.record_correct("catalan_ch01", None, 7))
+        self.assertIsNotNone(self.row()["mastered_at"])
+
+    def test_a_late_review_never_brings_the_position_back_the_same_day(self):
+        self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "e4")
+        self.go_to(23, 10)  # the day-1 review, a week late
+        self.assertTrue(self.db.record_correct("catalan_ch01", None, 7))
+        self.assertEqual(self.row()["next_due_at"], "2026-11-24T00:00:00Z")  # day 7 has passed: tomorrow instead
+        self.assertEqual(self.due_plies(), [])
+
+    def test_a_new_mistake_restarts_the_plan(self):
+        self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "e4")
+        self.go_to(16)
         self.db.record_correct("catalan_ch01", None, 7)
         self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "d4")
-        row = self.mistake_rows()[0]
-        self.assertEqual((row["wrong_count"], row["streak_correct"]), (2, 0))
-        self.assertEqual(len(self.db.get_due_mistakes()), 1)
+        row = self.row()
+        self.assertEqual((row["wrong_count"], row["streak_correct"], row["next_due_at"]),
+                         (2, 0, "2026-11-17T00:00:00Z"))
+
+    def test_a_mastered_position_comes_back_only_after_a_new_mistake(self):
+        self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "e4", review_days=(1,))
+        self.go_to(16)
+        self.assertTrue(self.db.record_correct("catalan_ch01", None, 7))
+        self.assertIsNotNone(self.row()["mastered_at"])
+        self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "d4")
+        self.assertIsNone(self.row()["mastered_at"])
+        self.go_to(17)
+        self.assertEqual(self.due_plies(), [7])
+
+    def test_tomorrow_starts_at_local_midnight(self):
+        amman = timezone(timedelta(hours=3))
+        with mock.patch.object(database, "_local_timezone", lambda: amman):
+            self.clock.now = datetime(2026, 11, 15, 22, 30, tzinfo=timezone.utc)  # 01:30 on the 16th in Amman
+            self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "e4")
+        self.assertEqual(self.row()["next_due_at"], "2026-11-16T21:00:00Z")     # 00:00 on the 17th in Amman
+
+    def test_invalid_review_days_are_refused(self):
+        for bad in ((), (0, 7), (7, 1), (1, 1), ("1",), (True,)):
+            with self.assertRaises(ValueError, msg=bad):
+                self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "e4", review_days=bad)
+        self.assertEqual(self.mistake_rows(), [])
 
     def test_correct_move_without_a_recorded_mistake_does_nothing(self):
         self.assertFalse(self.db.record_correct("catalan_ch01", None, 3))
@@ -427,12 +480,25 @@ class MistakeTests(DatabaseTestCase):
         self.db.record_mistake("catalan_ch01", None, 9, START_FEN, "e4")
         self.clock.advance(minutes=1)
         self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "e4")
-        self.clock.advance(minutes=1)
-        self.assertEqual([m["ply"] for m in self.db.get_due_mistakes()], [9, 7])
+        self.go_to(16)  # both due at the same midnight: the older mistake comes first
+        self.assertEqual(self.due_plies(), [9, 7])
         self.assertEqual([m["ply"] for m in self.db.get_due_mistakes(limit=1)], [9])
 
         self.db.create_user("second")
         self.assertEqual(self.db.get_due_mistakes(), [])
+
+    def test_due_count_and_next_review_by_chapter(self):
+        self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "e4")
+        self.db.record_mistake("old_chapter", None, 3, START_FEN, "e4")
+        self.assertEqual(self.db.get_next_review_at(["catalan_ch01"]), "2026-11-16T00:00:00Z")
+        self.assertEqual(self.db.count_due_mistakes(), 0)
+        self.go_to(16)
+        self.assertEqual(self.db.count_due_mistakes(), 2)
+        self.assertEqual(self.db.count_due_mistakes(["catalan_ch01"]), 1)
+        self.assertEqual([m["chapter_id"] for m in self.db.get_due_mistakes(chapter_ids=["catalan_ch01"])],
+                         ["catalan_ch01"])
+        self.assertEqual(self.db.get_due_mistakes(chapter_ids=[]), [])
+        self.assertIsNone(self.db.get_next_review_at(["no_such_chapter"]))
 
     def test_database_rejects_a_review_line_id_for_mistakes(self):
         with self.assertRaises(sqlite3.IntegrityError):
@@ -451,7 +517,7 @@ class ThreadingTests(DatabaseTestCase):
         def worker():
             try:
                 results.append(self.db.record_mistake("catalan_ch01", None, 7, START_FEN, "e4"))
-                results.append(len(self.db.get_due_mistakes()))
+                results.append(self.db.get_mistake("catalan_ch01", None, 7)["wrong_count"])
             except Exception as exc:  # report instead of dying silently in the thread
                 results.append(exc)
 
@@ -459,6 +525,34 @@ class ThreadingTests(DatabaseTestCase):
         thread.start()
         thread.join()
         self.assertEqual(results, [True, 1])
+
+
+class MigrationTests(DatabaseTestCase):
+    def test_version_1_database_is_upgraded_and_keeps_progress(self):
+        old_path = os.path.join(self._tmp.name, "old.db")
+        conn = sqlite3.connect(old_path, isolation_level=None)
+        for statement in database._SCHEMA_V1:
+            conn.execute(statement)
+        conn.execute("INSERT INTO users (username, display_name, created_at, updated_at, last_login_at) "
+                     "VALUES ('adham', 'adham', 't', 't', 't')")
+        insert = ("INSERT INTO move_mistakes (user_id, chapter_id, line_id, ply, fen, last_wrong_san, wrong_count, "
+                  "streak_correct, last_mistake_at, next_due_at) VALUES (1, 'c', 'core', ?, 'f', 'e4', ?, ?, ?, ?)")
+        conn.execute(insert, (7, 2, 3, "2026-11-01T10:00:00Z", "2026-11-10T10:00:00Z"))  # mastered by the old rule
+        conn.execute(insert, (9, 1, 1, "2026-11-14T10:00:00Z", "2026-11-15T10:00:00Z"))  # one review done
+        conn.close()
+
+        db = ChessCoachDB(old_path)
+        with db._connection(writable=False) as check:
+            self.assertEqual(check.execute("PRAGMA user_version").fetchone()[0], database.SCHEMA_VERSION)
+            rows = [tuple(row) for row in check.execute(
+                "SELECT ply, wrong_count, streak_correct, review_days, mastered_at FROM move_mistakes ORDER BY ply")]
+        self.assertEqual(rows, [(7, 2, 3, "1,3,7", "2026-11-10T10:00:00Z"), (9, 1, 1, "1,3,7", None)])
+
+        db.login(1)
+        self.assertEqual([m["ply"] for m in db.get_due_mistakes()], [9])  # the mastered one stays away
+        self.assertTrue(db.record_correct("c", None, 9))                 # old rows follow the new rules:
+        self.assertEqual(db.get_mistake("c", None, 9)["next_due_at"],     # 2nd review passed -> day 7 of
+                         "2026-11-21T00:00:00Z")                          # 1,3,7 after the mistake on the 14th
 
 
 if __name__ == "__main__":
