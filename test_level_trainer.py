@@ -159,9 +159,35 @@ class ValidationTests(unittest.TestCase):
         main, line_2 = chapter["lines"]["main"], chapter["lines"]["line_2"]
         self.assertIs(line_2[4]["purpose"], main[4]["purpose"])          # 3.g3: written once, on main
         self.assertNotEqual(line_2[14]["purpose"], main[14]["purpose"])  # 8.Nbd2 in two different positions
-        steps = main + line_2
+        steps = main + line_2[:25]  # levels 1-8; the questions for the newer lines come later
         self.assertTrue(all(step["purpose"] for step in steps if step["turn"] == "white"))
-        self.assertTrue(all(step["purpose"] is None for step in steps if step["turn"] == "black"))
+        self.assertTrue(all(step["purpose"] is None for line in chapter["lines"].values() for step in line
+                            if step["turn"] == "black"))
+
+    def test_every_level_of_the_real_chapter_can_be_finished(self):
+        chapter = load_level_chapter(REAL_CHAPTER_PATH)
+        for level in chapter["levels"]:
+            with self.subTest(level=level["level"]):
+                session = LevelSession(chapter, level["level"])
+                for _ in range(200):
+                    if session.is_complete:
+                        break
+                    if session.kind == "learn":
+                        session.next_step()
+                    else:
+                        self.assertEqual(session.submit_move(session.current_question["uci"])["status"], "correct")
+                self.assertTrue(session.is_complete and session.passed)
+                if session.kind == "learn":  # every move of a learn level is explained
+                    self.assertTrue(all(step["strategic_idea"] for step in session.moves), level["title"])
+                else:
+                    self.assertEqual(session.accuracy, 100.0)
+
+    def test_a_transposition_in_the_real_chapter_is_explained_once(self):
+        lines = load_level_chapter(REAL_CHAPTER_PATH)["lines"]
+        # 7...Nbd7 8.Nbd2 b6 9.e4 Bb7 and 7...b6 8.Nbd2 Bb7 9.e4 Nbd7: the same position, so the same texts for 10.e5
+        self.assertEqual(lines["nbd7_bb7"][18]["fen_before"].split()[:4], lines["b6_nbd7"][18]["fen_before"].split()[:4])
+        self.assertEqual(lines["nbd7_bb7"][18]["explanation"], lines["b6_nbd7"][18]["explanation"])
+        self.assertEqual(lines["nbd7_bb7"][18]["hint"], "Push your e-pawn and attack the f6-knight.")
 
     def test_rejects_illegal_move(self):
         data = make_chapter()

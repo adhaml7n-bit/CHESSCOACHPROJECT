@@ -620,8 +620,521 @@
                         "You open the b-file for your queen's rook."
                     ]
                 }
+            },
+            {
+                "ply": 26,
+                "move_number": 13,
+                "turn": "black",
+                "san": "Ne6",
+                "strategic_idea": "Your opponent's knight steps back to e6.",
+                "explanation": "Attacked by your b-pawn, the knight retreats to e6. From there it watches d4 and c5 and helps protect Black's kingside.",
+                "hint": null
+            },
+            {
+                "ply": 27,
+                "move_number": 14,
+                "turn": "white",
+                "san": "Bb2",
+                "strategic_idea": "You put your bishop on the long dark diagonal.",
+                "explanation": "Your bishop controls d4, the square in front of Black's isolated pawn, and already eyes the f6-knight.",
+                "hint": "Put your dark-squared bishop on the long diagonal."
+            },
+            {
+                "ply": 28,
+                "move_number": 14,
+                "turn": "black",
+                "san": "Rc8",
+                "strategic_idea": "Your opponent takes the open c-file.",
+                "explanation": "Black's rook adds pressure on your c4-pawn, which your queen and your d2-knight still protect.",
+                "hint": null
+            },
+            {
+                "ply": 29,
+                "move_number": 15,
+                "turn": "white",
+                "san": "Ne5",
+                "strategic_idea": "You plant your knight on e5.",
+                "explanation": "Protected by your b2-bishop, the knight is strong on e5 and guards c4. With f3 free, your g2-bishop now sees all the way to the d5-pawn.",
+                "hint": "Bring your f3-knight to a strong central square."
+            },
+            {
+                "ply": 30,
+                "move_number": 15,
+                "turn": "black",
+                "san": "Qc7",
+                "strategic_idea": "Your opponent's queen joins the c-file.",
+                "explanation": "The queen lines up with the rook against c4 and attacks your e5-knight, which your b2-bishop protects.",
+                "hint": null
+            },
+            {
+                "ply": 31,
+                "move_number": 16,
+                "turn": "white",
+                "san": "Rac1",
+                "strategic_idea": "You bring your last piece into play.",
+                "explanation": "Your rook stands behind your queen on the c-file and meets Black's pressure there. All your pieces are in play.",
+                "hint": "Bring your a1-rook to the c-file."
             }
-        ]
+        ],
+        "b6_nbd7": {
+            "from_line": "line_2",
+            "after_ply": 17,
+            "moves": [
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "Nbd7",
+                    "strategic_idea": "Your opponent develops the knight to d7.",
+                    "explanation": "A natural square, but it takes d7 away from the f6-knight, and you use that at once.",
+                    "hint": null
+                },
+                {
+                    "ply": 19,
+                    "move_number": 10,
+                    "turn": "white",
+                    "san": "e5",
+                    "strategic_idea": "You push forward and chase the f6-knight.",
+                    "explanation": "The knight's best square, d7, is taken by the other knight, so it has no good place to go. Your e5-pawn also gains space on the kingside.",
+                    "hint": "Push your e-pawn and attack the f6-knight."
+                },
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "Ne8",
+                    "strategic_idea": "Your opponent's knight retreats to e8.",
+                    "explanation": "It's passive there, but it can come back into play via c7.",
+                    "hint": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "cxd5",
+                    "strategic_idea": "You exchange pawns on d5.",
+                    "explanation": "You release the tension in the center. Your pawns on d4 and e5 now stand firm, and the c-file opens.",
+                    "hint": "Exchange your c-pawn on d5."
+                },
+                {
+                    "ply": 22,
+                    "move_number": 11,
+                    "turn": "black",
+                    "san": "cxd5",
+                    "strategic_idea": "Your opponent takes back with the c-pawn.",
+                    "explanation": "Black keeps a solid chain on e6 and d5, and the c-file is open for both sides' rooks.",
+                    "hint": null
+                },
+                {
+                    "ply": 23,
+                    "move_number": 12,
+                    "turn": "white",
+                    "san": "Re1",
+                    "strategic_idea": "Your rook supports the e5-pawn.",
+                    "explanation": "It also makes room on f1 for your d2-knight, which will head for the kingside.",
+                    "hint": "Bring your f1-rook to the e-file."
+                },
+                {
+                    "ply": 24,
+                    "move_number": 12,
+                    "turn": "black",
+                    "san": "Rc8",
+                    "strategic_idea": "Your opponent's rook takes the c-file.",
+                    "explanation": "It attacks your queen on c2.",
+                    "hint": null
+                },
+                {
+                    "ply": 25,
+                    "move_number": 13,
+                    "turn": "white",
+                    "san": "Qa4",
+                    "strategic_idea": "Your queen steps aside with threats.",
+                    "explanation": "On a4 it attacks the a7-pawn and the d7-knight.",
+                    "hint": "Move your queen off the c-file to a square where it attacks something."
+                },
+                {
+                    "ply": 26,
+                    "move_number": 13,
+                    "turn": "black",
+                    "san": "Nc7",
+                    "strategic_idea": "Your opponent's knight comes back into play.",
+                    "explanation": "From c7 it protects d5 and e6. The a7-pawn now looks free, but it's a trap: after 14.Qxa7? Ba6 and ...Ra8 your queen is caught.",
+                    "hint": null
+                },
+                {
+                    "ply": 27,
+                    "move_number": 14,
+                    "turn": "white",
+                    "san": "Nf1",
+                    "strategic_idea": "Your knight heads for the kingside.",
+                    "explanation": "From f1 it can go to e3 to attack d5, or to h2 and then g4, near Black's king.",
+                    "hint": "Reroute your d2-knight through f1."
+                },
+                {
+                    "ply": 28,
+                    "move_number": 14,
+                    "turn": "black",
+                    "san": "b5",
+                    "strategic_idea": "Your opponent attacks your queen.",
+                    "explanation": "Black gains space on the queenside and chases your queen away.",
+                    "hint": null
+                },
+                {
+                    "ply": 29,
+                    "move_number": 15,
+                    "turn": "white",
+                    "san": "Qd1",
+                    "strategic_idea": "Your queen goes back to d1.",
+                    "explanation": "From d1 it protects d4 and supports your play on the kingside.",
+                    "hint": "Retreat your queen to a square where it helps on the kingside."
+                },
+                {
+                    "ply": 30,
+                    "move_number": 15,
+                    "turn": "black",
+                    "san": "b4",
+                    "strategic_idea": "Your opponent pushes on with the b-pawn.",
+                    "explanation": "Black grabs more space on the queenside, where Black wants to play.",
+                    "hint": null
+                },
+                {
+                    "ply": 31,
+                    "move_number": 16,
+                    "turn": "white",
+                    "san": "h4",
+                    "strategic_idea": "You start your play on the kingside.",
+                    "explanation": "Black plays on the queenside, you play where Black's king is: h4-h5 and a knight on g5 or g4 put pressure on the king.",
+                    "hint": "Start a pawn advance on the kingside."
+                }
+            ]
+        },
+        "b6_nbd7_a5": {
+            "from_line": "b6_nbd7",
+            "after_ply": 25,
+            "moves": [
+                {
+                    "ply": 26,
+                    "move_number": 13,
+                    "turn": "black",
+                    "san": "a5",
+                    "strategic_idea": "Your opponent saves the a-pawn.",
+                    "explanation": "On a5 the pawn is protected by the b6-pawn, so your queen can't take it.",
+                    "hint": null
+                },
+                {
+                    "ply": 27,
+                    "move_number": 14,
+                    "turn": "white",
+                    "san": "Nf1",
+                    "strategic_idea": "Your knight heads for the kingside.",
+                    "explanation": "The same plan as before: the knight goes to e3, or to h2 and g4.",
+                    "hint": "Reroute your d2-knight through f1."
+                },
+                {
+                    "ply": 28,
+                    "move_number": 14,
+                    "turn": "black",
+                    "san": "Ba6",
+                    "strategic_idea": "Your opponent's bishop comes to a6.",
+                    "explanation": "It eyes your f1-knight along the a6-f1 diagonal, but your rook, your bishop and your king protect the knight.",
+                    "hint": null
+                },
+                {
+                    "ply": 29,
+                    "move_number": 15,
+                    "turn": "white",
+                    "san": "Qd1",
+                    "strategic_idea": "Your queen goes back to d1.",
+                    "explanation": "From d1 it protects d4 and supports your kingside play, out of the way of Black's queenside pawns.",
+                    "hint": "Bring your queen back where it helps on the kingside."
+                }
+            ]
+        },
+        "nbd7_bb7": {
+            "from_line": "main",
+            "after_ply": 17,
+            "moves": [
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "Bb7",
+                    "strategic_idea": "Your opponent develops the bishop and keeps the tension.",
+                    "explanation": "With the knight on d7, the pawn on b6 and the bishop on b7, this is exactly the position from level 11 after 9...Nbd7. You know what to do: 10.e5.",
+                    "hint": null
+                },
+                {
+                    "ply": 19,
+                    "move_number": 10,
+                    "turn": "white",
+                    "san": "e5",
+                    "strategic_idea": null,
+                    "explanation": null,
+                    "hint": null
+                },
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "Ne8",
+                    "strategic_idea": null,
+                    "explanation": null,
+                    "hint": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "cxd5",
+                    "strategic_idea": null,
+                    "explanation": null,
+                    "hint": null
+                },
+                {
+                    "ply": 22,
+                    "move_number": 11,
+                    "turn": "black",
+                    "san": "cxd5",
+                    "strategic_idea": null,
+                    "explanation": null,
+                    "hint": null
+                }
+            ]
+        },
+        "nbd7_dxe4": {
+            "from_line": "main",
+            "after_ply": 17,
+            "moves": [
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "dxe4",
+                    "strategic_idea": "Your opponent takes on e4.",
+                    "explanation": "The e4-pawn now attacks your f3-knight, so you take back at once.",
+                    "hint": null
+                },
+                {
+                    "ply": 19,
+                    "move_number": 10,
+                    "turn": "white",
+                    "san": "Nxe4",
+                    "strategic_idea": "You take back with your knight.",
+                    "explanation": "Your knight lands in the center and challenges the f6-knight.",
+                    "hint": "Take back on e4 with your knight."
+                },
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "Nxe4",
+                    "strategic_idea": "Your opponent trades knights.",
+                    "explanation": "Black wants to ease the pressure by exchanging pieces.",
+                    "hint": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "Qxe4",
+                    "strategic_idea": "Your queen takes back and rules the center.",
+                    "explanation": "On e4 your queen eyes the c6- and h7-pawns. With pawns on c4 and d4 against Black's c6 and e6, you have more space in the center.",
+                    "hint": "Take back on e4."
+                }
+            ]
+        },
+        "nbd7_b5": {
+            "from_line": "main",
+            "after_ply": 15,
+            "moves": [
+                {
+                    "ply": 16,
+                    "move_number": 8,
+                    "turn": "black",
+                    "san": "b5",
+                    "strategic_idea": "Your opponent attacks your c4-pawn.",
+                    "explanation": "Black wants to open the queenside with the b-pawn.",
+                    "hint": null
+                },
+                {
+                    "ply": 17,
+                    "move_number": 9,
+                    "turn": "white",
+                    "san": "c5",
+                    "strategic_idea": "You push past the b-pawn.",
+                    "explanation": "Instead of taking on b5, you push to c5, where your d4-pawn protects it. The pawn takes space and cramps Black's queenside.",
+                    "hint": "Push your c-pawn forward instead of taking on b5."
+                },
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "a5",
+                    "strategic_idea": "Your opponent gains more space on the queenside.",
+                    "explanation": "Black prepares to push on with ...b4.",
+                    "hint": null
+                },
+                {
+                    "ply": 19,
+                    "move_number": 10,
+                    "turn": "white",
+                    "san": "e4",
+                    "strategic_idea": "You open the center.",
+                    "explanation": "With the queenside closed, you strike in the middle: e4 attacks d5 and frees your pieces.",
+                    "hint": "Strike in the center with your e-pawn."
+                }
+            ]
+        },
+        "nbd7_re8": {
+            "from_line": "main",
+            "after_ply": 15,
+            "moves": [
+                {
+                    "ply": 16,
+                    "move_number": 8,
+                    "turn": "black",
+                    "san": "Re8",
+                    "strategic_idea": "Your opponent's rook goes to e8.",
+                    "explanation": "Black prepares to free the position with ...e5 later.",
+                    "hint": null
+                },
+                {
+                    "ply": 17,
+                    "move_number": 9,
+                    "turn": "white",
+                    "san": "e4",
+                    "strategic_idea": "You strike in the center first.",
+                    "explanation": "Before Black can play ...e5, you attack d5 and open lines for your pieces.",
+                    "hint": "Push your e-pawn and attack d5."
+                },
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "dxe4",
+                    "strategic_idea": "Your opponent takes on e4.",
+                    "explanation": "The pawn now attacks your f3-knight, so you take back at once.",
+                    "hint": null
+                },
+                {
+                    "ply": 19,
+                    "move_number": 10,
+                    "turn": "white",
+                    "san": "Nxe4",
+                    "strategic_idea": "You take back with your knight.",
+                    "explanation": "Your knight lands in the center and challenges the f6-knight.",
+                    "hint": "Take back on e4 with your knight."
+                },
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "Nxe4",
+                    "strategic_idea": "Your opponent trades knights.",
+                    "explanation": "Exchanging pieces gives Black more room.",
+                    "hint": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "Qxe4",
+                    "strategic_idea": "Your queen takes back and rules the center.",
+                    "explanation": "On e4 your queen eyes the c6- and h7-pawns, and your c4- and d4-pawns give you more space.",
+                    "hint": "Take back on e4."
+                },
+                {
+                    "ply": 22,
+                    "move_number": 11,
+                    "turn": "black",
+                    "san": "Nf6",
+                    "strategic_idea": "Your opponent's knight attacks your queen.",
+                    "explanation": "Black's other knight comes to f6, hits your queen and covers the kingside.",
+                    "hint": null
+                },
+                {
+                    "ply": 23,
+                    "move_number": 12,
+                    "turn": "white",
+                    "san": "Qe2",
+                    "strategic_idea": "Your queen steps back to e2.",
+                    "explanation": "From e2 it protects your c4-pawn and keeps an eye on e6 along the e-file.",
+                    "hint": "Retreat your queen to a square where it protects c4."
+                },
+                {
+                    "ply": 24,
+                    "move_number": 12,
+                    "turn": "black",
+                    "san": "c5",
+                    "strategic_idea": "Your opponent strikes at your d4-pawn.",
+                    "explanation": "This is Black's usual freeing break.",
+                    "hint": null
+                },
+                {
+                    "ply": 25,
+                    "move_number": 13,
+                    "turn": "white",
+                    "san": "Rd1",
+                    "strategic_idea": "Your rook comes to d1.",
+                    "explanation": "It protects your d4-pawn and stands opposite Black's queen on d8.",
+                    "hint": "Bring a rook to the d-file."
+                },
+                {
+                    "ply": 26,
+                    "move_number": 13,
+                    "turn": "black",
+                    "san": "cxd4",
+                    "strategic_idea": "Your opponent exchanges on d4.",
+                    "explanation": "The d-file is now free of pawns.",
+                    "hint": null
+                },
+                {
+                    "ply": 27,
+                    "move_number": 14,
+                    "turn": "white",
+                    "san": "Nxd4",
+                    "strategic_idea": "You take back with your knight.",
+                    "explanation": "Your knight lands on a great central square, protected by your rook.",
+                    "hint": "Recapture on d4 with a minor piece."
+                },
+                {
+                    "ply": 28,
+                    "move_number": 14,
+                    "turn": "black",
+                    "san": "Qb6",
+                    "strategic_idea": "Your opponent's queen attacks twice.",
+                    "explanation": "It hits your d4-knight and your b2-pawn at the same time.",
+                    "hint": null
+                },
+                {
+                    "ply": 29,
+                    "move_number": 15,
+                    "turn": "white",
+                    "san": "Be3",
+                    "strategic_idea": "Your bishop protects the knight.",
+                    "explanation": "Now your d4-knight is protected twice. Your b2-pawn is safe too: your queen guards it along the second rank.",
+                    "hint": "Bring a piece to protect your d4-knight."
+                },
+                {
+                    "ply": 30,
+                    "move_number": 15,
+                    "turn": "black",
+                    "san": "Bc5",
+                    "strategic_idea": "Your opponent adds pressure on d4.",
+                    "explanation": "The bishop attacks your knight, with the queen behind it.",
+                    "hint": null
+                },
+                {
+                    "ply": 31,
+                    "move_number": 16,
+                    "turn": "white",
+                    "san": "Nb5",
+                    "strategic_idea": "Your knight jumps out to b5.",
+                    "explanation": "It leaves the pressure on d4 and eyes c7 and d6. Now Rd6, attacking Black's queen, is a real threat.",
+                    "hint": "Move your d4-knight to a square where it threatens something."
+                }
+            ]
+        }
     },
     "levels": [
         {
@@ -746,6 +1259,194 @@
             "line_id": "line_2",
             "from_ply": 14,
             "to_ply": 25,
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 9,
+            "type": "learn",
+            "title": "The 7...b6 line to move 16",
+            "line_id": "line_2",
+            "from_ply": 26,
+            "to_ply": 31,
+            "intro": "You know this line up to 13.b4. Now your pieces take their best squares around Black's isolated d5-pawn.",
+            "key_ideas": [
+                "Your e5-knight is your best piece; keep it protected by the b2-bishop.",
+                "Keep the pressure on d5 with your g2-bishop, and bring a rook to d1 later.",
+                "If your opponent takes on c4, take back: your pieces stay more active than Black's."
+            ]
+        },
+        {
+            "level": 10,
+            "type": "quiz",
+            "title": "Test: the whole 7...b6 line",
+            "line_id": "line_2",
+            "from_ply": 14,
+            "to_ply": 31,
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 11,
+            "type": "learn",
+            "title": "9...Nbd7: the e5 push",
+            "line_id": "b6_nbd7",
+            "from_ply": 18,
+            "to_ply": 31,
+            "intro": "In the 7...b6 line your opponent can also answer 9.e4 with 9...Nbd7. Now the e5 push is very strong.",
+            "key_ideas": [
+                "Black plays on the queenside, you play on the kingside. That's the plan in this pawn structure.",
+                "Bring your f1-knight to e3 to attack d5, or to h2 and g4 toward Black's king.",
+                "Your e5-pawn gives you space, so keep it protected with your rook and your f3-knight."
+            ]
+        },
+        {
+            "level": 12,
+            "type": "learn",
+            "title": "The e5 structure, two more ways",
+            "parts": [
+                {
+                    "line_id": "b6_nbd7_a5",
+                    "from_ply": 26,
+                    "to_ply": 29,
+                    "intro": "If your opponent plays 13...a5 instead of 13...Nc7:"
+                },
+                {
+                    "line_id": "nbd7_bb7",
+                    "from_ply": 18,
+                    "to_ply": 22,
+                    "intro": "In the 7...Nbd7 line, 9...Bb7 leads to the same position as level 11:"
+                }
+            ],
+            "intro": "Two more ways your opponent can reach the structure of level 11.",
+            "key_ideas": [
+                "Black plays on the queenside, you play on the kingside. That's the plan in this pawn structure.",
+                "Bring your f1-knight to e3 to attack d5, or to h2 and g4 toward Black's king.",
+                "Your e5-pawn gives you space, so keep it protected with your rook and your f3-knight."
+            ]
+        },
+        {
+            "level": 13,
+            "type": "quiz",
+            "title": "Test: the e5 structure",
+            "parts": [
+                {
+                    "line_id": "b6_nbd7",
+                    "from_ply": 18,
+                    "to_ply": 31
+                },
+                {
+                    "line_id": "b6_nbd7_a5",
+                    "from_ply": 26,
+                    "to_ply": 29
+                }
+            ],
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 14,
+            "type": "learn",
+            "title": "7...Nbd7: two short side lines",
+            "parts": [
+                {
+                    "line_id": "nbd7_dxe4",
+                    "from_ply": 18,
+                    "to_ply": 21,
+                    "intro": "After 9.e4, your opponent can take on e4 instead of c4.",
+                    "key_ideas": [
+                        "You have more space: your c4- and d4-pawns against Black's c6 and e6.",
+                        "Next, bring a rook to d1 and your bishop to f4.",
+                        "If your opponent breaks with ...c5, the push d4-d5 often gains you even more space."
+                    ]
+                },
+                {
+                    "line_id": "nbd7_b5",
+                    "from_ply": 16,
+                    "to_ply": 19,
+                    "intro": "Back to move 8: your opponent can also attack your c4-pawn with 8...b5.",
+                    "key_ideas": [
+                        "Your c5-pawn takes space and cramps Black's queenside. Keep it protected by the d4-pawn.",
+                        "Open the center with e4: after the exchanges on e4 your pieces become more active."
+                    ]
+                }
+            ],
+            "intro": "In the 7...Nbd7 line your opponent has other tries than 9...dxc4. Here are two short ones."
+        },
+        {
+            "level": 15,
+            "type": "learn",
+            "title": "8...Re8",
+            "line_id": "nbd7_re8",
+            "from_ply": 16,
+            "to_ply": 31,
+            "intro": "Your opponent can also prepare ...e5 with 8...Re8. You strike in the center first.",
+            "key_ideas": [
+                "Your pieces are more active: from b5 your knight can jump to d6, deep in Black's camp.",
+                "If Black trades on e3, take back with your queen. Even after the queens come off, Nd6 stays very strong.",
+                "Your rook on d1 owns the open d-file."
+            ]
+        },
+        {
+            "level": 16,
+            "type": "quiz",
+            "title": "Test: the 7...Nbd7 side lines",
+            "parts": [
+                {
+                    "line_id": "nbd7_dxe4",
+                    "from_ply": 18,
+                    "to_ply": 21
+                },
+                {
+                    "line_id": "nbd7_b5",
+                    "from_ply": 16,
+                    "to_ply": 19
+                },
+                {
+                    "line_id": "nbd7_re8",
+                    "from_ply": 16,
+                    "to_ply": 31
+                }
+            ],
             "question_type": "play_move",
             "show_explanations": false,
             "retry_mistakes": true,

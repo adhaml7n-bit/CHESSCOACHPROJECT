@@ -4,7 +4,7 @@ ChessCoach is a desktop chess trainer built with **Python**, **Flet**, **python-
 It teaches openings move by move, talks to you while you learn ("you", "your opponent"), tests you on what
 you learned, remembers the moves you get wrong, and includes a 2D board with **Stockfish** analysis.
 
-**Status:** Catalan opening page and Chapter 1 (Closed Catalan, 8 levels) playable · **Last updated:** 2026-11-17
+**Status:** Catalan opening page and Chapter 1 (Closed Catalan, 16 levels, about 40 planned) playable · **Last updated:** 2026-11-17
 
 ---
 
@@ -20,7 +20,7 @@ you learned, remembers the moves you get wrong, and includes a 2D board with **S
 | Mistakes in a quiz | ✅ Done | 1st mistake: a hint (or the piece to move is highlighted); 2nd: the correct move is shown and you play it |
 | Second chance | ✅ Done | Positions you missed come back at the end of a quiz, to check you understood |
 | Passing a level | ✅ Done | 85 % first-try accuracy opens the next level; one mistake is always allowed in a short quiz |
-| Chapter 1: Closed Catalan | ✅ Done | 8 levels on two branches (7...Nbd7 up to 14.Qe2, 7...b6 up to 13.b4), with your plan at the end of each line |
+| Chapter 1: Closed Catalan | 🚧 Growing | 16 levels so far: 7...Nbd7 up to 14.Qe2, the 7...b6 line to move 16, the e5 pawn structure and the 7...Nbd7 side lines, with your plan at the end of each line. About 40 levels will cover every Closed Catalan line of the source study |
 | Responsive board | ✅ Done | Board, panel and text grow with the window and the sidebar |
 | Piece pictures | ✅ Done | Merida pieces on every board (see Credits) |
 | Content import | ✅ Done | `pgn_import.py` turns a Lichess study (PGN) into a chapter file; every move is checked |
@@ -94,7 +94,7 @@ The database file `chesscoach.db` is created automatically on first launch and i
 ```powershell
 .venv\Scripts\python.exe -m unittest
 ```
-176 unit tests: database (47), levels, quizzes and reviews (68), study import (23), opening page data (6), board layout (9), piece pictures (6), review dates (2) and the engine (15, two of them with the real Stockfish when it is installed).
+178 unit tests: database (47), levels, quizzes and reviews (70), study import (23), opening page data (6), board layout (9), piece pictures (6), review dates (2) and the engine (15, two of them with the real Stockfish when it is installed).
 
 ---
 
@@ -113,7 +113,8 @@ The database file `chesscoach.db` is created automatically on first launch and i
 - Stockfish as a second opinion: good alternative moves are accepted without penalty, and an optional "Use engine" card follows each level.
 - Fixed: with several Stockfish downloads, the app could pick a build for another processor and silently run without the engine. It now tries every binary it finds, builds for another processor last.
 - Chapter format: a line can branch from another line, each move's explanation is written once for its position, and a level can cover several lines one after another (preparing the full Closed Catalan).
-- 138 new unit tests (176 in total).
+- Chapter 1 levels 9-16: the 7...b6 line to move 16, the e5 pawn structure (9...Nbd7, 13...a5, 9...Bb7) and the 7...Nbd7 side lines (9...dxe4, 8...b5, 8...Re8).
+- 140 new unit tests (178 in total).
 
 ### 2026-11-15 — Persistence & profiles
 - Added the SQLite database layer with 38 unit tests.
