@@ -4,7 +4,7 @@ ChessCoach is a desktop chess trainer built with **Python**, **Flet**, **python-
 It teaches openings move by move, talks to you while you learn ("you", "your opponent"), tests you on what
 you learned, remembers the moves you get wrong, and includes a 2D board with **Stockfish** analysis.
 
-**Status:** Catalan opening page and Chapter 1 (Closed Catalan, 20 levels, about 40 planned) playable · **Last updated:** 2026-11-17
+**Status:** Catalan opening page and Chapter 1 (Closed Catalan, 24 levels, about 40 planned) playable · **Last updated:** 2026-11-17
 
 ---
 
@@ -20,7 +20,7 @@ you learned, remembers the moves you get wrong, and includes a 2D board with **S
 | Mistakes in a quiz | ✅ Done | 1st mistake: a hint (or the piece to move is highlighted); 2nd: the correct move is shown and you play it |
 | Second chance | ✅ Done | Positions you missed come back at the end of a quiz, to check you understood |
 | Passing a level | ✅ Done | 85 % first-try accuracy opens the next level; one mistake is always allowed in a short quiz |
-| Chapter 1: Closed Catalan | 🚧 Growing | 20 levels so far: 7...Nbd7 up to 14.Qe2, the 7...b6 line to move 16, the e5 pawn structure, the 7...Nbd7 side lines, and Black's other 6th moves (6...b6, 6...Ne4 with ...f5), with your plan at the end of each line. About 40 levels will cover every Closed Catalan line of the source study |
+| Chapter 1: Closed Catalan | 🚧 Growing | 24 levels so far: 7...Nbd7 up to 14.Qe2, the 7...b6 line to move 16, the e5 pawn structure, the 7...Nbd7 side lines, Black's other 6th moves (6...b6, 6...Ne4 with ...f5) and the check 4...Bb4+ 5.Bd2 Be7, with your plan at the end of each line. About 40 levels will cover every Closed Catalan line of the source study |
 | Responsive board | ✅ Done | Board, panel and text grow with the window and the sidebar |
 | Piece pictures | ✅ Done | Merida pieces on every board (see Credits) |
 | Content import | ✅ Done | `pgn_import.py` turns a Lichess study (PGN) into a chapter file; every move is checked |
@@ -113,7 +113,7 @@ The database file `chesscoach.db` is created automatically on first launch and i
 - Stockfish as a second opinion: good alternative moves are accepted without penalty, and an optional "Use engine" card follows each level.
 - Fixed: with several Stockfish downloads, the app could pick a build for another processor and silently run without the engine. It now tries every binary it finds, builds for another processor last.
 - Chapter format: a line can branch from another line, each move's explanation is written once for its position, and a level can cover several lines one after another (preparing the full Closed Catalan).
-- Chapter 1 levels 9-16: the 7...b6 line to move 16, the e5 pawn structure (9...Nbd7, 13...a5, 9...Bb7) and the 7...Nbd7 side lines (9...dxe4, 8...b5, 8...Re8); levels 17-20: 6...b6 and 6...Ne4 with ...f5.
+- Chapter 1 levels 9-16: the 7...b6 line to move 16, the e5 pawn structure (9...Nbd7, 13...a5, 9...Bb7) and the 7...Nbd7 side lines (9...dxe4, 8...b5, 8...Re8); levels 17-20: 6...b6 and 6...Ne4 with ...f5; levels 21-24: 4...Bb4+ 5.Bd2 Be7 (9...Nbd7, 9...Bb7, 9...Ba6).
 - 140 new unit tests (178 in total).
 
 ### 2026-11-15 — Persistence & profiles
