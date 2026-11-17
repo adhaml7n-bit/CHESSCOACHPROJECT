@@ -87,6 +87,18 @@ def _validate_setup(setup) -> None:
             raise OpeningFormatError(f"setup square {name!r} is not a square like 'g2'.") from exc
 
 
+def chapters_by_id(opening_paths) -> dict:
+    """All ready chapters of the given opening files as {chapter_id: chapter}
+    (e.g. to find the lesson behind a position due for review). Broken or
+    coming-soon chapters are left out."""
+    chapters = {}
+    for path in opening_paths:
+        for item in load_hub_chapters(load_opening(path)):
+            if item["chapter"] is not None:
+                chapters[item["chapter"]["chapter_meta"]["chapter_id"]] = item["chapter"]
+    return chapters
+
+
 def load_hub_chapters(opening: dict) -> list[dict]:
     """Each chapter of a validated opening with its content loaded.
 

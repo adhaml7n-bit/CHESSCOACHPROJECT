@@ -21,6 +21,8 @@ from database import ChessCoachDB
 from level_trainer import (
     ChapterFormatError,
     LevelSession,
+    ReviewSession,
+    build_review_items,
     level_line_id,
     load_level_chapter,
     summarize_chapter,
@@ -483,6 +485,59 @@ class RealChapterQuizTests(unittest.TestCase):
             answer(self.session)
         result = self.session.submit_move("f1d1")
         self.assertEqual(result["hint"], self.chapter["lines"]["main"][14]["hint"])
+
+
+class ReviewTests(unittest.TestCase):
+    """The Daily review: database rows -> questions -> ReviewSession."""
+
+    def setUp(self):
+        self.chapter = load_level_chapter(REAL_CHAPTER_PATH)
+        self.chapters = {"catalan_ch01_v2": self.chapter}
+
+    def row(self, line_id, ply, chapter_id="catalan_ch01_v2", fen=None):
+        if fen is None:
+            fen = self.chapter["lines"][line_id][ply - 1]["fen_before"]
+        return {"chapter_id": chapter_id, "line_id": line_id, "ply": ply, "fen": fen}
+
+    def test_items_skip_changed_and_unknown_positions(self):
+        rows = [
+            self.row("main", 15),                                 # 8.Nbd2
+            self.row("main", 13),                                 # 7.Qc2 ...
+            self.row("line_2", 13),                               # ... the same position on the other branch
+            self.row("main", 14),                                 # Black's move: not a question
+            self.row("main", 15, chapter_id="catalan_ch01"),      # the old chapter file
+            self.row("main", 17, fen="8/8/8/8/8/8/8/8 w - - 0 1"),  # the lesson changed
+            self.row("line_9", 3, fen="x"),                       # unknown line
+            self.row("main", 99, fen="x"),                        # past the end of the line
+        ]
+        items = build_review_items(rows, self.chapters)
+        self.assertEqual([(item["line_id"], item["ply"]) for item in items], [("main", 15), ("main", 13)])
+        self.assertEqual(items[1]["keys"], [("main", 13), ("line_2", 13)])  # asked once, both rows updated
+        self.assertEqual(items[0]["previous"]["san"], "Nbd7")
+        self.assertEqual(items[0]["chapter_title"], self.chapter["chapter_meta"]["chapter_title"])
+
+    def test_review_session_uses_the_quiz_rules(self):
+        items = build_review_items([self.row("main", 15), self.row("main", 13)], self.chapters)
+        session = ReviewSession(items)
+        self.assertEqual((session.count, session.fen), (2, items[0]["step"]["fen_before"]))
+        result = session.submit_move("f1d1")  # 8.Rd1 instead of 8.Nbd2
+        self.assertEqual((result["action"], result["hint"], result["review_days"]),
+                         ("show_hint", items[0]["step"]["hint"], [1, 7]))
+        result = session.submit_move("b1c3")
+        self.assertEqual((result["action"], result["correct_san"], result["review_days"]),
+                         ("show_correct_move", "Nbd2", [1, 3, 7]))
+        self.assertEqual(session.submit_move("a1a5")["status"], "illegal")
+        self.assertFalse(session.submit_move("b1d2")["first_try"])
+        self.assertEqual(session.question_states(), ["shown", "current"])
+        self.assertTrue(session.submit_move("d1c2")["first_try"])  # 7.Qc2
+        self.assertTrue(session.is_complete)
+        self.assertEqual((session.question_states(), session.accuracy), (["shown", "ok"], 50.0))
+        self.assertEqual(session.submit_move("d1c2")["status"], "complete")
+
+    def test_nothing_to_review(self):
+        session = ReviewSession([])
+        self.assertTrue(session.is_complete)
+        self.assertEqual((session.fen, session.last_move), (chess.STARTING_FEN, None))
 
 
 class LevelSummaryTests(unittest.TestCase):

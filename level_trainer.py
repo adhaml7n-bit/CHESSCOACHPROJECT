@@ -60,6 +60,25 @@ def _parse_move(board: chess.Board, text: str) -> chess.Move | None:
         return None
 
 
+# Default mistake rules (DESIGN.md section 3): first the hint, then the correct
+# move; the review days are the position's plan after one or two mistakes.
+DEFAULT_MISTAKE_RULES = (
+    {"wrong_attempt": 1, "action": "show_hint", "review_days": [1, 7]},
+    {"wrong_attempt": 2, "action": "show_correct_move", "review_days": [1, 3, 7]},
+)
+
+
+def rule_for(rules, wrong_attempt: int) -> dict:
+    """The mistake rule for this wrong attempt; later attempts repeat the last rule."""
+    return rules[min(wrong_attempt, len(rules)) - 1]
+
+
+def mistake_state(rules, wrong: int) -> str:
+    """'shown' if the correct move was shown within `wrong` attempts, else 'hint'."""
+    shown = any(rule_for(rules, n)["action"] == "show_correct_move" for n in range(1, wrong + 1))
+    return "shown" if shown else "hint"
+
+
 # =====================================================================
 # 1. Loading & validation
 # =====================================================================
@@ -573,13 +592,10 @@ class LevelSession:
     # Helpers
     # -----------------------------------------------------------------
     def _rule_for(self, wrong_attempt: int) -> dict:
-        """The on_mistake rule for this attempt; later attempts repeat the last rule."""
-        rules = self.level["on_mistake"]
-        return rules[min(wrong_attempt, len(rules)) - 1]
+        return rule_for(self.level["on_mistake"], wrong_attempt)
 
     def _mistake_state(self, wrong: int) -> str:
-        shown = any(self._rule_for(n)["action"] == "show_correct_move" for n in range(1, wrong + 1))
-        return "shown" if shown else "hint"
+        return mistake_state(self.level["on_mistake"], wrong)
 
     def _play_opponent_moves(self) -> list[dict]:
         played = []
@@ -591,6 +607,160 @@ class LevelSession:
     def _require(self, kind: str) -> None:
         if self.kind != kind:
             raise RuntimeError(f"Level {self.level_number} is a {self.kind} level, not a {kind} level.")
+
+
+# =====================================================================
+# 4. Review sessions (Daily review)
+# =====================================================================
+
+def build_review_items(rows: list[dict], chapters: dict) -> list[dict]:
+    """Turns due database rows (ChessCoachDB.get_due_mistakes) into review questions.
+
+    chapters maps chapter_id -> a validated format-2 chapter. A row is skipped
+    when its chapter, line or position no longer matches the chapter file (the
+    lesson has changed) or when it is not the player's move. Rows for the same
+    position (lines share their first moves) become one question; its "keys"
+    list every (line_id, ply) so the screen can update all of them.
+    """
+    items, by_position = [], {}
+    for row in rows:
+        chapter = chapters.get(row["chapter_id"])
+        if chapter is None:
+            continue
+        line = chapter["lines"].get(row["line_id"])
+        ply = row["ply"]
+        if not line or not 1 <= ply <= len(line):
+            continue
+        step = line[ply - 1]
+        meta = chapter["chapter_meta"]
+        if step["fen_before"] != row["fen"] or step["turn"] != meta["player_color"]:
+            continue
+        position = (row["chapter_id"], row["fen"])
+        if position in by_position:
+            by_position[position]["keys"].append((row["line_id"], ply))
+            continue
+        item = {
+            "chapter_id": row["chapter_id"],
+            "chapter_title": meta["chapter_title"],
+            "player_color": meta["player_color"],
+            "line_id": row["line_id"],
+            "ply": ply,
+            "step": step,
+            "previous": line[ply - 2] if ply > 1 else None,
+            "keys": [(row["line_id"], ply)],
+        }
+        by_position[position] = item
+        items.append(item)
+    return items
+
+
+class ReviewSession:
+    """Plays the positions due for review one after another (the Daily review).
+
+    The rules are the quizzes': the hint first, then the correct move, which
+    the player then plays. Each incorrect result carries the review_days that
+    restart that position's plan.
+    """
+
+    def __init__(self, items: list[dict], rules=DEFAULT_MISTAKE_RULES):
+        self.items = items
+        self.rules = list(rules)
+        self.index = 0
+        self._wrong: dict[int, int] = {}  # item index -> wrong attempts
+        self.first_try_count = 0
+
+    @property
+    def count(self) -> int:
+        return len(self.items)
+
+    @property
+    def is_complete(self) -> bool:
+        return self.index >= len(self.items)
+
+    @property
+    def current(self) -> dict | None:
+        return None if self.is_complete else self.items[self.index]
+
+    @property
+    def answered_count(self) -> int:
+        return self.index
+
+    @property
+    def fen(self) -> str:
+        if self.current is not None:
+            return self.current["step"]["fen_before"]
+        return self.items[-1]["step"]["fen_after"] if self.items else chess.STARTING_FEN
+
+    @property
+    def last_move(self) -> dict | None:
+        """The move before the question (to highlight), or the last answer once finished."""
+        if self.current is not None:
+            return self.current["previous"]
+        return self.items[-1]["step"] if self.items else None
+
+    @property
+    def accuracy(self) -> float:
+        if not self.answered_count:
+            return 100.0
+        return round(100 * self.first_try_count / self.answered_count, 1)
+
+    def submit_move(self, move_text: str) -> dict:
+        """Checks the player's move; the result looks like LevelSession.submit_move's."""
+        item = self.current
+        if item is None:
+            return {"status": "complete", "fen": self.fen}
+        step = item["step"]
+        board = chess.Board(step["fen_before"])
+        move = _parse_move(board, move_text)
+        if move is None:
+            return {"status": "illegal", "fen": step["fen_before"],
+                    "message": f"{move_text!r} is not a legal move in this position."}
+
+        if move.uci() != step["uci"]:
+            wrong = self._wrong.get(self.index, 0) + 1
+            self._wrong[self.index] = wrong
+            rule = rule_for(self.rules, wrong)
+            reveal = rule["action"] == "show_correct_move"
+            return {
+                "status": "incorrect",
+                "item": item,
+                "ply": step["ply"],
+                "fen": step["fen_before"],
+                "played_san": board.san(move),
+                "played_uci": move.uci(),
+                "wrong_attempt": wrong,
+                "action": rule["action"],
+                "hint": step["hint"] if rule["action"] == "show_hint" else None,
+                "correct_san": step["san"] if reveal else None,
+                "correct_uci": step["uci"] if reveal else None,
+                "review_days": list(rule["review_days"]),
+            }
+
+        wrong = self._wrong.get(self.index, 0)
+        if wrong == 0:
+            self.first_try_count += 1
+        self.index += 1
+        return {
+            "status": "correct",
+            "item": item,
+            "ply": step["ply"],
+            "san": step["san"],
+            "uci": step["uci"],
+            "first_try": wrong == 0,
+            "wrong_attempts": wrong,
+            "is_complete": self.is_complete,
+        }
+
+    def question_states(self) -> list[str]:
+        """'ok', 'hint', 'shown', 'current' or 'pending' for each position."""
+        states = []
+        for number in range(len(self.items)):
+            if number < self.index:
+                wrong = self._wrong.get(number, 0)
+                states.append("ok" if wrong == 0 else mistake_state(self.rules, wrong))
+            else:
+                states.append("current" if number == self.index else "pending")
+        return states
 
 
 if __name__ == "__main__":

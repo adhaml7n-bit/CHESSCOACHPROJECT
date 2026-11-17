@@ -37,16 +37,12 @@ from pathlib import Path
 import chess
 import chess.pgn
 
-from level_trainer import FORMAT_VERSION, ChapterFormatError, validate_level_chapter
+from level_trainer import DEFAULT_MISTAKE_RULES, FORMAT_VERSION, ChapterFormatError, validate_level_chapter
 
 MAX_MOVE_NUMBER = 14  # owner's rule: a branch ends by move 14 at the latest
 DEFAULT_PASS_MARK = 85
 DEFAULT_ALLOWED_MISTAKES = 1  # owner's rule: one first-try mistake always passes a (short) quiz
 DEFAULT_OPENING_NAME = "Catalan Opening"
-DEFAULT_MISTAKE_RULES = (
-    {"wrong_attempt": 1, "action": "show_hint", "review_days": [1, 7]},
-    {"wrong_attempt": 2, "action": "show_correct_move", "review_days": [1, 3, 7]},
-)
 
 _COMMAND = re.compile(r"\[%[^\]]*\]")  # [%cal Gb1d2], [%csl Ge4], [%eval 0.3], [%clk 0:05:00]
 _HINT_MARKER = re.compile(r"(?:\bhint|تلميح)\s*:\s*", re.IGNORECASE)

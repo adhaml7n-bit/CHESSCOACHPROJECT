@@ -16,7 +16,7 @@ import unittest
 
 import chess
 
-from opening_hub import OpeningFormatError, load_hub_chapters, load_opening, validate_opening
+from opening_hub import OpeningFormatError, chapters_by_id, load_hub_chapters, load_opening, validate_opening
 
 PROJECT = os.path.dirname(os.path.abspath(__file__))
 REAL_OPENING_PATH = os.path.join(PROJECT, "catalan_opening.json")
@@ -51,6 +51,11 @@ class RealOpeningTests(unittest.TestCase):
         self.assertIsNone(items[0]["error"])
         self.assertEqual(items[0]["chapter"]["chapter_meta"]["chapter_id"], "catalan_ch01_v2")
         self.assertTrue(all(item["chapter"] is None and item["error"] is None for item in items[1:]))  # coming soon
+
+    def test_ready_chapters_by_id(self):
+        chapters = chapters_by_id([REAL_OPENING_PATH])
+        self.assertEqual(list(chapters), ["catalan_ch01_v2"])  # coming-soon chapters are left out
+        self.assertIn("main", chapters["catalan_ch01_v2"]["lines"])
 
 
 class ValidationTests(unittest.TestCase):
