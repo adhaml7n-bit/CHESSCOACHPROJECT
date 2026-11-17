@@ -2978,7 +2978,14 @@
                     "san": "Qb3",
                     "strategic_idea": "Your queen protects c4 and attacks the b4-bishop.",
                     "explanation": "Now the bishop needs protection.",
-                    "hint": "Protect c4 with your queen and attack the b4-bishop at the same time."
+                    "hint": "Protect c4 with your queen and attack the b4-bishop at the same time.",
+                    "purpose": {
+                        "answer": "Your queen protects c4 and attacks the b4-bishop.",
+                        "wrong": [
+                            "Your queen attacks the d5-pawn.",
+                            "Your queen protects your d4-pawn."
+                        ]
+                    }
                 },
                 {
                     "ply": 14,
@@ -2996,7 +3003,14 @@
                     "san": "dxc5",
                     "strategic_idea": "You take on c5.",
                     "explanation": "Black has to spend a move taking back.",
-                    "hint": "Take on c5 with your d-pawn."
+                    "hint": "Take on c5 with your d-pawn.",
+                    "purpose": {
+                        "answer": "You take on c5, and Black has to spend a move taking back.",
+                        "wrong": [
+                            "You win a pawn, because c5 can't be taken back.",
+                            "You give Black an isolated pawn on d5 at once."
+                        ]
+                    }
                 },
                 {
                     "ply": 16,
@@ -3014,7 +3028,14 @@
                     "san": "cxd5",
                     "strategic_idea": "You exchange on d5.",
                     "explanation": "After ...exd5, Black's d5-pawn will be isolated.",
-                    "hint": "Exchange your c-pawn on d5."
+                    "hint": "Exchange your c-pawn on d5.",
+                    "purpose": {
+                        "answer": "You exchange on d5, and after ...exd5 Black's d5-pawn is isolated.",
+                        "wrong": [
+                            "You win a pawn, because d5 can't be taken back.",
+                            "You open the long diagonal for your g2-bishop."
+                        ]
+                    }
                 },
                 {
                     "ply": 18,
@@ -3032,7 +3053,14 @@
                     "san": "O-O",
                     "strategic_idea": "You castle.",
                     "explanation": "Your king is safe, and next your pieces go after the isolated pawn.",
-                    "hint": "Get your king to safety."
+                    "hint": "Get your king to safety.",
+                    "purpose": {
+                        "answer": "Your king gets safe, and next your pieces go after the isolated pawn.",
+                        "wrong": [
+                            "You prepare to push your f-pawn to f4 and attack.",
+                            "Your rook comes to f1 to put pressure on the f7-pawn."
+                        ]
+                    }
                 }
             ]
         },
@@ -3056,7 +3084,14 @@
                     "san": "Nf3",
                     "strategic_idea": "You develop your king's knight.",
                     "explanation": "It protects d4 and your d2-bishop and gets you ready to castle.",
-                    "hint": "Develop your king's knight to its usual square."
+                    "hint": "Develop your king's knight to its usual square.",
+                    "purpose": {
+                        "answer": "Your knight develops, protects d4 and your d2-bishop, and prepares castling.",
+                        "wrong": [
+                            "Your knight protects your c4-pawn.",
+                            "Your knight protects your g3-pawn from the d6-bishop."
+                        ]
+                    }
                 },
                 {
                     "ply": 12,
@@ -3074,7 +3109,14 @@
                     "san": "Qc2",
                     "strategic_idea": "Your queen protects c4.",
                     "explanation": "From c2 it guards your c4-pawn and eyes the h7-pawn.",
-                    "hint": "Protect your c4-pawn with your queen."
+                    "hint": "Protect your c4-pawn with your queen.",
+                    "purpose": {
+                        "answer": "Your queen protects c4 and eyes the h7-pawn.",
+                        "wrong": [
+                            "Your queen protects your d4-pawn.",
+                            "You prepare b2-b4 and a pawn attack on the queenside."
+                        ]
+                    }
                 },
                 {
                     "ply": 14,
@@ -3092,7 +3134,14 @@
                     "san": "O-O",
                     "strategic_idea": "You castle.",
                     "explanation": "Your king is safe behind the g2-bishop.",
-                    "hint": "Get your king to safety."
+                    "hint": "Get your king to safety.",
+                    "purpose": {
+                        "answer": "Your king gets safe behind the g2-bishop, and your rook joins the game.",
+                        "wrong": [
+                            "You prepare to push your f-pawn to f4 and attack.",
+                            "Your rook comes to f1 to put pressure on the f7-pawn."
+                        ]
+                    }
                 },
                 {
                     "ply": 16,
@@ -3110,7 +3159,14 @@
                     "san": "Bg5",
                     "strategic_idea": "Your bishop pins the f6-knight.",
                     "explanation": "It leaves d2 and pins the knight against Black's queen on d8.",
-                    "hint": "Pin the f6-knight with your dark-squared bishop."
+                    "hint": "Pin the f6-knight with your dark-squared bishop.",
+                    "purpose": {
+                        "answer": "Your bishop leaves d2 and pins the f6-knight against Black's queen.",
+                        "wrong": [
+                            "Your bishop protects your d4-pawn.",
+                            "Your bishop attacks the d6-bishop."
+                        ]
+                    }
                 },
                 {
                     "ply": 18,
@@ -3128,7 +3184,14 @@
                     "san": "Bxf6",
                     "strategic_idea": "You take the f6-knight.",
                     "explanation": "It was the piece guarding e4, so your e2-e4 push gets easier.",
-                    "hint": "Take the f6-knight with your bishop."
+                    "hint": "Take the f6-knight with your bishop.",
+                    "purpose": {
+                        "answer": "You remove the knight that guarded e4, so your e2-e4 push gets easier.",
+                        "wrong": [
+                            "You come out a piece up after the exchange.",
+                            "You give Black doubled pawns."
+                        ]
+                    }
                 },
                 {
                     "ply": 20,
@@ -3146,7 +3209,14 @@
                     "san": "Nbd2",
                     "strategic_idea": "Your knight develops to d2.",
                     "explanation": "From d2 it protects c4 and supports the e2-e4 push.",
-                    "hint": "Develop your b1-knight to a square where it supports e4."
+                    "hint": "Develop your b1-knight to a square where it supports e4.",
+                    "purpose": {
+                        "answer": "Your knight develops to d2, protects c4 and supports e2-e4.",
+                        "wrong": [
+                            "Your knight protects your d4-pawn.",
+                            "Your knight attacks the f6-knight."
+                        ]
+                    }
                 },
                 {
                     "ply": 22,
@@ -3164,7 +3234,14 @@
                     "san": "e4",
                     "strategic_idea": "You break in the center.",
                     "explanation": "Your e-pawn attacks d5 and opens lines for your pieces.",
-                    "hint": "Push your e-pawn two squares."
+                    "hint": "Push your e-pawn two squares.",
+                    "purpose": {
+                        "answer": "You break in the center: your e-pawn attacks d5 and opens lines.",
+                        "wrong": [
+                            "Your e-pawn protects your d4-pawn.",
+                            "You stop Black from playing ...dxc4."
+                        ]
+                    }
                 },
                 {
                     "ply": 24,
@@ -3182,7 +3259,14 @@
                     "san": "e5",
                     "strategic_idea": "You push forward and chase the f6-knight.",
                     "explanation": "Your e5-pawn gains space, and the knight has to move.",
-                    "hint": "Push your e-pawn and attack the f6-knight."
+                    "hint": "Push your e-pawn and attack the f6-knight.",
+                    "purpose": {
+                        "answer": "You chase the f6-knight and gain space on the kingside.",
+                        "wrong": [
+                            "You win the f6-knight, which has no square left.",
+                            "You open the long diagonal for your g2-bishop."
+                        ]
+                    }
                 },
                 {
                     "ply": 26,
@@ -3200,7 +3284,14 @@
                     "san": "Rfc1",
                     "strategic_idea": "Your rook comes to c1.",
                     "explanation": "It stands behind your queen and gets ready for the c-file, which opens if the c-pawns are exchanged.",
-                    "hint": "Bring a rook to the c-file."
+                    "hint": "Bring a rook to the c-file.",
+                    "purpose": {
+                        "answer": "Your rook gets ready for the c-file, which opens if the c-pawns are exchanged.",
+                        "wrong": [
+                            "Your rook protects your d4-pawn.",
+                            "Your rook gets ready to swing to the kingside via c3."
+                        ]
+                    }
                 }
             ]
         },
@@ -3224,7 +3315,14 @@
                     "san": "Nbd2",
                     "strategic_idea": "Your knight develops to d2.",
                     "explanation": "It protects c4 and supports e2-e4, and your f3-knight is now protected three times.",
-                    "hint": "Develop your b1-knight to a square where it supports e4."
+                    "hint": "Develop your b1-knight to a square where it supports e4.",
+                    "purpose": {
+                        "answer": "Your knight develops, supports e2-e4, and your f3-knight is now protected three times.",
+                        "wrong": [
+                            "Your knight protects your d4-pawn.",
+                            "Your knight attacks Black's queen on f6."
+                        ]
+                    }
                 }
             ]
         },
@@ -3248,7 +3346,14 @@
                     "san": "Nf3",
                     "strategic_idea": "You develop your king's knight.",
                     "explanation": "It protects d4 and gets you ready to castle.",
-                    "hint": "Develop your king's knight to its usual square."
+                    "hint": "Develop your king's knight to its usual square.",
+                    "purpose": {
+                        "answer": "Your knight develops, protects d4 and prepares castling.",
+                        "wrong": [
+                            "Your knight protects your c4-pawn.",
+                            "Your knight heads for g5 to attack h7."
+                        ]
+                    }
                 },
                 {
                     "ply": 10,
@@ -3266,7 +3371,14 @@
                     "san": "O-O",
                     "strategic_idea": "You castle.",
                     "explanation": "Your king is safe behind the g2-bishop.",
-                    "hint": "Get your king to safety."
+                    "hint": "Get your king to safety.",
+                    "purpose": {
+                        "answer": "Your king gets safe behind the g2-bishop, and your rook joins the game.",
+                        "wrong": [
+                            "You prepare to push your f-pawn to f4 and attack.",
+                            "Your rook comes to f1 to put pressure on the f7-pawn."
+                        ]
+                    }
                 },
                 {
                     "ply": 12,
@@ -3284,7 +3396,14 @@
                     "san": "Nc3",
                     "strategic_idea": "Your queenside knight develops.",
                     "explanation": "It adds pressure on d5.",
-                    "hint": "Develop your queenside knight to its natural square."
+                    "hint": "Develop your queenside knight to its natural square.",
+                    "purpose": {
+                        "answer": "Your queenside knight develops and adds pressure on d5.",
+                        "wrong": [
+                            "Your knight protects your c4-pawn.",
+                            "You stop Black from playing ...e5."
+                        ]
+                    }
                 },
                 {
                     "ply": 14,
@@ -3302,7 +3421,14 @@
                     "san": "Nd2",
                     "strategic_idea": "Your f3-knight steps back to d2.",
                     "explanation": "It protects c4, supports e2-e4, and opens the long diagonal for your g2-bishop.",
-                    "hint": "Move your f3-knight to a square where it supports e2-e4."
+                    "hint": "Move your f3-knight to a square where it supports e2-e4.",
+                    "purpose": {
+                        "answer": "Your knight protects c4, supports e2-e4 and opens the long diagonal for your g2-bishop.",
+                        "wrong": [
+                            "Your knight protects your d4-pawn.",
+                            "You make room for your queen to come to f3."
+                        ]
+                    }
                 },
                 {
                     "ply": 16,
@@ -3320,7 +3446,14 @@
                     "san": "e4",
                     "strategic_idea": "You strike in the center first.",
                     "explanation": "Before Black can play ...e5, you attack d5.",
-                    "hint": "Push your e-pawn two squares."
+                    "hint": "Push your e-pawn two squares.",
+                    "purpose": {
+                        "answer": "You strike in the center before Black can play ...e5.",
+                        "wrong": [
+                            "Your e-pawn protects your d4-pawn.",
+                            "You stop Black from taking on c4."
+                        ]
+                    }
                 },
                 {
                     "ply": 18,
@@ -3338,7 +3471,14 @@
                     "san": "Ndxe4",
                     "strategic_idea": "You take back with your d2-knight.",
                     "explanation": "It attacks the d6-bishop and the f6-knight.",
-                    "hint": "Take back on e4 with a knight."
+                    "hint": "Take back on e4 with a knight.",
+                    "purpose": {
+                        "answer": "You take back with the d2-knight, which attacks the d6-bishop and the f6-knight.",
+                        "wrong": [
+                            "You come out a pawn up after the exchanges.",
+                            "Your knight protects your c4-pawn."
+                        ]
+                    }
                 },
                 {
                     "ply": 20,
@@ -3356,7 +3496,14 @@
                     "san": "Nxe4",
                     "strategic_idea": "Your other knight takes back.",
                     "explanation": "Now this knight attacks the d6-bishop.",
-                    "hint": "Take back on e4."
+                    "hint": "Take back on e4.",
+                    "purpose": {
+                        "answer": "Your other knight takes back and attacks the d6-bishop.",
+                        "wrong": [
+                            "You come out a piece up after the exchange.",
+                            "Your knight protects your c4-pawn."
+                        ]
+                    }
                 },
                 {
                     "ply": 22,
@@ -3389,7 +3536,14 @@
                     "san": "Nf3",
                     "strategic_idea": "You develop your king's knight.",
                     "explanation": "It protects d4 and gets you ready to castle.",
-                    "hint": "Develop your king's knight to its usual square."
+                    "hint": "Develop your king's knight to its usual square.",
+                    "purpose": {
+                        "answer": "Your knight develops, protects d4 and prepares castling.",
+                        "wrong": [
+                            "Your knight protects your c4-pawn.",
+                            "Your knight heads for g5 to attack h7."
+                        ]
+                    }
                 },
                 {
                     "ply": 10,
@@ -3407,7 +3561,14 @@
                     "san": "O-O",
                     "strategic_idea": "You castle.",
                     "explanation": "Your king is safe behind the g2-bishop.",
-                    "hint": "Get your king to safety."
+                    "hint": "Get your king to safety.",
+                    "purpose": {
+                        "answer": "Your king gets safe behind the g2-bishop, and your rook joins the game.",
+                        "wrong": [
+                            "You prepare to push your f-pawn to f4 and attack.",
+                            "Your rook comes to f1 to put pressure on the f7-pawn."
+                        ]
+                    }
                 },
                 {
                     "ply": 12,
@@ -3425,7 +3586,14 @@
                     "san": "Nc3",
                     "strategic_idea": "Your queenside knight develops.",
                     "explanation": "It adds pressure on d5.",
-                    "hint": "Develop your queenside knight to its natural square."
+                    "hint": "Develop your queenside knight to its natural square.",
+                    "purpose": {
+                        "answer": "Your queenside knight develops and adds pressure on d5.",
+                        "wrong": [
+                            "Your knight protects your c4-pawn.",
+                            "Your knight stops Black from playing ...Nc6."
+                        ]
+                    }
                 },
                 {
                     "ply": 14,
@@ -3443,7 +3611,14 @@
                     "san": "Ne5",
                     "strategic_idea": "Your knight jumps to e5.",
                     "explanation": "It attacks the c6-knight and protects c4, and with f3 free your g2-bishop now looks at d5.",
-                    "hint": "Put your f3-knight on a strong central square."
+                    "hint": "Put your f3-knight on a strong central square.",
+                    "purpose": {
+                        "answer": "Your knight attacks the c6-knight, protects c4 and opens the g2-bishop's view of d5.",
+                        "wrong": [
+                            "Your knight protects your d4-pawn.",
+                            "Your knight attacks the g7-bishop."
+                        ]
+                    }
                 },
                 {
                     "ply": 16,
@@ -3461,7 +3636,14 @@
                     "san": "Qd3",
                     "strategic_idea": "Your queen protects c4 and d4.",
                     "explanation": "From d3 it guards both pawns and eyes the g6-pawn.",
-                    "hint": "Bring your queen to a square where it protects both c4 and d4."
+                    "hint": "Bring your queen to a square where it protects both c4 and d4.",
+                    "purpose": {
+                        "answer": "Your queen protects both c4 and d4 and eyes the g6-pawn.",
+                        "wrong": [
+                            "Your queen attacks the d5-pawn.",
+                            "Your queen protects your e5-knight."
+                        ]
+                    }
                 },
                 {
                     "ply": 18,
@@ -3494,7 +3676,14 @@
                     "san": "dxe5",
                     "strategic_idea": "You take back with the d-pawn.",
                     "explanation": "Your new e5-pawn attacks the f6-knight.",
-                    "hint": "Take back on e5 with a pawn."
+                    "hint": "Take back on e5 with a pawn.",
+                    "purpose": {
+                        "answer": "You take back with the d-pawn, which now attacks the f6-knight.",
+                        "wrong": [
+                            "You come out a piece up after the exchange.",
+                            "You stop Black from playing ...Nd7."
+                        ]
+                    }
                 },
                 {
                     "ply": 18,
@@ -3512,7 +3701,14 @@
                     "san": "f4",
                     "strategic_idea": "You protect the e5-pawn with the f-pawn.",
                     "explanation": "Your pawns on e5 and f4 take space on the kingside and keep Black's g7-bishop blocked.",
-                    "hint": "Protect your e5-pawn with a pawn."
+                    "hint": "Protect your e5-pawn with a pawn.",
+                    "purpose": {
+                        "answer": "You protect your e5-pawn, gain space and keep the g7-bishop blocked.",
+                        "wrong": [
+                            "You open the f-file for your rook.",
+                            "Your f-pawn protects your g3-pawn."
+                        ]
+                    }
                 }
             ]
         },
@@ -3536,7 +3732,14 @@
                     "san": "Nf3",
                     "strategic_idea": "You develop your king's knight.",
                     "explanation": "It protects d4 and gets you ready to castle.",
-                    "hint": "Develop your king's knight to its usual square."
+                    "hint": "Develop your king's knight to its usual square.",
+                    "purpose": {
+                        "answer": "Your knight develops, protects d4 and prepares castling.",
+                        "wrong": [
+                            "Your knight protects your c4-pawn.",
+                            "Your knight attacks the e4-knight."
+                        ]
+                    }
                 },
                 {
                     "ply": 10,
@@ -3554,7 +3757,14 @@
                     "san": "Nbd2",
                     "strategic_idea": "You block with your queenside knight.",
                     "explanation": "It attacks the e4-knight and protects your c4-pawn. Until you castle, it is pinned to your king.",
-                    "hint": "Block the check with your queenside knight."
+                    "hint": "Block the check with your queenside knight.",
+                    "purpose": {
+                        "answer": "You block the check with your queenside knight, which attacks e4 and protects c4.",
+                        "wrong": [
+                            "You block the check and keep your knight free to move.",
+                            "Your knight protects your d4-pawn."
+                        ]
+                    }
                 },
                 {
                     "ply": 12,
@@ -3572,7 +3782,14 @@
                     "san": "O-O",
                     "strategic_idea": "You castle.",
                     "explanation": "Your king is safe, and your d2-knight is no longer pinned.",
-                    "hint": "Get your king to safety."
+                    "hint": "Get your king to safety.",
+                    "purpose": {
+                        "answer": "Your king gets safe, and your d2-knight is no longer pinned.",
+                        "wrong": [
+                            "You prepare to push your f-pawn to f4 and attack.",
+                            "Your rook comes to f1 to put pressure on the f7-pawn."
+                        ]
+                    }
                 },
                 {
                     "ply": 14,
@@ -3590,7 +3807,14 @@
                     "san": "e3",
                     "strategic_idea": "You protect d4 with your e-pawn.",
                     "explanation": "Now d4 is protected twice, by your e3-pawn and your f3-knight.",
-                    "hint": "Protect your d4-pawn with a pawn."
+                    "hint": "Protect your d4-pawn with a pawn.",
+                    "purpose": {
+                        "answer": "You protect d4 a second time with your e-pawn.",
+                        "wrong": [
+                            "Your e-pawn attacks the e4-knight.",
+                            "You open the long diagonal for your g2-bishop."
+                        ]
+                    }
                 },
                 {
                     "ply": 16,
@@ -3608,7 +3832,14 @@
                     "san": "Bxd2",
                     "strategic_idea": "You take back with your bishop.",
                     "explanation": "It now challenges the b4-bishop.",
-                    "hint": "Take back on d2 with your bishop."
+                    "hint": "Take back on d2 with your bishop.",
+                    "purpose": {
+                        "answer": "You take back with your bishop, which now challenges the b4-bishop.",
+                        "wrong": [
+                            "You come out a piece up after the exchange.",
+                            "Your bishop protects your c4-pawn."
+                        ]
+                    }
                 },
                 {
                     "ply": 18,
@@ -3626,7 +3857,14 @@
                     "san": "Qxd2",
                     "strategic_idea": "You take back with your queen.",
                     "explanation": "It protects d4 and e3. Your c4-pawn is not protected now, but you can win it back.",
-                    "hint": "Take back on d2 with your queen."
+                    "hint": "Take back on d2 with your queen.",
+                    "purpose": {
+                        "answer": "You take back with the queen, which protects d4 and e3.",
+                        "wrong": [
+                            "Your queen protects your c4-pawn.",
+                            "You come out a piece up after the exchange."
+                        ]
+                    }
                 },
                 {
                     "ply": 20,
@@ -3644,7 +3882,14 @@
                     "san": "Qc3",
                     "strategic_idea": "Your queen attacks the c4-pawn.",
                     "explanation": "Nothing protects it, so Black can't hold it for long.",
-                    "hint": "Attack the c4-pawn with your queen."
+                    "hint": "Attack the c4-pawn with your queen.",
+                    "purpose": {
+                        "answer": "Your queen attacks the c4-pawn, which nothing protects.",
+                        "wrong": [
+                            "Your queen attacks Black's king along the long diagonal.",
+                            "Your queen attacks the c6-knight."
+                        ]
+                    }
                 }
             ]
         }

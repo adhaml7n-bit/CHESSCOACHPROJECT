@@ -109,7 +109,7 @@ The database file `chesscoach.db` is created automatically on first launch and i
 - Pieces are now Merida pictures on every board (the black pawn no longer shows as an emoji on Windows).
 - Review schedule: missed positions come back tomorrow and on day 7 (days 1, 3 and 7 after two mistakes); database schema version 2 (existing progress is kept).
 - Daily review screen behind the homepage's "Daily Revised" card.
-- "Why this move?": on the last review of a position, a multiple-choice question about the move's purpose (every White move of levels 1-8 has one; the newer levels follow).
+- "Why this move?": on the last review of a position, a multiple-choice question about the move's purpose (all 141 White moves of chapter 1 have one).
 - Stockfish as a second opinion: good alternative moves are accepted without penalty, and an optional "Use engine" card follows each level.
 - Fixed: with several Stockfish downloads, the app could pick a build for another processor and silently run without the engine. It now tries every binary it finds, builds for another processor last.
 - Chapter format: a line can branch from another line, each move's explanation is written once for its position, and a level can cover several lines one after another (preparing the full Closed Catalan).

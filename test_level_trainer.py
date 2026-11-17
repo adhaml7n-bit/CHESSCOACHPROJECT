@@ -159,10 +159,10 @@ class ValidationTests(unittest.TestCase):
         main, line_2 = chapter["lines"]["main"], chapter["lines"]["line_2"]
         self.assertIs(line_2[4]["purpose"], main[4]["purpose"])          # 3.g3: written once, on main
         self.assertNotEqual(line_2[14]["purpose"], main[14]["purpose"])  # 8.Nbd2 in two different positions
-        steps = main + line_2  # the two first lines; the questions for the other lines come in batches
-        self.assertTrue(all(step["purpose"] for step in steps if step["turn"] == "white"))
-        self.assertTrue(all(step["purpose"] is None for line in chapter["lines"].values() for step in line
-                            if step["turn"] == "black"))
+        steps = [step for line in chapter["lines"].values() for step in line]  # all 28 lines
+        missing = [f"{step['move_number']}.{step['san']}" for step in steps if step["turn"] == "white" and not step["purpose"]]
+        self.assertEqual(missing, [])  # every White move has its day-7 question
+        self.assertTrue(all(step["purpose"] is None for step in steps if step["turn"] == "black"))
 
     def test_every_level_of_the_real_chapter_can_be_finished(self):
         chapter = load_level_chapter(REAL_CHAPTER_PATH)
