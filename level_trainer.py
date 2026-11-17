@@ -169,6 +169,10 @@ def _validate_level(level, number: int, lines: dict, player_color: str) -> None:
             f"{where}: need 1 <= from_ply <= to_ply <= {len(line)}, got from_ply={first!r}, to_ply={last!r}."
         )
 
+    ideas = level.get("key_ideas", [])
+    if not isinstance(ideas, list) or not all(isinstance(idea, str) and idea.strip() for idea in ideas):
+        raise ChapterFormatError(f"{where}: 'key_ideas' must be a list of short texts.")
+
     if level["type"] == "quiz":
         _validate_quiz(level, where, line[first - 1:last], player_color)
 

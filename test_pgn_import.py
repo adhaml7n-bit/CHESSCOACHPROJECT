@@ -184,7 +184,8 @@ class PilotTest(unittest.TestCase):
         chapter, warnings = pgn_to_chapter(pgn, "catalan_ch01_pilot")
         existing = load_level_chapter(REAL_CHAPTER_PATH)
         self.assertEqual(warnings, [])
-        self.assertEqual(sans(chapter["lines"]["main"]), sans(existing["lines"]["main"]))
+        imported = sans(chapter["lines"]["main"])
+        self.assertEqual(imported, sans(existing["lines"]["main"])[:len(imported)])  # the real line may go further
         # Levels 1-3 match; the real level 4 was set by hand to test everything (plies 1-21).
         self.assertEqual(ranges(chapter["levels"])[:3], ranges(existing["levels"])[:3])
         self.assertEqual(ranges(chapter["levels"])[3], (4, "quiz", "main", 18, 21))

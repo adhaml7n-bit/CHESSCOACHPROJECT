@@ -196,8 +196,62 @@
                 "turn": "white",
                 "san": "Rd1",
                 "strategic_idea": "You put your rook behind your d-pawn.",
-                "explanation": "The rook supports your d4-pawn and stands opposite the queen on d8. If Black plays ...c5, you are ready to answer with d4-d5 or to open the d-file.",
+                "explanation": "The rook supports your d4-pawn and stands opposite the queen on d8. If Black plays ...c5, you are ready to answer with e4-e5 and gain space.",
                 "hint": "Bring a rook behind your d-pawn."
+            },
+            {
+                "ply": 22,
+                "move_number": 11,
+                "turn": "black",
+                "san": "c5",
+                "strategic_idea": "Your opponent strikes back in the center.",
+                "explanation": "This is Black's freeing break: it attacks your d4-pawn and wants to open the long diagonal for the b7-bishop.",
+                "hint": null
+            },
+            {
+                "ply": 23,
+                "move_number": 12,
+                "turn": "white",
+                "san": "e5",
+                "strategic_idea": "You push forward and gain space.",
+                "explanation": "Your e-pawn chases the f6-knight away from Black's kingside and takes control of d6. Black's b7-bishop now looks at your f3-knight, but your g2-bishop guards it.",
+                "hint": "Push a pawn and chase the f6-knight."
+            },
+            {
+                "ply": 24,
+                "move_number": 12,
+                "turn": "black",
+                "san": "Nd5",
+                "strategic_idea": "Your opponent's knight jumps to a strong central square.",
+                "explanation": "On d5 the knight blocks your d-pawn, and none of your pawns can attack it there.",
+                "hint": null
+            },
+            {
+                "ply": 25,
+                "move_number": 13,
+                "turn": "white",
+                "san": "Nd6",
+                "strategic_idea": "You plant your knight on d6.",
+                "explanation": "Supported by your e5-pawn, the knight sits deep in your opponent's camp and gets in the way of Black's queen and rooks.",
+                "hint": "Jump into the square your e5-pawn controls."
+            },
+            {
+                "ply": 26,
+                "move_number": 13,
+                "turn": "black",
+                "san": "Nb4",
+                "strategic_idea": "Your opponent attacks your queen.",
+                "explanation": "The knight hits your queen on c2 and eyes the c2 and d3 squares, so you have to move the queen.",
+                "hint": null
+            },
+            {
+                "ply": 27,
+                "move_number": 14,
+                "turn": "white",
+                "san": "Qe2",
+                "strategic_idea": "You keep your queen active and safe.",
+                "explanation": "On e2 your queen is out of the knight's reach and still watches the center. If Black takes your knight with ...Bxd6, you recapture with exd6 and keep an advanced pawn in Black's camp.",
+                "hint": "Move your queen to a safe square on the e-file."
             }
         ]
     },
@@ -262,6 +316,21 @@
                     "action": "show_correct_move",
                     "review_days": [1, 3, 7]
                 }
+            ]
+        },
+        {
+            "level": 5,
+            "type": "learn",
+            "title": "Your opponent breaks with ...c5",
+            "line_id": "main",
+            "from_ply": 22,
+            "to_ply": 27,
+            "intro": "Your opponent finally plays the freeing ...c5. You answer by gaining space with e5 and planting a knight on d6.",
+            "key_ideas": [
+                "Your knight on d6 is a thorn in Black's position. If Black takes it with ...Bxd6, recapture with exd6: the pawn on d6 keeps cramping Black.",
+                "Bring out your last pieces: your c1-bishop goes to f4 or g5, often after b3.",
+                "If Black exchanges on d4 (...cxd4), take back with a piece (Nxd4 or Rxd4) and keep control of the center.",
+                "When the c-file opens, bring your other rook to c1."
             ]
         }
     ]

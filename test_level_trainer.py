@@ -170,6 +170,8 @@ class ValidationTests(unittest.TestCase):
             "day zero": set_rule(0, review_days=[0, 7]),
             "no days": set_rule(0, review_days=[]),
             "no levels": lambda d: d.update(levels=[]),
+            "key ideas not a list": set_level(0, key_ideas="Play e4."),
+            "empty key idea": set_level(0, key_ideas=["Play e4.", " "]),
         }
         for name, mutate in cases.items():
             with self.subTest(name):

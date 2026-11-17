@@ -513,12 +513,24 @@ class LevelTrainerView:
             if step["explanation"]:
                 body.append(self._text(step["explanation"], color=t["fg_secondary"]))
             body.append(self._move_list(step["ply"]))
+            if session.is_complete:  # the end of the line: how to play on
+                body.extend(self._key_ideas())
         body.append(ft.Row(spacing=8, controls=[
             self._button("← Back", lambda e: self._learn_back()),
             self._button("Finish level ✓" if session.is_complete else "Next →", lambda e: self._learn_next(),
                          primary=True),
         ]))
         return body
+
+    def _key_ideas(self) -> list:
+        """The level's short 'how to play on' messages (key_ideas in the JSON), if any."""
+        ideas = self.session.level.get("key_ideas") or []
+        if not ideas:
+            return []
+        t = self.theme
+        return [self._text("Your plan from here", size=14, color=t["accent"], bold=True)] + [
+            self._text(f"• {idea}", color=t["fg_primary"]) for idea in ideas
+        ]
 
     def _move_list(self, upto_ply: int) -> ft.Row:
         """The line up to the current move: earlier levels muted, the current move highlighted."""
@@ -608,6 +620,7 @@ class LevelTrainerView:
                 ]))
         else:
             body.append(self._text("You've seen every move of this level.", color=t["fg_secondary"]))
+            body.extend(self._key_ideas())
 
         buttons = []
         if next_level and next_level["unlocked"]:
