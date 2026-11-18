@@ -2869,6 +2869,370 @@
                     "purpose": null
                 }
             ]
+        },
+        "b5_nfd7": {
+            "from_line": "b5",
+            "after_ply": 19,
+            "moves": [
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "Nfd7",
+                    "strategic_idea": "Your opponent's knight challenges your e5-knight.",
+                    "explanation": "Black offers a knight trade on e5. Your d4-pawn protects your knight.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "Nxd7",
+                    "strategic_idea": "You trade knights on d7.",
+                    "explanation": "Black takes back, best with the b8-knight.",
+                    "hint": "Take the d7-knight.",
+                    "purpose": null
+                },
+                {
+                    "ply": 22,
+                    "move_number": 11,
+                    "turn": "black",
+                    "san": "Nxd7",
+                    "strategic_idea": "Your opponent takes back with the b8-knight.",
+                    "explanation": "The knight develops with the capture. Black is still a pawn up.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 23,
+                    "move_number": 12,
+                    "turn": "white",
+                    "san": "axb5",
+                    "strategic_idea": "You take the b5-pawn.",
+                    "explanation": "Your b5-pawn attacks c6. After 12...cxb5 your a1-rook gets the half-open a-file and hits the a7-pawn.",
+                    "hint": "Take the b5-pawn with your a-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 24,
+                    "move_number": 12,
+                    "turn": "black",
+                    "san": "cxb5",
+                    "strategic_idea": "Your opponent takes back with the c-pawn.",
+                    "explanation": "Now the b5-pawn protects the c4-pawn, which your b3-pawn attacks.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 25,
+                    "move_number": 13,
+                    "turn": "white",
+                    "san": "bxc4",
+                    "strategic_idea": "You take the c4-pawn.",
+                    "explanation": "After 13...bxc4 Black has no pawn left on the b- or d-file, so the c4-pawn can only be protected by pieces.",
+                    "hint": "Take the c4-pawn with your b-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 26,
+                    "move_number": 13,
+                    "turn": "black",
+                    "san": "bxc4",
+                    "strategic_idea": "Your opponent takes back with the b-pawn.",
+                    "explanation": "Black is still a pawn up, but the c4-pawn is isolated and has no defender.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 27,
+                    "move_number": 14,
+                    "turn": "white",
+                    "san": "Na3",
+                    "strategic_idea": "Your knight attacks the c4-pawn.",
+                    "explanation": "Your knight develops to the edge and attacks the c4-pawn, which has no defender.",
+                    "hint": "Develop your b1-knight to the edge, where it attacks the c4-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 28,
+                    "move_number": 14,
+                    "turn": "black",
+                    "san": "Rc8",
+                    "strategic_idea": "Your opponent's rook protects the c4-pawn.",
+                    "explanation": "From c8 the rook guards c4 down the c-file.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 29,
+                    "move_number": 15,
+                    "turn": "white",
+                    "san": "Rb1",
+                    "strategic_idea": "Your rook takes the b-file and attacks the b7-bishop.",
+                    "explanation": "The bishop has no defender.",
+                    "hint": "Bring your a1-rook to the open b-file, against the b7-bishop.",
+                    "purpose": null
+                },
+                {
+                    "ply": 30,
+                    "move_number": 15,
+                    "turn": "black",
+                    "san": "Ba8",
+                    "strategic_idea": "Your opponent's bishop steps back to a8.",
+                    "explanation": "There your rook doesn't attack it, and it still aims at your e4-pawn, which your g2-bishop protects.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 31,
+                    "move_number": 16,
+                    "turn": "white",
+                    "san": "Qa4",
+                    "strategic_idea": "Your queen attacks the c4-pawn and pins the d7-knight.",
+                    "explanation": "Now your queen and your a3-knight both attack c4, and only the c8-rook protects it. The d7-knight can't move, because it shields Black's king.",
+                    "hint": "Bring your queen to the square where it attacks the c4-pawn and pins the d7-knight.",
+                    "purpose": null
+                }
+            ]
+        },
+        "b5_c3": {
+            "from_line": "b5_nfd7",
+            "after_ply": 27,
+            "moves": [
+                {
+                    "ply": 28,
+                    "move_number": 14,
+                    "turn": "black",
+                    "san": "c3",
+                    "strategic_idea": "Your opponent pushes the c-pawn to c3.",
+                    "explanation": "The pawn escapes from your knight. It is a passed pawn, but nothing protects it.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 29,
+                    "move_number": 15,
+                    "turn": "white",
+                    "san": "Qb3",
+                    "strategic_idea": "Your queen attacks the c3-pawn and the b7-bishop.",
+                    "explanation": "Neither of them has a defender.",
+                    "hint": "Bring your queen to the square where it attacks the c3-pawn and the b7-bishop.",
+                    "purpose": null
+                },
+                {
+                    "ply": 30,
+                    "move_number": 15,
+                    "turn": "black",
+                    "san": "Ba6",
+                    "strategic_idea": "Your opponent's bishop attacks your f1-rook.",
+                    "explanation": "If you take the c3-pawn now, the bishop takes your rook: 16.Qxc3? Bxf1.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 31,
+                    "move_number": 16,
+                    "turn": "white",
+                    "san": "Nb5",
+                    "strategic_idea": "Your knight blocks the bishop's attack on your rook.",
+                    "explanation": "On b5 your queen protects the knight, and it attacks the c3- and a7-pawns.",
+                    "hint": "Block the bishop's attack on your rook with your knight, on a square where it also attacks the c3-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 32,
+                    "move_number": 16,
+                    "turn": "black",
+                    "san": "Bxb5",
+                    "strategic_idea": "Your opponent takes your knight.",
+                    "explanation": "Now the b5-bishop attacks your f1-rook, so you take it back at once.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 33,
+                    "move_number": 17,
+                    "turn": "white",
+                    "san": "Qxb5",
+                    "strategic_idea": "You take back with your queen.",
+                    "explanation": "Your queen pins the d7-knight to Black's king. Black is a pawn up, but the c3-pawn has no defender.",
+                    "hint": "Take back on b5 with your queen.",
+                    "purpose": null
+                }
+            ]
+        },
+        "b5_nbd7": {
+            "from_line": "b5",
+            "after_ply": 19,
+            "moves": [
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "Nbd7",
+                    "strategic_idea": "Your opponent's other knight challenges your e5-knight.",
+                    "explanation": "This time the b8-knight comes to d7, and the f6-knight still attacks your e4-pawn, which your g2-bishop protects.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "bxc4",
+                    "strategic_idea": "You take the c4-pawn.",
+                    "explanation": "Material is level again, and your c4-pawn attacks b5. If Black takes on e5, you take back with the d-pawn.",
+                    "hint": "Take the c4-pawn with your b-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 22,
+                    "move_number": 11,
+                    "turn": "black",
+                    "san": "Nxe5",
+                    "strategic_idea": "Your opponent takes your e5-knight.",
+                    "explanation": "The knight on e5 also attacks your c4-pawn.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 23,
+                    "move_number": 12,
+                    "turn": "white",
+                    "san": "dxe5",
+                    "strategic_idea": "You take back with the d-pawn and attack the f6-knight.",
+                    "explanation": "With your d-pawn gone, the queens face each other on the open d-file, and Black can trade them.",
+                    "hint": "Take back on e5 with your d-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 24,
+                    "move_number": 12,
+                    "turn": "black",
+                    "san": "Qxd1",
+                    "strategic_idea": "Your opponent trades queens.",
+                    "explanation": "You take back with your rook.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 25,
+                    "move_number": 13,
+                    "turn": "white",
+                    "san": "Rxd1",
+                    "strategic_idea": "You take back with your rook.",
+                    "explanation": "Your rook takes the open d-file, and your e5-pawn still attacks the f6-knight.",
+                    "hint": "Take back the queen with your rook.",
+                    "purpose": null
+                },
+                {
+                    "ply": 26,
+                    "move_number": 13,
+                    "turn": "black",
+                    "san": "Ng4",
+                    "strategic_idea": "Your opponent's knight jumps to g4 and attacks your e5-pawn.",
+                    "explanation": "Nothing protects your e5-pawn. The knight also hits your f2- and h2-pawns, which your king protects.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 27,
+                    "move_number": 14,
+                    "turn": "white",
+                    "san": "h3",
+                    "strategic_idea": "You attack the g4-knight with your h-pawn.",
+                    "explanation": "The knight takes your e5-pawn, but you win the pawn back on the queenside.",
+                    "hint": "Attack the g4-knight with your h-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 28,
+                    "move_number": 14,
+                    "turn": "black",
+                    "san": "Nxe5",
+                    "strategic_idea": "Your opponent's knight takes your e5-pawn.",
+                    "explanation": "Black is a pawn up for the moment, and the knight attacks your c4-pawn.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 29,
+                    "move_number": 15,
+                    "turn": "white",
+                    "san": "cxb5",
+                    "strategic_idea": "You take the b5-pawn with your c-pawn.",
+                    "explanation": "Your c4-pawn escapes from the e5-knight. After 15...cxb5 16.axb5 you have won the pawn back.",
+                    "hint": "Take the b5-pawn with your c-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 30,
+                    "move_number": 15,
+                    "turn": "black",
+                    "san": "cxb5",
+                    "strategic_idea": "Your opponent takes back with the c-pawn.",
+                    "explanation": "The b5-pawn attacks your a4-pawn, which your a1-rook protects, but nothing protects the b5-pawn.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 31,
+                    "move_number": 16,
+                    "turn": "white",
+                    "san": "axb5",
+                    "strategic_idea": "You take the b5-pawn.",
+                    "explanation": "Material is level again. On the queenside only your b5-pawn and Black's a7-pawn are left.",
+                    "hint": "Take the b5-pawn with your a-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 32,
+                    "move_number": 16,
+                    "turn": "black",
+                    "san": "a6",
+                    "strategic_idea": "Your opponent attacks your b5-pawn.",
+                    "explanation": "The a6-pawn hits b5, which nothing protects.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 33,
+                    "move_number": 17,
+                    "turn": "white",
+                    "san": "Bf1",
+                    "strategic_idea": "Your bishop protects the b5-pawn.",
+                    "explanation": "If Black takes on b5, your bishop takes back with check. Your e4-pawn has no defender now, but 17...Bxe4 lets you develop with tempo with Nc3 or Nd2.",
+                    "hint": "Protect your b5-pawn with your g2-bishop.",
+                    "purpose": null
+                }
+            ]
+        },
+        "b5_bb4": {
+            "from_line": "b5",
+            "after_ply": 13,
+            "moves": [
+                {
+                    "ply": 14,
+                    "move_number": 7,
+                    "turn": "black",
+                    "san": "Bb4+",
+                    "strategic_idea": "Your opponent gives a check with the bishop.",
+                    "explanation": "Black develops the bishop with check. The c6-pawn is still attacked by your e5-knight and your g2-bishop.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 15,
+                    "move_number": 8,
+                    "turn": "white",
+                    "san": "Nc3",
+                    "strategic_idea": "You block the check with your knight.",
+                    "explanation": "The knight is pinned to your king for now, but it attacks the b5-pawn.",
+                    "hint": "Block the check with your knight, so that it also attacks the b5-pawn.",
+                    "purpose": null
+                }
+            ]
         }
     },
     "levels": [
@@ -3604,6 +3968,120 @@
                     "line_id": "b5_bd6",
                     "from_ply": 26,
                     "to_ply": 33
+                }
+            ],
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 32,
+            "type": "learn",
+            "title": "10...Nfd7: the isolated c4-pawn",
+            "parts": [
+                {
+                    "line_id": "b5_nfd7",
+                    "from_ply": 20,
+                    "to_ply": 31,
+                    "intro": "First, 10...Nfd7 with 14...Rc8."
+                },
+                {
+                    "line_id": "b5_c3",
+                    "from_ply": 28,
+                    "to_ply": 33,
+                    "intro": "Black can also push the c-pawn: 14...c3."
+                }
+            ],
+            "intro": "After 10.b3 your opponent can also challenge your e5-knight with 10...Nfd7. You trade knights, open the queenside, and then go after Black's isolated c-pawn.",
+            "key_ideas": [
+                "After 13...bxc4 Black is a pawn up, but the c4-pawn is isolated: attack it with Na3 and Qa4, and use Rb1 against the b7-bishop.",
+                "Your queen on a4 or b5 pins the d7-knight to Black's king.",
+                "Against 14...c3, don't grab the pawn at once: 16.Qxc3? Bxf1. First block the bishop with Nb5."
+            ]
+        },
+        {
+            "level": 33,
+            "type": "quiz",
+            "title": "Test: 10...Nfd7",
+            "parts": [
+                {
+                    "line_id": "b5_nfd7",
+                    "from_ply": 20,
+                    "to_ply": 31
+                },
+                {
+                    "line_id": "b5_c3",
+                    "from_ply": 28,
+                    "to_ply": 33
+                }
+            ],
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 34,
+            "type": "learn",
+            "title": "10...Nbd7 and 7...Bb4+",
+            "parts": [
+                {
+                    "line_id": "b5_nbd7",
+                    "from_ply": 20,
+                    "to_ply": 33,
+                    "intro": "First, 10...Nbd7: Black trades queens."
+                },
+                {
+                    "line_id": "b5_bb4",
+                    "from_ply": 14,
+                    "to_ply": 15,
+                    "intro": "Last, an earlier try: 7...Bb4+."
+                }
+            ],
+            "intro": "Against 10...Nbd7 Black can trade queens early, and you win back your pawns on the queenside. Against the check 7...Bb4+, you block with your knight.",
+            "key_ideas": [
+                "Against 10...Nbd7, take on c4 first. After 11...Nxe5 12.dxe5, Black's best is to trade queens.",
+                "In the endgame, win the pawn back with cxb5 and axb5, and protect your b5-pawn with Bf1.",
+                "Against 7...Bb4+, block with Nc3, which also attacks the b5-pawn."
+            ]
+        },
+        {
+            "level": 35,
+            "type": "quiz",
+            "title": "Test: 10...Nbd7 and 7...Bb4+",
+            "parts": [
+                {
+                    "line_id": "b5_nbd7",
+                    "from_ply": 20,
+                    "to_ply": 33
+                },
+                {
+                    "line_id": "b5_bb4",
+                    "from_ply": 14,
+                    "to_ply": 15
                 }
             ],
             "question_type": "play_move",
