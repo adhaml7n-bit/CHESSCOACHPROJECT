@@ -33,7 +33,7 @@ you learned, remembers the moves you get wrong, and includes a 2D board with **S
 | Daily review | ✅ Done | The "Daily Revised" card shows how many positions are due and drills them, with the next review date after each answer |
 | "Why this move?" | ✅ Done | On a position's last review (day 7) you also pick the move's purpose from three answers; it is mastered only when both are right |
 | Engine second opinion | ✅ Done | A different move that Stockfish rates at most half a pawn worse than the lesson's move is praised, with no penalty; an optional "Use engine" card after each level shows where the engine agrees or prefers another move |
-| Chapter 2: Open Catalan | 🚧 In progress | Your opponent takes your c4-pawn. Levels 1-4 are ready: 4...Be7 with 6...dxc4 7.Qc2 a6 8.a4, winning the pawn back, and the trap 16...Qxd4? 17.Ne4. About 39 levels are planned, one group per Black defence (5...a6, 5...c5, 5...Nc6, 5...b5, 5...c6, 5...Bb4+, 4...Nbd7 and more) |
+| Chapter 2: Open Catalan | 🚧 In progress | Your opponent takes your c4-pawn. Levels 1-8 are ready: 4...Be7 with 6...dxc4 7.Qc2 a6 8.a4, winning the pawn back, the trap 16...Qxd4? 17.Ne4, and Black's other tries (10...Nbd7, 10...a5, 8...Nc6, 7...Bd7). About 40 levels are planned, one group per Black defence (5...a6, 5...c5, 5...Nc6, 5...b5, 5...c6, 5...Bb4+, 4...Nbd7 and more) |
 | Chapters 3–6 | 📋 Planned | The Catalan against the King's Indian, Semi-Slav, Grünfeld and other defences |
 | Profile editing & online links | ⏸ Postponed | Rename profile, link Chess.com / Lichess accounts |
 
@@ -103,7 +103,7 @@ The database file `chesscoach.db` is created automatically on first launch and i
 ## Changelog
 
 ### 2026-11-18 — Open Catalan begins
-- Chapter 2 (Open Catalan) is on the Catalan page with its first 4 levels: 4...Be7 5.Nf3 O-O 6.O-O dxc4 7.Qc2 a6 8.a4, winning the c4-pawn back, and the trap 16...Qxd4? 17.Ne4. More levels follow, one group per Black defence.
+- Chapter 2 (Open Catalan) is on the Catalan page with its first 8 levels: 4...Be7 5.Nf3 O-O 6.O-O dxc4 7.Qc2 a6 8.a4, winning the c4-pawn back, the trap 16...Qxd4? 17.Ne4, and Black's other tries 10...Nbd7, 10...a5, 8...Nc6 and 7...Bd7. More levels follow, one group per Black defence.
 - Where chapter 2 starts with the same moves as chapter 1, it uses the same explanations, and both chapters always teach the same move in the same position.
 - 2 new unit tests (185 in total).
 
