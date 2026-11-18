@@ -1211,6 +1211,318 @@
                     "purpose": null
                 }
             ]
+        },
+        "a6": {
+            "from_line": "qc2",
+            "after_ply": 7,
+            "moves": [
+                {
+                    "ply": 8,
+                    "move_number": 4,
+                    "turn": "black",
+                    "san": "dxc4",
+                    "strategic_idea": "Your opponent takes your c4-pawn at once.",
+                    "explanation": "Black grabs a pawn before developing the rest of the pieces. In this line you don't rush to win it back: you develop quickly and open lines instead.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 9,
+                    "move_number": 5,
+                    "turn": "white",
+                    "san": "Nf3",
+                    "strategic_idea": "You develop your knight and get ready to castle.",
+                    "explanation": "Your knight protects d4 and clears the way for castling.",
+                    "hint": "Develop your g1-knight toward the center, where it protects d4.",
+                    "purpose": null
+                },
+                {
+                    "ply": 10,
+                    "move_number": 5,
+                    "turn": "black",
+                    "san": "a6",
+                    "strategic_idea": "Your opponent prepares ...b5 to keep the c4-pawn.",
+                    "explanation": "With ...b5 next, the c4-pawn would be protected.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 11,
+                    "move_number": 6,
+                    "turn": "white",
+                    "san": "O-O",
+                    "strategic_idea": "You castle.",
+                    "explanation": "Your king is safe, and your rook can come to the center later.",
+                    "hint": "Bring your king to safety.",
+                    "purpose": null
+                },
+                {
+                    "ply": 12,
+                    "move_number": 6,
+                    "turn": "black",
+                    "san": "Nc6",
+                    "strategic_idea": "Your opponent develops the knight and attacks d4.",
+                    "explanation": "Your f3-knight protects the d4-pawn.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 13,
+                    "move_number": 7,
+                    "turn": "white",
+                    "san": "e3",
+                    "strategic_idea": "You protect d4 with a pawn.",
+                    "explanation": "Now the d4-pawn is safe, and your queen can come to e2, where it attacks c4.",
+                    "hint": "Protect your d4-pawn with a pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 14,
+                    "move_number": 7,
+                    "turn": "black",
+                    "san": "Bd7",
+                    "strategic_idea": "Your opponent develops the bishop to d7.",
+                    "explanation": "It will keep the c6-knight protected once the b-pawn goes to b5.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 15,
+                    "move_number": 8,
+                    "turn": "white",
+                    "san": "Qe2",
+                    "strategic_idea": "Your queen attacks the c4-pawn.",
+                    "explanation": "From e2 it hits c4. Black protects the pawn with ...b5.",
+                    "hint": "Attack c4 with your queen from the square your e-pawn left.",
+                    "purpose": null
+                },
+                {
+                    "ply": 16,
+                    "move_number": 8,
+                    "turn": "black",
+                    "san": "b5",
+                    "strategic_idea": "Your opponent protects the c4-pawn with ...b5.",
+                    "explanation": "The a6-pawn backs up b5, so the chain a6-b5-c4 holds for now.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 17,
+                    "move_number": 9,
+                    "turn": "white",
+                    "san": "b3",
+                    "strategic_idea": "You strike at the pawn chain with your b-pawn.",
+                    "explanation": "After 9...cxb3 10.axb3 you stay a pawn down, but your a1-rook gets the half-open a-file, and your bishop gets the b2-square.",
+                    "hint": "Attack the c4-pawn with your b-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "cxb3",
+                    "strategic_idea": "Your opponent takes on b3.",
+                    "explanation": "The b3-pawn attacks your a2-pawn. You take back with that pawn.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 19,
+                    "move_number": 10,
+                    "turn": "white",
+                    "san": "axb3",
+                    "strategic_idea": "You take back with the a-pawn.",
+                    "explanation": "You are a pawn down, but your a1-rook now attacks the a6-pawn down the half-open a-file.",
+                    "hint": "Take back on b3 with a pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "Be7",
+                    "strategic_idea": "Your opponent develops the bishop.",
+                    "explanation": "Black gets ready to castle.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "Bb2",
+                    "strategic_idea": "You develop your bishop on the long dark diagonal.",
+                    "explanation": "On b2 it protects your d4-pawn, and the c1-square is free for a rook.",
+                    "hint": "Develop your dark-squared bishop on the long diagonal.",
+                    "purpose": null
+                },
+                {
+                    "ply": 22,
+                    "move_number": 11,
+                    "turn": "black",
+                    "san": "O-O",
+                    "strategic_idea": "Your opponent castles.",
+                    "explanation": "Black's king is now safe too.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 23,
+                    "move_number": 12,
+                    "turn": "white",
+                    "san": "Rc1",
+                    "strategic_idea": "Your rook takes the c-file.",
+                    "explanation": "It attacks the c6-knight and puts pressure on the c7-pawn behind it.",
+                    "hint": "Put a rook on the c-file, facing the c6-knight.",
+                    "purpose": null
+                },
+                {
+                    "ply": 24,
+                    "move_number": 12,
+                    "turn": "black",
+                    "san": "Nb4",
+                    "strategic_idea": "Your opponent's knight jumps to b4.",
+                    "explanation": "It leaves your rook's line and eyes the c2- and d3-squares.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 25,
+                    "move_number": 13,
+                    "turn": "white",
+                    "san": "Ne5",
+                    "strategic_idea": "Your knight jumps to e5.",
+                    "explanation": "It attacks the d7-bishop, and with f3 free your g2-bishop now hits the a8-rook, which Black's queen protects.",
+                    "hint": "Jump into the center with your f3-knight and attack the d7-bishop.",
+                    "purpose": null
+                },
+                {
+                    "ply": 26,
+                    "move_number": 13,
+                    "turn": "black",
+                    "san": "Nfd5",
+                    "strategic_idea": "Your opponent's knight comes to d5.",
+                    "explanation": "It blocks your g2-bishop's diagonal and adds a defender to the c7-pawn, which your c1-rook attacks.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 27,
+                    "move_number": 14,
+                    "turn": "white",
+                    "san": "Na3",
+                    "strategic_idea": "Your last knight develops to a3.",
+                    "explanation": "It attacks the b5-pawn and can go on to c2 to challenge the b4-knight.",
+                    "hint": "Develop your b1-knight to the edge, where it attacks b5 and can go on to c2.",
+                    "purpose": null
+                },
+                {
+                    "ply": 28,
+                    "move_number": 14,
+                    "turn": "black",
+                    "san": "Be8",
+                    "strategic_idea": "Your opponent's bishop steps back to e8.",
+                    "explanation": "From e8 it escapes your knight and still protects the b5-pawn.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 29,
+                    "move_number": 15,
+                    "turn": "white",
+                    "san": "e4",
+                    "strategic_idea": "You push the e-pawn and attack the d5-knight.",
+                    "explanation": "Your pawns on d4 and e4 take the center and attack the d5-knight.",
+                    "hint": "Push your e-pawn one square and attack the d5-knight.",
+                    "purpose": null
+                },
+                {
+                    "ply": 30,
+                    "move_number": 15,
+                    "turn": "black",
+                    "san": "Nb6",
+                    "strategic_idea": "Your opponent's knight retreats to b6.",
+                    "explanation": "From b6 it eyes c4 and covers a8 in case the a-file opens.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 31,
+                    "move_number": 16,
+                    "turn": "white",
+                    "san": "Nc2",
+                    "strategic_idea": "Your knight challenges the b4-knight.",
+                    "explanation": "It attacks the b4-knight and protects your d4-pawn.",
+                    "hint": "Bring your a3-knight to a square where it attacks the b4-knight.",
+                    "purpose": null
+                },
+                {
+                    "ply": 32,
+                    "move_number": 16,
+                    "turn": "black",
+                    "san": "a5",
+                    "strategic_idea": "Your opponent protects the b4-knight with a pawn.",
+                    "explanation": "The a5-pawn gives the knight a second defender.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 33,
+                    "move_number": 17,
+                    "turn": "white",
+                    "san": "Nxb4",
+                    "strategic_idea": "You take the b4-knight.",
+                    "explanation": "Black must take back with the bishop: 17...axb4? opens the a-file, and after 18.Rxa8 you win your pawn back with a much better game.",
+                    "hint": "Take the b4-knight.",
+                    "purpose": null
+                }
+            ]
+        },
+        "a6_nb4": {
+            "from_line": "a6",
+            "after_ply": 21,
+            "moves": [
+                {
+                    "ply": 22,
+                    "move_number": 11,
+                    "turn": "black",
+                    "san": "Nb4",
+                    "strategic_idea": "Your opponent's knight jumps to b4 before castling.",
+                    "explanation": "It eyes the c2- and d3-squares, but Black's king is still in the center.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 23,
+                    "move_number": 12,
+                    "turn": "white",
+                    "san": "Ne5",
+                    "strategic_idea": "Your knight jumps to e5.",
+                    "explanation": "It attacks the d7-bishop, and with f3 free your g2-bishop now hits the a8-rook, which Black's queen protects.",
+                    "hint": "Jump into the center with your f3-knight and attack the d7-bishop.",
+                    "purpose": null
+                },
+                {
+                    "ply": 24,
+                    "move_number": 12,
+                    "turn": "black",
+                    "san": "Nbd5",
+                    "strategic_idea": "Your opponent's knight retreats to d5.",
+                    "explanation": "It blocks your g2-bishop's diagonal and attacks your e3-pawn, which your f2-pawn and queen protect.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 25,
+                    "move_number": 13,
+                    "turn": "white",
+                    "san": "Na3",
+                    "strategic_idea": "Your last knight develops to a3.",
+                    "explanation": "Together with your queen it attacks the b5-pawn, which the a6-pawn and the d7-bishop protect. Black still has to castle.",
+                    "hint": "Develop your b1-knight to the edge, where it attacks b5.",
+                    "purpose": null
+                }
+            ]
         }
     },
     "levels": [
@@ -1506,6 +1818,99 @@
                     "line_id": "qc2_nd5",
                     "from_ply": 18,
                     "to_ply": 31
+                }
+            ],
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 14,
+            "type": "learn",
+            "title": "4...dxc4 5.Nf3 a6: the b2-b3 break",
+            "line_id": "a6",
+            "from_ply": 8,
+            "to_ply": 21,
+            "intro": "Your opponent can take on c4 at once, on move 4. You develop quickly, then strike at Black's queenside pawns with b2-b3: you stay a pawn down, but you get open lines.",
+            "key_ideas": [
+                "Against ...a6 and ...b5, break the pawn chain with b2-b3: you don't win the pawn back, you get open lines instead.",
+                "After 9...cxb3 10.axb3 you are a pawn down, but your a1-rook gets the half-open a-file and your bishop goes to b2."
+            ]
+        },
+        {
+            "level": 15,
+            "type": "quiz",
+            "title": "Test: 4...dxc4 5.Nf3 a6",
+            "line_id": "a6",
+            "from_ply": 8,
+            "to_ply": 21,
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 16,
+            "type": "learn",
+            "title": "Black's knight goes to b4: your knights answer",
+            "parts": [
+                {
+                    "line_id": "a6",
+                    "from_ply": 22,
+                    "to_ply": 33,
+                    "intro": "First, your opponent castles: 11...O-O."
+                },
+                {
+                    "line_id": "a6_nb4",
+                    "from_ply": 22,
+                    "to_ply": 25,
+                    "intro": "Or the knight jumps first, before castling: 11...Nb4."
+                }
+            ],
+            "intro": "Black's c6-knight heads for b4. You jump into e5 with your knight and bring your last knight out to a3.",
+            "key_ideas": [
+                "Ne5 attacks the d7-bishop and lets your g2-bishop hit the a8-rook.",
+                "After 11...O-O, e3-e4 attacks the d5-knight and Nc2 challenges the b4-knight.",
+                "After 17.Nxb4 Black must take back with the bishop, since 17...axb4? 18.Rxa8 wins your pawn back with a much better game. After 17...Bxb4 you are still a pawn down, but your active pieces make the game about level."
+            ]
+        },
+        {
+            "level": 17,
+            "type": "quiz",
+            "title": "Test: the knight on b4",
+            "parts": [
+                {
+                    "line_id": "a6",
+                    "from_ply": 22,
+                    "to_ply": 33
+                },
+                {
+                    "line_id": "a6_nb4",
+                    "from_ply": 22,
+                    "to_ply": 25
                 }
             ],
             "question_type": "play_move",
