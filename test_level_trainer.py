@@ -6,8 +6,9 @@ Tests for level_trainer.py. Run from the project folder:
     python -m unittest test_level_trainer -v
 
 Most tests build small chapters in memory; some load the real
-catalan_ch01_v2.json so the shipped chapter is checked too. The database test
-uses a throw-away database in a temporary folder, never chesscoach.db.
+catalan_ch01_v2.json and catalan_ch02.json so the shipped chapters are checked
+too. The database test uses a throw-away database in a temporary folder, never
+chesscoach.db.
 """
 
 import copy
@@ -34,6 +35,7 @@ from level_trainer import (
 )
 
 REAL_CHAPTER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "catalan_ch01_v2.json")
+REAL_CHAPTER_2_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "catalan_ch02.json")
 
 QUIZ_RULES = [
     {"wrong_attempt": 1, "action": "show_hint", "review_days": [1, 7]},
@@ -164,23 +166,45 @@ class ValidationTests(unittest.TestCase):
         self.assertEqual(missing, [])  # every White move has its day-7 question
         self.assertTrue(all(step["purpose"] is None for step in steps if step["turn"] == "black"))
 
-    def test_every_level_of_the_real_chapter_can_be_finished(self):
-        chapter = load_level_chapter(REAL_CHAPTER_PATH)
-        for level in chapter["levels"]:
-            with self.subTest(level=level["level"]):
-                session = LevelSession(chapter, level["level"])
-                for _ in range(200):
-                    if session.is_complete:
-                        break
-                    if session.kind == "learn":
-                        session.next_step()
+    def test_every_level_of_the_real_chapters_can_be_finished(self):
+        for path in (REAL_CHAPTER_PATH, REAL_CHAPTER_2_PATH):
+            chapter = load_level_chapter(path)
+            for level in chapter["levels"]:
+                with self.subTest(chapter=os.path.basename(path), level=level["level"]):
+                    session = LevelSession(chapter, level["level"])
+                    for _ in range(200):
+                        if session.is_complete:
+                            break
+                        if session.kind == "learn":
+                            session.next_step()
+                        else:
+                            self.assertEqual(session.submit_move(session.current_question["uci"])["status"], "correct")
+                    self.assertTrue(session.is_complete and session.passed)
+                    if session.kind == "learn":  # every move of a learn level is explained
+                        self.assertTrue(all(step["strategic_idea"] for step in session.moves), level["title"])
                     else:
-                        self.assertEqual(session.submit_move(session.current_question["uci"])["status"], "correct")
-                self.assertTrue(session.is_complete and session.passed)
-                if session.kind == "learn":  # every move of a learn level is explained
-                    self.assertTrue(all(step["strategic_idea"] for step in session.moves), level["title"])
-                else:
-                    self.assertEqual(session.accuracy, 100.0)
+                        self.assertEqual(session.accuracy, 100.0)
+                        self.assertTrue(all(q["hint"] for q in session.questions), level["title"])  # a hint for each
+
+    def test_chapters_1_and_2_play_the_same_move_where_they_meet(self):
+        # A player who learns both chapters must never get two answers for one position.
+        moves = {}
+        for path in (REAL_CHAPTER_PATH, REAL_CHAPTER_2_PATH):
+            for steps in load_level_chapter(path)["lines"].values():
+                for step in steps:
+                    if step["turn"] == "white":
+                        moves.setdefault(" ".join(step["fen_before"].split()[:4]), set()).add(step["san"])
+        self.assertEqual({position: sans for position, sans in moves.items() if len(sans) > 1}, {})
+
+    def test_chapter_2_reuses_chapter_1_texts_for_the_shared_first_moves(self):
+        chapter_1 = load_level_chapter(REAL_CHAPTER_PATH)["lines"]["main"]
+        chapter_2 = load_level_chapter(REAL_CHAPTER_2_PATH)["lines"]["qc2"]
+        self.assertEqual([s["san"] for s in chapter_2[:11]], [s["san"] for s in chapter_1[:11]])  # 1.d4 ... 6.O-O
+        for ply in (1, 3, 5, 7, 9, 11):  # White's moves keep chapter 1's texts and day-7 questions
+            self.assertEqual((chapter_2[ply - 1]["explanation"], chapter_2[ply - 1]["purpose"]),
+                             (chapter_1[ply - 1]["explanation"], chapter_1[ply - 1]["purpose"]))
+        self.assertNotEqual(chapter_2[7]["explanation"], chapter_1[7]["explanation"])  # 4...Be7: Black takes on c4 later
+        self.assertEqual(chapter_2[11]["san"], "dxc4")
 
     def test_a_transposition_in_the_real_chapter_is_explained_once(self):
         lines = load_level_chapter(REAL_CHAPTER_PATH)["lines"]

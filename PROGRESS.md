@@ -4,7 +4,7 @@ ChessCoach is a desktop chess trainer built with **Python**, **Flet**, **python-
 It teaches openings move by move, talks to you while you learn ("you", "your opponent"), tests you on what
 you learned, remembers the moves you get wrong, and includes a 2D board with **Stockfish** analysis.
 
-**Status:** Catalan opening page and Chapter 1 (Closed Catalan, 40 levels) playable · **Last updated:** 2026-11-17
+**Status:** Catalan opening page, Chapter 1 (Closed Catalan, 40 levels) and the first levels of Chapter 2 (Open Catalan) playable · **Last updated:** 2026-11-18
 
 ---
 
@@ -33,7 +33,8 @@ you learned, remembers the moves you get wrong, and includes a 2D board with **S
 | Daily review | ✅ Done | The "Daily Revised" card shows how many positions are due and drills them, with the next review date after each answer |
 | "Why this move?" | ✅ Done | On a position's last review (day 7) you also pick the move's purpose from three answers; it is mastered only when both are right |
 | Engine second opinion | ✅ Done | A different move that Stockfish rates at most half a pawn worse than the lesson's move is praised, with no penalty; an optional "Use engine" card after each level shows where the engine agrees or prefers another move |
-| Chapters 2–6 | 📋 Planned | Open Catalan, and the Catalan against the King's Indian, Semi-Slav, Grünfeld and other defences |
+| Chapter 2: Open Catalan | 🚧 In progress | Your opponent takes your c4-pawn. Levels 1-4 are ready: 4...Be7 with 6...dxc4 7.Qc2 a6 8.a4, winning the pawn back, and the trap 16...Qxd4? 17.Ne4. About 39 levels are planned, one group per Black defence (5...a6, 5...c5, 5...Nc6, 5...b5, 5...c6, 5...Bb4+, 4...Nbd7 and more) |
+| Chapters 3–6 | 📋 Planned | The Catalan against the King's Indian, Semi-Slav, Grünfeld and other defences |
 | Profile editing & online links | ⏸ Postponed | Rename profile, link Chess.com / Lichess accounts |
 
 ---
@@ -44,7 +45,7 @@ you learned, remembers the moves you get wrong, and includes a 2D board with **S
 |---|---|---|
 | Interface | `chesscoach_flet.py`, `opening_hub_view.py`, `level_view.py`, `review_view.py`, `board_view.py`, `board_pieces.py`, `flet_compat.py` | Windows, themes, dialogs, the opening page, the training and review screens, the board and its pieces |
 | Training logic | `level_trainer.py`, `opening_hub.py`, `engine_judge.py` | Validates chapters and moves, runs learn / quiz levels and reviews, scores accuracy, unlocks levels, asks Stockfish for a second opinion; no UI, no database |
-| Curriculum | `catalan_opening.json`, `catalan_ch01_v2.json` | The opening page (intro, setup, chapter list) and chapter 1 (lines, ideas, hints, levels) |
+| Curriculum | `catalan_opening.json`, `catalan_ch01_v2.json`, `catalan_ch02.json` | The opening page (intro, setup, chapter list), chapter 1 and chapter 2 (lines, ideas, hints, levels) |
 | Content tools | `pgn_import.py` | Lichess study PGN → chapter file |
 | Persistence | `database.py` | Profiles, settings, progress and mistakes in a local SQLite file |
 | Assets | `assets/pieces/merida/` | Piece pictures and their license |
@@ -95,11 +96,16 @@ The database file `chesscoach.db` is created automatically on first launch and i
 ```powershell
 .venv\Scripts\python.exe -m unittest
 ```
-183 unit tests: database (47), levels, quizzes and reviews (70), study import (23), opening page data (6), screen layout (14), piece pictures (6), review dates (2) and the engine (15, two of them with the real Stockfish when it is installed).
+185 unit tests: database (47), levels, quizzes and reviews (72, including checks that both chapters can be played to the end and never teach two moves in one position), study import (23), opening page data (6), screen layout (14), piece pictures (6), review dates (2) and the engine (15, two of them with the real Stockfish when it is installed).
 
 ---
 
 ## Changelog
+
+### 2026-11-18 — Open Catalan begins
+- Chapter 2 (Open Catalan) is on the Catalan page with its first 4 levels: 4...Be7 5.Nf3 O-O 6.O-O dxc4 7.Qc2 a6 8.a4, winning the c4-pawn back, and the trap 16...Qxd4? 17.Ne4. More levels follow, one group per Black defence.
+- Where chapter 2 starts with the same moves as chapter 1, it uses the same explanations, and both chapters always teach the same move in the same position.
+- 2 new unit tests (185 in total).
 
 ### 2026-11-17 — Training experience
 - Catalan opening page: introduction, ideal-setup board and six chapters; Chapter 1 is ready, the rest are marked "Coming soon".

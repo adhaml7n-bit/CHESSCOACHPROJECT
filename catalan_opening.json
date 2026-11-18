@@ -16,10 +16,10 @@
         "focus_square": "g2",
         "path": ["f3", "e4", "d5", "c6", "b7", "a8"]
     },
-    "release_note": "This version covers the Closed Catalan. The other chapters are coming soon.",
+    "release_note": "This version covers the Closed Catalan, and the Open Catalan is growing level by level. The other chapters are coming soon.",
     "chapters": [
         {"number": 1, "title": "Closed Catalan", "file": "catalan_ch01_v2.json"},
-        {"number": 2, "title": "Open Catalan", "file": null},
+        {"number": 2, "title": "Open Catalan", "file": "catalan_ch02.json"},
         {"number": 3, "title": "Catalan against the King's Indian", "file": null},
         {"number": 4, "title": "Catalan against the Semi-Slav", "file": null},
         {"number": 5, "title": "Catalan against the Grünfeld", "file": null},

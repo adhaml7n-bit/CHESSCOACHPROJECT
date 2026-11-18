@@ -50,12 +50,15 @@ class RealOpeningTests(unittest.TestCase):
         items = load_hub_chapters(opening)
         self.assertIsNone(items[0]["error"])
         self.assertEqual(items[0]["chapter"]["chapter_meta"]["chapter_id"], "catalan_ch01_v2")
-        self.assertTrue(all(item["chapter"] is None and item["error"] is None for item in items[1:]))  # coming soon
+        self.assertIsNone(items[1]["error"])
+        self.assertEqual(items[1]["chapter"]["chapter_meta"]["chapter_id"], "catalan_ch02")  # the Open Catalan
+        self.assertTrue(all(item["chapter"] is None and item["error"] is None for item in items[2:]))  # coming soon
 
     def test_ready_chapters_by_id(self):
         chapters = chapters_by_id([REAL_OPENING_PATH])
-        self.assertEqual(list(chapters), ["catalan_ch01_v2"])  # coming-soon chapters are left out
+        self.assertEqual(list(chapters), ["catalan_ch01_v2", "catalan_ch02"])  # coming-soon chapters are left out
         self.assertIn("main", chapters["catalan_ch01_v2"]["lines"])
+        self.assertIn("qc2", chapters["catalan_ch02"]["lines"])
 
 
 class ValidationTests(unittest.TestCase):
