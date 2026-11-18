@@ -2491,6 +2491,384 @@
                     "purpose": null
                 }
             ]
+        },
+        "b5": {
+            "from_line": "a6",
+            "after_ply": 9,
+            "moves": [
+                {
+                    "ply": 10,
+                    "move_number": 5,
+                    "turn": "black",
+                    "san": "b5",
+                    "strategic_idea": "Your opponent protects the c4-pawn with ...b5 at once.",
+                    "explanation": "Nothing protects the b5-pawn yet, so your a-pawn can attack it.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 11,
+                    "move_number": 6,
+                    "turn": "white",
+                    "san": "a4",
+                    "strategic_idea": "You attack the b5-pawn.",
+                    "explanation": "Your a-pawn hits b5, the pawn that protects c4, and nothing protects b5.",
+                    "hint": "Attack the b5-pawn with a pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 12,
+                    "move_number": 6,
+                    "turn": "black",
+                    "san": "c6",
+                    "strategic_idea": "Your opponent protects the b5-pawn with the c-pawn.",
+                    "explanation": "The c6-pawn protects b5, and b5 protects c4.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 13,
+                    "move_number": 7,
+                    "turn": "white",
+                    "san": "Ne5",
+                    "strategic_idea": "Your knight jumps to e5 and attacks c6.",
+                    "explanation": "With the knight gone from f3, your g2-bishop also hits the c6-pawn, which only the b8-knight protects. The knight on e5 also attacks the c4-pawn.",
+                    "hint": "Jump into the center with your f3-knight and attack the c6-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 14,
+                    "move_number": 7,
+                    "turn": "black",
+                    "san": "Nd5",
+                    "strategic_idea": "Your opponent blocks your g2-bishop's diagonal.",
+                    "explanation": "On d5 the knight stands between your g2-bishop and the c6-pawn. The c6- and e6-pawns and Black's queen protect it.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 15,
+                    "move_number": 8,
+                    "turn": "white",
+                    "san": "O-O",
+                    "strategic_idea": "You castle.",
+                    "explanation": "Your king is safe. Black's king is still in the center.",
+                    "hint": "Bring your king to safety.",
+                    "purpose": null
+                },
+                {
+                    "ply": 16,
+                    "move_number": 8,
+                    "turn": "black",
+                    "san": "Bb7",
+                    "strategic_idea": "Your opponent's bishop comes to b7 and protects c6.",
+                    "explanation": "Now the c6-pawn has two defenders, the bishop and the b8-knight.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 17,
+                    "move_number": 9,
+                    "turn": "white",
+                    "san": "e4",
+                    "strategic_idea": "You attack the d5-knight with your e-pawn.",
+                    "explanation": "Your pawn drives the knight away from d5 and takes space in the center.",
+                    "hint": "Attack the d5-knight with a pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "Nf6",
+                    "strategic_idea": "Your opponent's knight goes back to f6 and attacks e4.",
+                    "explanation": "Your g2-bishop protects the e4-pawn.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 19,
+                    "move_number": 10,
+                    "turn": "white",
+                    "san": "b3",
+                    "strategic_idea": "You strike at Black's queenside pawns with your b-pawn.",
+                    "explanation": "Your b3-pawn and your e5-knight attack c4, and only the b5-pawn protects it. The b3-pawn also protects your a4-pawn.",
+                    "hint": "Attack the c4-pawn with your b-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "cxb3",
+                    "strategic_idea": "Your opponent takes on b3.",
+                    "explanation": "Black is two pawns up for the moment, but the b3-pawn has no defender.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "axb5",
+                    "strategic_idea": "You take the b5-pawn first.",
+                    "explanation": "Your b5-pawn attacks c6, and the open a-file lets your a1-rook hit the a7-pawn. Taking on b3 first would let Black grab your d4-pawn: 11.Qxb3 Qxd4.",
+                    "hint": "Take the b5-pawn with your a-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 22,
+                    "move_number": 11,
+                    "turn": "black",
+                    "san": "cxb5",
+                    "strategic_idea": "Your opponent takes back on b5.",
+                    "explanation": "Black is still two pawns up, but both the b3- and b5-pawns are loose.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 23,
+                    "move_number": 12,
+                    "turn": "white",
+                    "san": "Qxb3",
+                    "strategic_idea": "You win back a pawn.",
+                    "explanation": "Black is now one pawn up. Your queen attacks the b5-pawn. Your d4-pawn is loose, but 12...Qxd4? runs into 13.Qxb5+.",
+                    "hint": "Take back the pawn on b3 with your queen.",
+                    "purpose": null
+                },
+                {
+                    "ply": 24,
+                    "move_number": 12,
+                    "turn": "black",
+                    "san": "a6",
+                    "strategic_idea": "Your opponent protects the b5-pawn.",
+                    "explanation": "The a6-pawn guards b5 against your queen.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 25,
+                    "move_number": 13,
+                    "turn": "white",
+                    "san": "d5",
+                    "strategic_idea": "You push your d-pawn and attack e6.",
+                    "explanation": "Your pawn also blocks the b7-bishop's diagonal. Black's king is still in the center: if Black does nothing, 14.dxe6 fxe6 15.Qxe6+ follows.",
+                    "hint": "Push your d-pawn and attack the e6-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 26,
+                    "move_number": 13,
+                    "turn": "black",
+                    "san": "exd5",
+                    "strategic_idea": "Your opponent takes on d5.",
+                    "explanation": "Black takes the d5-pawn, but this opens the center while Black's king is still on e8.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 27,
+                    "move_number": 14,
+                    "turn": "white",
+                    "san": "exd5",
+                    "strategic_idea": "You take back with the e-pawn.",
+                    "explanation": "Now the e-file is open, and Black's king still stands on it.",
+                    "hint": "Take back on d5 with your e-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 28,
+                    "move_number": 14,
+                    "turn": "black",
+                    "san": "Bxd5",
+                    "strategic_idea": "Your opponent's bishop takes on d5 and attacks your queen.",
+                    "explanation": "It also attacks your g2-bishop, which your king protects.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 29,
+                    "move_number": 15,
+                    "turn": "white",
+                    "san": "Qe3",
+                    "strategic_idea": "Your queen goes to e3, behind your e5-knight.",
+                    "explanation": "Now your queen and Black's king are on the same open file, with only your knight in between. If the knight moves, it gives a discovered check: for example, 16.Nc6+ would also attack Black's queen.",
+                    "hint": "Move your attacked queen to the e-file, behind your e5-knight.",
+                    "purpose": null
+                },
+                {
+                    "ply": 30,
+                    "move_number": 15,
+                    "turn": "black",
+                    "san": "Qe7",
+                    "strategic_idea": "Your opponent's queen blocks the e-file.",
+                    "explanation": "Black's queen stands between your knight and Black's king, and it attacks your e5-knight, which your queen protects.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 31,
+                    "move_number": 16,
+                    "turn": "white",
+                    "san": "Ba3",
+                    "strategic_idea": "You develop your bishop with an attack on Black's queen.",
+                    "explanation": "If the queen steps off the e-file, any move of your e5-knight gives check.",
+                    "hint": "Develop your dark-squared bishop with an attack on Black's queen.",
+                    "purpose": null
+                },
+                {
+                    "ply": 32,
+                    "move_number": 16,
+                    "turn": "black",
+                    "san": "Qe6",
+                    "strategic_idea": "Your opponent's queen stays on the e-file.",
+                    "explanation": "On e6 it still blocks the e-file and attacks your e5-knight.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 33,
+                    "move_number": 17,
+                    "turn": "white",
+                    "san": "Re1",
+                    "strategic_idea": "Your rook joins the e-file behind your queen.",
+                    "explanation": "You are two pawns down, but Black's king is still in the center and can't castle yet, and your pieces are much more active.",
+                    "hint": "Bring your f1-rook to the e-file, behind your queen.",
+                    "purpose": null
+                }
+            ]
+        },
+        "b5_qb6": {
+            "from_line": "b5",
+            "after_ply": 25,
+            "moves": [
+                {
+                    "ply": 26,
+                    "move_number": 13,
+                    "turn": "black",
+                    "san": "Qb6",
+                    "strategic_idea": "Your opponent's queen comes to b6.",
+                    "explanation": "It attacks your f2-pawn, which your rook and king protect.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 27,
+                    "move_number": 14,
+                    "turn": "white",
+                    "san": "Nc4",
+                    "strategic_idea": "Your knight attacks Black's queen.",
+                    "explanation": "Taking the knight would lose Black's queen: 14...bxc4? 15.Qxb6.",
+                    "hint": "Attack Black's queen with your e5-knight, on a square your queen protects.",
+                    "purpose": null
+                },
+                {
+                    "ply": 28,
+                    "move_number": 14,
+                    "turn": "black",
+                    "san": "Qd4",
+                    "strategic_idea": "Your opponent's queen attacks your a1-rook and your c4-knight.",
+                    "explanation": "The c4-knight is attacked twice, by the queen and the b5-pawn, and only your queen protects it.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 29,
+                    "move_number": 15,
+                    "turn": "white",
+                    "san": "Nba3",
+                    "strategic_idea": "Your other knight protects the c4-knight.",
+                    "explanation": "It also attacks the b5-pawn. Your a1-rook looks loose, but 15...Qxa1? 16.Bb2 traps Black's queen, and Black gets at most two rooks for it.",
+                    "hint": "Protect your c4-knight with your b1-knight, from the edge of the board.",
+                    "purpose": null
+                }
+            ]
+        },
+        "b5_bd6": {
+            "from_line": "b5",
+            "after_ply": 25,
+            "moves": [
+                {
+                    "ply": 26,
+                    "move_number": 13,
+                    "turn": "black",
+                    "san": "Bd6",
+                    "strategic_idea": "Your opponent's bishop attacks your e5-knight.",
+                    "explanation": "Nothing protects your knight. Black also gets ready to castle.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 27,
+                    "move_number": 14,
+                    "turn": "white",
+                    "san": "dxe6",
+                    "strategic_idea": "You take the e6-pawn and attack f7 twice.",
+                    "explanation": "Your e6-pawn and your e5-knight both attack f7, which only Black's king protects. If 14...Bxe5?, then 15.exf7+.",
+                    "hint": "Take the e6-pawn with your d-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 28,
+                    "move_number": 14,
+                    "turn": "black",
+                    "san": "fxe6",
+                    "strategic_idea": "Your opponent takes back with the f-pawn.",
+                    "explanation": "The e6-pawn has no defender now, but 15.Qxe6+ Qe7 would let Black offer a queen trade.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 29,
+                    "move_number": 15,
+                    "turn": "white",
+                    "san": "Rd1",
+                    "strategic_idea": "Your rook pins the d6-bishop to Black's queen.",
+                    "explanation": "If the bishop takes your e5-knight, 16.Rxd8+ wins Black's queen for a rook. The e6-pawn is still loose.",
+                    "hint": "Bring your f1-rook to the d-file, against the d6-bishop and Black's queen.",
+                    "purpose": null
+                },
+                {
+                    "ply": 30,
+                    "move_number": 15,
+                    "turn": "black",
+                    "san": "Qe7",
+                    "strategic_idea": "Your opponent's queen leaves the d-file.",
+                    "explanation": "Now the d6-bishop is no longer pinned and threatens to take your e5-knight. Black's queen also protects the e6-pawn.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 31,
+                    "move_number": 16,
+                    "turn": "white",
+                    "san": "Nd3",
+                    "strategic_idea": "Your knight steps back to d3.",
+                    "explanation": "Your rook and queen protect it there, and it supports e4-e5, which would attack the d6-bishop and the f6-knight at once.",
+                    "hint": "Retreat your attacked knight to a square where your rook and queen protect it.",
+                    "purpose": null
+                },
+                {
+                    "ply": 32,
+                    "move_number": 16,
+                    "turn": "black",
+                    "san": "e5",
+                    "strategic_idea": "Your opponent blocks the e5-square with a pawn.",
+                    "explanation": "This stops your e4-e5. The e5-pawn is protected twice, by the d6-bishop and the queen.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 33,
+                    "move_number": 17,
+                    "turn": "white",
+                    "san": "Nxe5",
+                    "strategic_idea": "Your knight takes the e5-pawn.",
+                    "explanation": "Material is level again. If 17...Bxe5?, then 18.Ba3 attacks Black's queen and wins material.",
+                    "hint": "Take the e5-pawn with your knight.",
+                    "purpose": null
+                }
+            ]
         }
     },
     "levels": [
@@ -3121,6 +3499,111 @@
                     "line_id": "nc6_bd6",
                     "from_ply": 12,
                     "to_ply": 17
+                }
+            ],
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 28,
+            "type": "learn",
+            "title": "5...b5 6.a4 c6 7.Ne5: the d5-push",
+            "line_id": "b5",
+            "from_ply": 10,
+            "to_ply": 25,
+            "intro": "Your opponent protects the c4-pawn with 5...b5. You attack Black's queenside pawns with a4, Ne5 and b3, and then push your d-pawn while Black's king is still in the center.",
+            "key_ideas": [
+                "7.Ne5 frees your g2-bishop: together with the knight it attacks the c6-pawn.",
+                "Take on b5 before b3: 11.axb5 keeps Black busy, while 11.Qxb3 would let Black take your d4-pawn.",
+                "After 12.Qxb3 you are a pawn down, but 13.d5 opens lines against Black's king."
+            ]
+        },
+        {
+            "level": 29,
+            "type": "quiz",
+            "title": "Test: 5...b5 6.a4 c6 7.Ne5",
+            "line_id": "b5",
+            "from_ply": 10,
+            "to_ply": 25,
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 30,
+            "type": "learn",
+            "title": "13.d5: Black's three answers",
+            "parts": [
+                {
+                    "line_id": "b5",
+                    "from_ply": 26,
+                    "to_ply": 33,
+                    "intro": "First, 13...exd5: Black opens the e-file."
+                },
+                {
+                    "line_id": "b5_qb6",
+                    "from_ply": 26,
+                    "to_ply": 29,
+                    "intro": "Now 13...Qb6: Black's queen attacks f2."
+                },
+                {
+                    "line_id": "b5_bd6",
+                    "from_ply": 26,
+                    "to_ply": 33,
+                    "intro": "Last, 13...Bd6: Black attacks your e5-knight."
+                }
+            ],
+            "intro": "After 13.d5 Black's king is still in the center. Whether Black takes on d5, brings the queen out or attacks your knight, you keep the initiative.",
+            "key_ideas": [
+                "Against 13...exd5, put your queen behind your e5-knight on the open e-file: a knight move then gives a discovered check.",
+                "Against 13...Qb6, chase the queen with Nc4: 14...bxc4? loses the queen to 15.Qxb6.",
+                "Against 13...Bd6, take on e6 and pin the bishop with Rd1. After 16...e5, Nxe5 wins the pawn back, since 17...Bxe5? 18.Ba3 wins material."
+            ]
+        },
+        {
+            "level": 31,
+            "type": "quiz",
+            "title": "Test: 13.d5",
+            "parts": [
+                {
+                    "line_id": "b5",
+                    "from_ply": 26,
+                    "to_ply": 33
+                },
+                {
+                    "line_id": "b5_qb6",
+                    "from_ply": 26,
+                    "to_ply": 29
+                },
+                {
+                    "line_id": "b5_bd6",
+                    "from_ply": 26,
+                    "to_ply": 33
                 }
             ],
             "question_type": "play_move",
