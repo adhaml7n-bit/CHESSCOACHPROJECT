@@ -16,7 +16,7 @@ import flet as ft
 from board_pieces import piece_controls
 from flet_compat import border_all, pad_symmetric
 from level_trainer import summarize_chapter
-from opening_hub import load_hub_chapters, load_opening
+from opening_hub import chapter_unlock_states, load_hub_chapters, load_opening
 
 SETUP_SQUARE = 38
 SETUP_PIECE = 24
@@ -63,7 +63,12 @@ class OpeningHubView:
         note = self.opening.get("release_note")
         if note:
             controls.append(self._text(note, size=13, color=t["fg_secondary"]))
-        controls.extend(self._chapter_card(item) for item in self.chapters)
+        summaries = [self._summary(item["chapter"]) if item["chapter"] is not None else None for item in self.chapters]
+        unlocked = chapter_unlock_states(self.chapters, summaries)
+        controls.extend(
+            self._chapter_card(item, summary, is_open)
+            for item, summary, is_open in zip(self.chapters, summaries, unlocked)
+        )
         self.root.content = ft.Column(expand=True, scroll=ft.ScrollMode.AUTO, spacing=16, controls=controls)
         if update:
             self.page.update()
@@ -198,18 +203,20 @@ class OpeningHubView:
         if self.on_open_chapter:
             self.on_open_chapter(path)
 
-    def _chapter_card(self, item: dict) -> ft.Container:
+    def _chapter_card(self, item: dict, summary: dict | None, unlocked: bool) -> ft.Container:
         t = self.theme
         title = f"Chapter {item['number']}: {item['title']}"
         chapter = item["chapter"]
-        if chapter is None:
+        if chapter is None or summary is None:
             return self._coming_soon_card(title, item["error"])
 
-        summary = self._summary(chapter)
         lines = len(chapter["lines"])
         pass_mark = chapter["chapter_meta"].get("min_accuracy_to_pass", 0)
         details = (f"{summary['levels_total']} levels • {lines} branch{'es' if lines != 1 else ''} • "
                    f"Target accuracy: {pass_mark}%")
+        if not unlocked:
+            return self._locked_card(title, details, item["number"] - 1)
+
         side = [
             self._badge(f"{summary['percent']}% complete".upper(), t["success"], t["bg_main"]),
             self._progress(summary["levels_passed"], summary["levels_total"]),
@@ -227,6 +234,40 @@ class OpeningHubView:
                     ft.Container(expand=True, content=ft.Column(spacing=8, controls=[
                         self._text(title, size=22, bold=True),
                         self._text(details, size=14, color=t["fg_secondary"]),
+                    ])),
+                    ft.Container(width=CARD_SIDE_WIDTH, content=ft.Column(
+                        spacing=10, horizontal_alignment=ft.CrossAxisAlignment.END, controls=side)),
+                ],
+            ),
+        )
+
+    def _locked_card(self, title: str, details: str, previous_number: int) -> ft.Container:
+        t = self.theme
+        locked_btn = ft.Container(
+            bgcolor=t["btn_bg"],
+            border_radius=8,
+            padding=pad_symmetric(horizontal=16, vertical=10),
+            content=ft.Text(f"FINISH CHAPTER {previous_number}", size=14,
+                            weight=ft.FontWeight.BOLD, color=t["fg_muted"]),
+        )
+        side = [
+            self._badge("🔒 LOCKED", t["btn_bg"], t["fg_secondary"]),
+            self._progress(0, 1),
+            locked_btn,
+        ]
+        return ft.Container(
+            bgcolor=t["section_bar_bg"],
+            border=border_all(1, t["card_border"]),
+            border_radius=12,
+            padding=20,
+            content=ft.Row(
+                spacing=20,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                controls=[
+                    ft.Container(expand=True, content=ft.Column(spacing=8, controls=[
+                        self._text(title, size=22, color=t["fg_muted"], bold=True),
+                        self._text(details, size=14, color=t["fg_muted"]),
+                        self._text(f"Complete Chapter {previous_number} to unlock.", size=13, color=t["fg_secondary"]),
                     ])),
                     ft.Container(width=CARD_SIDE_WIDTH, content=ft.Column(
                         spacing=10, horizontal_alignment=ft.CrossAxisAlignment.END, controls=side)),

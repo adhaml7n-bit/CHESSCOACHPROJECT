@@ -16,7 +16,14 @@ import unittest
 
 import chess
 
-from opening_hub import OpeningFormatError, chapters_by_id, load_hub_chapters, load_opening, validate_opening
+from opening_hub import (
+    OpeningFormatError,
+    chapter_unlock_states,
+    chapters_by_id,
+    load_hub_chapters,
+    load_opening,
+    validate_opening,
+)
 
 PROJECT = os.path.dirname(os.path.abspath(__file__))
 REAL_OPENING_PATH = os.path.join(PROJECT, "catalan_opening.json")
@@ -105,6 +112,34 @@ class ChapterLoadingTests(unittest.TestCase):
             items = load_hub_chapters(validate_opening(example(), folder))
         self.assertIsNone(items[0]["chapter"])
         self.assertTrue(items[0]["error"])
+
+
+class ChapterUnlockTests(unittest.TestCase):
+    def test_chapter_2_locks_until_chapter_1_is_completed(self):
+        items = [{"chapter": {}}, {"chapter": {}}, {"chapter": None}]
+        self.assertEqual(
+            chapter_unlock_states(items, [{"status": "not_started"}, {"status": "not_started"}, None]),
+            [True, False, False],
+        )
+        self.assertEqual(
+            chapter_unlock_states(items, [{"status": "in_progress"}, {"status": "not_started"}, None]),
+            [True, False, False],
+        )
+        self.assertEqual(
+            chapter_unlock_states(items, [{"status": "completed"}, {"status": "not_started"}, None]),
+            [True, True, False],
+        )
+
+    def test_chain_unlocks_chapter_by_chapter(self):
+        items = [{"chapter": {}}, {"chapter": {}}, {"chapter": {}}]
+        self.assertEqual(
+            chapter_unlock_states(items, [{"status": "completed"}, {"status": "in_progress"}, {"status": "not_started"}]),
+            [True, True, False],
+        )
+        self.assertEqual(
+            chapter_unlock_states(items, [{"status": "completed"}, {"status": "completed"}, {"status": "not_started"}]),
+            [True, True, True],
+        )
 
 
 if __name__ == "__main__":

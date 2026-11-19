@@ -15,7 +15,7 @@ you learned, remembers the moves you get wrong, and includes a 2D board with **S
 | App shell | ✅ Done | Collapsible sidebar, top bar, homepage dashboard, view routing |
 | Themes | ✅ Done | Light / Dark UI, three board presets, custom HEX square colours |
 | Engine & board | ✅ Done | Legal-move hints, promotion, castling, en passant, async Stockfish analysis with auto-detection |
-| Opening page | ✅ Done | Catalan introduction, "ideal setup" board, six chapters with progress bars and Start / Resume / Practice again |
+| Opening page | ✅ Done | Catalan introduction, "ideal setup" board, six chapters with progress bars, sequential unlocking (Chapter 2+ locked until the previous chapter is completed), and Start / Resume / Practice again |
 | Training screen | ✅ Done | Learn levels (move by move with ideas) and quiz levels (play the moves from memory) |
 | Levels page | ✅ Done | A chapter opens on a page with all its levels as tiles (passed, next, locked, best quiz score) and a Continue button; inside a level, a one-line header leaves the room to the board |
 | Mistakes in a quiz | ✅ Done | 1st mistake: a hint (or the piece to move is highlighted); 2nd: the correct move is shown and you play it |
@@ -96,14 +96,15 @@ The database file `chesscoach.db` is created automatically on first launch and i
 ```powershell
 .venv\Scripts\python.exe -m unittest
 ```
-185 unit tests: database (47), levels, quizzes and reviews (72, including checks that both chapters can be played to the end and never teach two moves in one position), study import (23), opening page data (6), screen layout (14), piece pictures (6), review dates (2) and the engine (15, two of them with the real Stockfish when it is installed).
+187 unit tests: database (47), levels, quizzes and reviews (72, including checks that both chapters can be played to the end and never teach two moves in one position), study import (23), opening page data & chapter unlocking (8), screen layout (14), piece pictures (6), review dates (2) and the engine (15, two of them with the real Stockfish when it is installed).
 
 ---
 
 ## Changelog
 
-### 2026-11-19 — Open Catalan: 5...c6
+### 2026-11-19 — Open Catalan: 5...c6 & chapter locking
 - Chapter 2 levels 36-39: 5...c6 6.Ne5 (6...Bb4+ 7.Bd2 Be7 8.e3 with Black's exchange sacrifice after 8...b5 and winning c4 back after 8...O-O; and 6...b5 7.O-O Bb7 8.a4 a6 9.b3 cxb3 10.Bb2 Nbd7 11.Nxc6 with the c-file pin against 11...Qb6 and 11...Qc7).
+- Opening hub: Chapter 2 (and future ready chapters) now stay locked (`🔒 LOCKED` / `Finish Chapter 1`) until the previous chapter is 100% completed (2 new unit tests, 187 in total).
 
 ### 2026-11-18 — Open Catalan begins
 - Chapter 2 (Open Catalan) is on the Catalan page with its first 35 levels: 4...Be7 5.Nf3 O-O 6.O-O dxc4 7.Qc2 a6 8.a4, winning the c4-pawn back, the trap 16...Qxd4? 17.Ne4, Black's other tries 10...Nbd7, 10...a5, 8...Nc6 and 7...Bd7, 7...b5 8.a4 (the double threat 11.Ng5, and 8...b4 9.Nfd2), and 4...dxc4 5.Nf3 a6 6.O-O Nc6, where 9.b3 leaves you a pawn down for open lines (Black's knight goes to b4, your knights answer from e5, a3 and c2), and 6...b5 7.Ne5, where you win a knight for two pawns and 12.Qh5 threatens mate on f7, and 5...c5 (7.Qa4 pins the c6-knight; 6...cxd4 and 6...Be7), and 5...Nc6 6.Qa4 (6...Bb4+ with 13.Nb5 and the queen trade; 6...Bd6), and 5...b5 6.a4 c6 7.Ne5 (13.d5 against Black's king in the center; 10...Nfd7, 10...Nbd7 and 7...Bb4+). More levels follow, one group per Black defence.

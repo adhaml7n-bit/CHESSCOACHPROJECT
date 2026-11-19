@@ -99,6 +99,21 @@ def chapters_by_id(opening_paths) -> dict:
     return chapters
 
 
+def chapter_unlock_states(items: list[dict], summaries: list[dict | None]) -> list[bool]:
+    """Whether each hub chapter can be opened.
+
+    Chapter 1 is always open (when ready). Any later chapter opens only after
+    the chapter before it has been completed (all levels passed).
+    """
+    states = []
+    previous_completed = True
+    for item, summary in zip(items, summaries):
+        ready = item["chapter"] is not None and summary is not None
+        states.append(ready and previous_completed)
+        previous_completed = ready and summary["status"] == "completed"
+    return states
+
+
 def load_hub_chapters(opening: dict) -> list[dict]:
     """Each chapter of a validated opening with its content loaded.
 
