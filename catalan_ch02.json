@@ -4053,6 +4053,258 @@
                     "purpose": null
                 }
             ]
+        },
+        "be7": {
+            "from_line": "a6",
+            "after_ply": 9,
+            "moves": [
+                {
+                    "ply": 10,
+                    "move_number": 5,
+                    "turn": "black",
+                    "san": "Be7",
+                    "strategic_idea": "Your opponent develops the bishop and gets ready to castle.",
+                    "explanation": "Black ignores the c4-pawn for now and develops the kingside, leaving c4 undefended.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 11,
+                    "move_number": 6,
+                    "turn": "white",
+                    "san": "Qa4+",
+                    "strategic_idea": "Your queen gives check and attacks the c4-pawn.",
+                    "explanation": "Because Black must answer the check, there is no time to defend c4 safely (6...b5? drops the b5-pawn to 7.Qxb5+).",
+                    "hint": "Check Black's king with your queen while attacking the c4-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 12,
+                    "move_number": 6,
+                    "turn": "black",
+                    "san": "c6",
+                    "strategic_idea": "Your opponent blocks the check with the c-pawn.",
+                    "explanation": "Blocking with 6...c6 also dulls your g2-bishop's diagonal, while leaving the c4-pawn undefended.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 13,
+                    "move_number": 7,
+                    "turn": "white",
+                    "san": "Qxc4",
+                    "strategic_idea": "Your queen takes back the c4-pawn.",
+                    "explanation": "Material is level again, and your queen is active on c4 and eyes the c6-pawn.",
+                    "hint": "Take back the undefended c4-pawn with your queen.",
+                    "purpose": null
+                },
+                {
+                    "ply": 14,
+                    "move_number": 7,
+                    "turn": "black",
+                    "san": "O-O",
+                    "strategic_idea": "Your opponent castles.",
+                    "explanation": "Black brings the king to safety and gets ready to chase your queen with ...b5.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 15,
+                    "move_number": 8,
+                    "turn": "white",
+                    "san": "O-O",
+                    "strategic_idea": "You castle your king to safety.",
+                    "explanation": "Your king moves behind your g2-bishop and your rook enters the game.",
+                    "hint": "Castle your king to safety.",
+                    "purpose": null
+                },
+                {
+                    "ply": 16,
+                    "move_number": 8,
+                    "turn": "black",
+                    "san": "b5",
+                    "strategic_idea": "Your opponent pushes ...b5 and attacks your queen.",
+                    "explanation": "Black gains queenside space with tempo and prepares to put the c8-bishop on b7.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 17,
+                    "move_number": 9,
+                    "turn": "white",
+                    "san": "Qc2",
+                    "strategic_idea": "Your queen steps back to c2.",
+                    "explanation": "From c2 your queen stays on the c-file eyeing the c6-pawn and controls the e4-square.",
+                    "hint": "Step your attacked queen back to the second rank on the c-file.",
+                    "purpose": null
+                },
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "Bb7",
+                    "strategic_idea": "Your opponent develops the bishop to the long diagonal.",
+                    "explanation": "The bishop adds a second defender to the attacked c6-pawn and stands behind it on the long diagonal.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 19,
+                    "move_number": 10,
+                    "turn": "white",
+                    "san": "Rd1",
+                    "strategic_idea": "You bring your rook to the d-file.",
+                    "explanation": "Your rook adds a second defender to your d4-pawn, which Black's queen eyes, and takes the d-file behind it. The game is about level, and you have easy play with your central d4-pawn, your g2-bishop and your rook on the d-file.",
+                    "hint": "Bring your rook to the d-file.",
+                    "purpose": null
+                }
+            ]
+        },
+        "bd7": {
+            "from_line": "a6",
+            "after_ply": 9,
+            "moves": [
+                {
+                    "ply": 10,
+                    "move_number": 5,
+                    "turn": "black",
+                    "san": "Bd7",
+                    "strategic_idea": "Your opponent develops the bishop toward c6.",
+                    "explanation": "Black aims to challenge your g2-bishop on the long diagonal, leaving the c4-pawn undefended.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 11,
+                    "move_number": 6,
+                    "turn": "white",
+                    "san": "Ne5",
+                    "strategic_idea": "Your knight jumps to e5, attacking c4 and the d7-bishop.",
+                    "explanation": "Your knight hits the undefended c4-pawn and the d7-bishop, and with f3 free your g2-bishop attacks the undefended b7-pawn.",
+                    "hint": "Jump your f3-knight to the center, attacking the c4-pawn and the d7-bishop.",
+                    "purpose": null
+                },
+                {
+                    "ply": 12,
+                    "move_number": 6,
+                    "turn": "black",
+                    "san": "Bc6",
+                    "strategic_idea": "Your opponent's bishop challenges your g2-bishop on c6.",
+                    "explanation": "Black offers a trade on the long diagonal. Both your e5-knight and g2-bishop attack the c6-bishop.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 13,
+                    "move_number": 7,
+                    "turn": "white",
+                    "san": "Nxc6",
+                    "strategic_idea": "You trade your knight for Black's light-squared bishop.",
+                    "explanation": "Your g2-bishop has no defender, so you take the c6-bishop with your knight to keep it and win the bishop pair. Taking back with the pawn would wreck Black's queenside, so Black takes with the knight.",
+                    "hint": "Take the c6-bishop with your knight.",
+                    "purpose": null
+                },
+                {
+                    "ply": 14,
+                    "move_number": 7,
+                    "turn": "black",
+                    "san": "Nxc6",
+                    "strategic_idea": "Your opponent takes back with the knight.",
+                    "explanation": "Black avoids tripled c-pawns and attacks your d4-pawn together with the d8-queen, while only your queen defends d4.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 15,
+                    "move_number": 8,
+                    "turn": "white",
+                    "san": "O-O",
+                    "strategic_idea": "You castle your king to safety.",
+                    "explanation": "Taking on d4 right away fails for Black: 8...Qxd4? 9.Bxc6+ wins Black's queen, and 8...Nxd4? runs into 9.Bxb7.",
+                    "hint": "Castle your king to safety.",
+                    "purpose": null
+                },
+                {
+                    "ply": 16,
+                    "move_number": 8,
+                    "turn": "black",
+                    "san": "Qd7",
+                    "strategic_idea": "Your opponent's queen protects the c6-knight and prepares queenside castling.",
+                    "explanation": "Black steps out of 9.Bxc6+ tricks, adds a defender to c6, and keeps both the queen and c6-knight aimed at your d4-pawn.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 17,
+                    "move_number": 9,
+                    "turn": "white",
+                    "san": "e3",
+                    "strategic_idea": "You protect your d4-pawn with your e-pawn.",
+                    "explanation": "Before winning back c4, your d4-pawn needs a second defender (otherwise 9.Nd2 allows 9...Qxd4 and 9.Qa4 allows 9...Nxd4).",
+                    "hint": "Protect your attacked d4-pawn with your e-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "O-O-O",
+                    "strategic_idea": "Your opponent castles queenside.",
+                    "explanation": "Black puts the king on the opposite wing, aiming for a sharp kingside pawn attack, while leaving the c4-pawn undefended.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 19,
+                    "move_number": 10,
+                    "turn": "white",
+                    "san": "Nd2",
+                    "strategic_idea": "You develop your b1-knight and attack the c4-pawn.",
+                    "explanation": "Your knight goes after the undefended c4-pawn and opens b1 for your a1-rook.",
+                    "hint": "Develop your b1-knight to the second rank so it attacks the c4-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "h5",
+                    "strategic_idea": "Your opponent launches the h-pawn toward your king.",
+                    "explanation": "Black ignores the c4-pawn and pushes ...h5 to try to open files on your kingside.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "Nxc4",
+                    "strategic_idea": "Your knight takes back the c4-pawn.",
+                    "explanation": "Material is level again, and your c4-knight joins the coming attack against Black's queenside king.",
+                    "hint": "Take back the undefended c4-pawn with your knight.",
+                    "purpose": null
+                },
+                {
+                    "ply": 22,
+                    "move_number": 11,
+                    "turn": "black",
+                    "san": "h4",
+                    "strategic_idea": "Your opponent pushes the h-pawn again to attack g3.",
+                    "explanation": "Black threatens ...hxg3 to open the h-file against your king, though your queenside attack is much faster.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 23,
+                    "move_number": 12,
+                    "turn": "white",
+                    "san": "Bd2",
+                    "strategic_idea": "You develop your c1-bishop to d2.",
+                    "explanation": "Your last minor piece enters the game, clearing c1 for a rook and supporting a queenside push like b2-b4. Your attack on Black's king is faster and you stand clearly better.",
+                    "hint": "Develop your c1-bishop.",
+                    "purpose": null
+                }
+            ]
         }
     },
     "levels": [
@@ -5093,6 +5345,63 @@
             "line_id": "bb4_c5",
             "from_ply": 12,
             "to_ply": 27,
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 44,
+            "type": "learn",
+            "title": "5...Be7 and 5...Bd7: winning back c4 smoothly",
+            "parts": [
+                {
+                    "line_id": "be7",
+                    "from_ply": 10,
+                    "to_ply": 19,
+                    "intro": "First, 5...Be7: 6.Qa4+ wins the c4-pawn back at once."
+                },
+                {
+                    "line_id": "bd7",
+                    "from_ply": 10,
+                    "to_ply": 23,
+                    "intro": "Now 5...Bd7: Black offers a bishop trade on c6 and castles queenside."
+                }
+            ],
+            "intro": "Two quiet 5th moves where your opponent develops a bishop without defending c4. Against 5...Be7 you win c4 back at once with check; against 5...Bd7 you keep your g2-bishop, protect d4, and prepare a faster attack against Black's queenside king.",
+            "key_ideas": [
+                "Against 5...Be7, 6.Qa4+ forks Black's king and c4-pawn so you take back on c4 at once, then castle, step back to c2 after ...b5, and put your rook on d1.",
+                "Against 5...Bd7 6.Ne5 Bc6, trade with 7.Nxc6 to keep your g2-bishop, then castle (8...Qxd4? runs into 9.Bxc6+ winning Black's queen) and guard d4 with 9.e3.",
+                "After 9...O-O-O, win back c4 with 10.Nd2 and 11.Nxc4, then develop 12.Bd2 to prepare a fast queenside attack."
+            ]
+        },
+        {
+            "level": 45,
+            "type": "quiz",
+            "title": "Test: 5...Be7 and 5...Bd7",
+            "parts": [
+                {
+                    "line_id": "be7",
+                    "from_ply": 10,
+                    "to_ply": 19
+                },
+                {
+                    "line_id": "bd7",
+                    "from_ply": 10,
+                    "to_ply": 23
+                }
+            ],
             "question_type": "play_move",
             "show_explanations": false,
             "retry_mistakes": true,
