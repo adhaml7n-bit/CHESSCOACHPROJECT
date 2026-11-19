@@ -4305,6 +4305,376 @@
                     "purpose": null
                 }
             ]
+        },
+        "nbd7_b5": {
+            "from_line": "qc2",
+            "after_ply": 7,
+            "moves": [
+                {
+                    "ply": 8,
+                    "move_number": 4,
+                    "turn": "black",
+                    "san": "Nbd7",
+                    "strategic_idea": "Your opponent develops the queenside knight to d7.",
+                    "explanation": "Instead of taking on c4 right away, Black develops the b8-knight first before capturing on c4 next move.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 9,
+                    "move_number": 5,
+                    "turn": "white",
+                    "san": "Nf3",
+                    "strategic_idea": "You develop your king's knight.",
+                    "explanation": "It protects d4 and gets you ready to castle.",
+                    "hint": "Develop your king's knight to its usual square.",
+                    "purpose": {
+                        "answer": "Your knight develops, protects d4 and prepares castling.",
+                        "wrong": [
+                            "Your knight protects your c4-pawn.",
+                            "Your knight heads for g5 to attack h7."
+                        ]
+                    }
+                },
+                {
+                    "ply": 10,
+                    "move_number": 5,
+                    "turn": "black",
+                    "san": "dxc4",
+                    "strategic_idea": "Your opponent takes your c4-pawn.",
+                    "explanation": "Black wins a pawn for now, and your g2-bishop's long diagonal is no longer blocked on d5. The c4-pawn has no defender.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 11,
+                    "move_number": 6,
+                    "turn": "white",
+                    "san": "O-O",
+                    "strategic_idea": "You castle your king to safety.",
+                    "explanation": "Your king moves behind your g2-bishop before you go after the c4-pawn.",
+                    "hint": "Castle your king to safety.",
+                    "purpose": null
+                },
+                {
+                    "ply": 12,
+                    "move_number": 6,
+                    "turn": "black",
+                    "san": "b5",
+                    "strategic_idea": "Your opponent tries to hold the c4-pawn with ...b5.",
+                    "explanation": "This is a serious mistake: moving the b-pawn exposes Black's a8-rook along your g2-bishop's diagonal.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 13,
+                    "move_number": 7,
+                    "turn": "white",
+                    "san": "Ne5",
+                    "strategic_idea": "Your knight jumps to e5 and uncovers your g2-bishop against a8.",
+                    "explanation": "Now your g2-bishop attacks the undefended a8-rook while your e5-knight hits the d7-knight and c4-pawn.",
+                    "hint": "Jump your f3-knight to the center, attacking the d7-knight and opening your g2-bishop against a8.",
+                    "purpose": null
+                },
+                {
+                    "ply": 14,
+                    "move_number": 7,
+                    "turn": "black",
+                    "san": "Rb8",
+                    "strategic_idea": "Your opponent moves the a8-rook out of danger.",
+                    "explanation": "This blunders the queen: stepping to b8 neither covers c6 nor frees c8 for Black's queen, walking into 8.Nc6.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 15,
+                    "move_number": 8,
+                    "turn": "white",
+                    "san": "Nc6",
+                    "strategic_idea": "Your knight forks Black's queen and b8-rook.",
+                    "explanation": "Black's queen is trapped: 8...Qe7 is its only legal move, and 9.Nxe7 wins it for your knight too.",
+                    "hint": "Fork Black's queen and b8-rook with your e5-knight.",
+                    "purpose": null
+                },
+                {
+                    "ply": 16,
+                    "move_number": 8,
+                    "turn": "black",
+                    "san": "Bb7",
+                    "strategic_idea": "Your opponent attacks your c6-knight and eyes g2.",
+                    "explanation": "Black gives up the trapped queen and plans 9...Bxg2 to trade off your g2-bishop.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 17,
+                    "move_number": 9,
+                    "turn": "white",
+                    "san": "Nxd8",
+                    "strategic_idea": "You take Black's trapped queen.",
+                    "explanation": "Even after 9...Bxg2 10.Kxg2 Rxd8, you come out a queen up for a knight and a pawn with a winning game.",
+                    "hint": "Take Black's trapped queen with your c6-knight.",
+                    "purpose": null
+                }
+            ]
+        },
+        "nbd7_ba6": {
+            "from_line": "nbd7_b5",
+            "after_ply": 13,
+            "moves": [
+                {
+                    "ply": 14,
+                    "move_number": 7,
+                    "turn": "black",
+                    "san": "Ba6",
+                    "strategic_idea": "Your opponent develops the bishop so the queen defends a8.",
+                    "explanation": "Instead of 7...Rb8??, clearing c8 lets Black's queen guard the a8-rook along the eighth rank, while the bishop supports the b5-pawn.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 15,
+                    "move_number": 8,
+                    "turn": "white",
+                    "san": "Nc3",
+                    "strategic_idea": "You develop your b1-knight and attack the b5-pawn.",
+                    "explanation": "Your knight hits b5, which only Black's a6-bishop protects.",
+                    "hint": "Develop your b1-knight toward the center so it attacks the b5-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 16,
+                    "move_number": 8,
+                    "turn": "black",
+                    "san": "Bd6",
+                    "strategic_idea": "Your opponent develops and attacks your e5-knight.",
+                    "explanation": "Now both Black's d6-bishop and d7-knight attack your e5-knight, which only your d4-pawn protects.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 17,
+                    "move_number": 9,
+                    "turn": "white",
+                    "san": "a4",
+                    "strategic_idea": "You attack the b5-pawn a second time with your a-pawn.",
+                    "explanation": "Both your c3-knight and a-pawn now hit b5, forcing Black to deal with the queenside pawns.",
+                    "hint": "Attack the b5-pawn with your a-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "b4",
+                    "strategic_idea": "Your opponent pushes past your a-pawn and attacks your c3-knight.",
+                    "explanation": "Black avoids losing the b5-pawn, but now your c3-knight jumps forward into Black's camp.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 19,
+                    "move_number": 10,
+                    "turn": "white",
+                    "san": "Nb5",
+                    "strategic_idea": "Your knight escapes to b5 and attacks the d6-bishop.",
+                    "explanation": "Taking the knight with 10...Bxb5 11.axb5 leaves Black's queenside weak, and your g2-bishop still aims at a8.",
+                    "hint": "Move your attacked c3-knight forward to the queenside to attack the d6-bishop.",
+                    "purpose": null
+                },
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "Nxe5",
+                    "strategic_idea": "Your opponent takes your e5-knight.",
+                    "explanation": "Black is a piece and a pawn up for the moment, but your g2-bishop aims straight at a8 and your b5-knight still attacks d6.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "Bxa8",
+                    "strategic_idea": "Your bishop takes the a8-rook.",
+                    "explanation": "You win the exchange (rook for knight), though Black is still a pawn up. Taking back with 11...Qxa8? runs into 12.Nxd6+ cxd6 13.dxe5.",
+                    "hint": "Take the a8-rook with your g2-bishop.",
+                    "purpose": null
+                },
+                {
+                    "ply": 22,
+                    "move_number": 11,
+                    "turn": "black",
+                    "san": "Ned7",
+                    "strategic_idea": "Your opponent retreats the knight instead of taking on a8.",
+                    "explanation": "Black avoids 11...Qxa8? 12.Nxd6+, while Black's queen still attacks your a8-bishop.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 23,
+                    "move_number": 12,
+                    "turn": "white",
+                    "san": "Bc6",
+                    "strategic_idea": "Your bishop escapes to c6 and pins the d7-knight.",
+                    "explanation": "Your bishop gets away from Black's queen, pins the d7-knight to Black's king, and adds a second defender to your attacked b5-knight. You are up the exchange for a pawn with a winning advantage.",
+                    "hint": "Save your attacked a8-bishop on a square that pins the d7-knight to Black's king.",
+                    "purpose": null
+                }
+            ]
+        },
+        "nbd7_be7": {
+            "from_line": "nbd7_b5",
+            "after_ply": 11,
+            "moves": [
+                {
+                    "ply": 12,
+                    "move_number": 6,
+                    "turn": "black",
+                    "san": "Be7",
+                    "strategic_idea": "Your opponent develops the bishop and leaves c4 undefended.",
+                    "explanation": "Instead of 6...b5?, Black develops sensibly and gets ready to castle.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 13,
+                    "move_number": 7,
+                    "turn": "white",
+                    "san": "Nbd2",
+                    "strategic_idea": "You develop your b1-knight and attack the c4-pawn.",
+                    "explanation": "Your knight aims straight at the undefended c4-pawn.",
+                    "hint": "Develop your b1-knight to the second rank so it attacks the c4-pawn.",
+                    "purpose": null
+                },
+                {
+                    "ply": 14,
+                    "move_number": 7,
+                    "turn": "black",
+                    "san": "b6",
+                    "strategic_idea": "Your opponent prepares ...Bb7.",
+                    "explanation": "Black wants to challenge the long diagonal, but pushing the b-pawn exposes the a8-rook along your g2-bishop's diagonal.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 15,
+                    "move_number": 8,
+                    "turn": "white",
+                    "san": "Ne5",
+                    "strategic_idea": "Your knight jumps to e5 and uncovers your g2-bishop against a8.",
+                    "explanation": "Your knight hits the d7-knight and c4-pawn while your g2-bishop attacks the undefended a8-rook (8...Bb7? loses material to 9.Bxb7, since 9...Rb8 runs into 10.Nc6).",
+                    "hint": "Jump your f3-knight to the center, attacking the d7-knight and uncovering your g2-bishop against a8.",
+                    "purpose": null
+                },
+                {
+                    "ply": 16,
+                    "move_number": 8,
+                    "turn": "black",
+                    "san": "Nxe5",
+                    "strategic_idea": "Your opponent trades off your e5-knight.",
+                    "explanation": "Black avoids the tactics on the long diagonal and takes the knight, while a8 is still attacked by your g2-bishop.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 17,
+                    "move_number": 9,
+                    "turn": "white",
+                    "san": "dxe5",
+                    "strategic_idea": "You take back with the d-pawn and attack the f6-knight.",
+                    "explanation": "This is better than 9.Bxa8 Qxd4 (which lets Black equalize): your e5-pawn attacks the f6-knight while your g2-bishop still attacks the undefended a8-rook.",
+                    "hint": "Take back the e5-knight with your d-pawn, attacking the f6-knight.",
+                    "purpose": null
+                },
+                {
+                    "ply": 18,
+                    "move_number": 9,
+                    "turn": "black",
+                    "san": "Nd5",
+                    "strategic_idea": "Your opponent's knight jumps to d5 and blocks the long diagonal.",
+                    "explanation": "Black saves the f6-knight and shields the a8-rook, while leaving the c4-pawn undefended.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 19,
+                    "move_number": 10,
+                    "turn": "white",
+                    "san": "Nxc4",
+                    "strategic_idea": "Your knight takes back the c4-pawn.",
+                    "explanation": "Material is level again, and your c4-knight supports your e5-pawn.",
+                    "hint": "Take back the undefended c4-pawn with your knight.",
+                    "purpose": null
+                },
+                {
+                    "ply": 20,
+                    "move_number": 10,
+                    "turn": "black",
+                    "san": "O-O",
+                    "strategic_idea": "Your opponent castles.",
+                    "explanation": "Black brings the king to safety.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 21,
+                    "move_number": 11,
+                    "turn": "white",
+                    "san": "Qc2",
+                    "strategic_idea": "You develop your queen to c2.",
+                    "explanation": "Your queen steps off the first rank, clearing d1 for a rook and aiming along the b1-h7 diagonal. You stand better with your central space and long-diagonal bishop.",
+                    "hint": "Develop your queen to the second rank on the c-file.",
+                    "purpose": null
+                }
+            ]
+        },
+        "nbd7_rb8": {
+            "from_line": "nbd7_b5",
+            "after_ply": 11,
+            "moves": [
+                {
+                    "ply": 12,
+                    "move_number": 6,
+                    "turn": "black",
+                    "san": "Rb8",
+                    "strategic_idea": "Your opponent moves the a8-rook off the long diagonal.",
+                    "explanation": "Black takes the rook out of your g2-bishop's line so ...b5 won't run into tactics against a8.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 13,
+                    "move_number": 7,
+                    "turn": "white",
+                    "san": "a4",
+                    "strategic_idea": "You push your a-pawn to contest b5.",
+                    "explanation": "You stop Black from easily supporting the c4-pawn with ...b5.",
+                    "hint": "Push your a-pawn two squares to contest b5.",
+                    "purpose": null
+                },
+                {
+                    "ply": 14,
+                    "move_number": 7,
+                    "turn": "black",
+                    "san": "a6",
+                    "strategic_idea": "Your opponent prepares ...b5 anyway.",
+                    "explanation": "Black supports the b5-square to try to hold onto the c4-pawn.",
+                    "hint": null,
+                    "purpose": null
+                },
+                {
+                    "ply": 15,
+                    "move_number": 8,
+                    "turn": "white",
+                    "san": "a5",
+                    "strategic_idea": "You push on to a5 to clamp down on Black's queenside.",
+                    "explanation": "Your a5-pawn controls the b6-square, and if Black plays 8...b5 you can capture 9.axb6 en passant. You stand better while getting ready to win back the c4-pawn.",
+                    "hint": "Push your a-pawn forward again to clamp down on Black's queenside.",
+                    "purpose": null
+                }
+            ]
         }
     },
     "levels": [
@@ -5400,6 +5770,120 @@
                     "line_id": "bd7",
                     "from_ply": 10,
                     "to_ply": 23
+                }
+            ],
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 46,
+            "type": "learn",
+            "title": "4...Nbd7 with 6...b5?: tactics on the long diagonal",
+            "parts": [
+                {
+                    "line_id": "nbd7_b5",
+                    "from_ply": 8,
+                    "to_ply": 17,
+                    "intro": "First the main trap after 4...Nbd7 5.Nf3 dxc4 6.O-O b5?, where 7...Rb8?? lets your knight trap Black's queen."
+                },
+                {
+                    "line_id": "nbd7_ba6",
+                    "from_ply": 14,
+                    "to_ply": 23,
+                    "intro": "Now 7...Ba6: Black avoids the queen trap, but you still win the exchange."
+                }
+            ],
+            "intro": "Black can develop 4...Nbd7 before taking on c4. If your opponent greedily tries to hold c4 with 6...b5?, 7.Ne5 opens your g2-bishop against a8 and wins material against both 7...Rb8?? and 7...Ba6.",
+            "key_ideas": [
+                "Against 6...b5?, 7.Ne5 attacks the d7-knight and uncovers your g2-bishop on the undefended a8-rook.",
+                "After 7...Rb8??, 8.Nc6 forks the queen and b8-rook, trapping the queen so 9.Nxd8 wins the queen for a knight.",
+                "Against 7...Ba6, attack b5 with 8.Nc3 and 9.a4, jump 10.Nb5 against the d6-bishop, win the exchange with 11.Bxa8, and save your bishop with 12.Bc6."
+            ]
+        },
+        {
+            "level": 47,
+            "type": "quiz",
+            "title": "Test: 4...Nbd7 with 6...b5?",
+            "parts": [
+                {
+                    "line_id": "nbd7_b5",
+                    "from_ply": 8,
+                    "to_ply": 17
+                },
+                {
+                    "line_id": "nbd7_ba6",
+                    "from_ply": 14,
+                    "to_ply": 23
+                }
+            ],
+            "question_type": "play_move",
+            "show_explanations": false,
+            "retry_mistakes": true,
+            "on_mistake": [
+                {
+                    "wrong_attempt": 1,
+                    "action": "show_hint",
+                    "review_days": [1, 7]
+                },
+                {
+                    "wrong_attempt": 2,
+                    "action": "show_correct_move",
+                    "review_days": [1, 3, 7]
+                }
+            ]
+        },
+        {
+            "level": 48,
+            "type": "learn",
+            "title": "4...Nbd7: 6...Be7 and 6...Rb8",
+            "parts": [
+                {
+                    "line_id": "nbd7_be7",
+                    "from_ply": 12,
+                    "to_ply": 21,
+                    "intro": "First, 6...Be7: Black develops and leaves c4 undefended."
+                },
+                {
+                    "line_id": "nbd7_rb8",
+                    "from_ply": 12,
+                    "to_ply": 15,
+                    "intro": "Now 6...Rb8: Black sidesteps the long diagonal to prepare ...b5."
+                }
+            ],
+            "intro": "Two sound 6th moves after 4...Nbd7 5.Nf3 dxc4 6.O-O. Against 6...Be7 you attack c4 with Nbd2, use Ne5 against 7...b6, and win back the pawn; against 6...Rb8 you clamp down on the queenside with a4 and a5.",
+            "key_ideas": [
+                "Against 6...Be7 7.Nbd2 b6, 8.Ne5 uncovers your g2-bishop on a8 (8...Bb7? loses to 9.Bxb7, since 9...Rb8 runs into 10.Nc6).",
+                "After 8...Nxe5, recapture 9.dxe5 (better than 9.Bxa8 Qxd4) to attack the f6-knight, then win back c4 with 10.Nxc4 and develop 11.Qc2.",
+                "Against 6...Rb8, play 7.a4 and meet 7...a6 with 8.a5 to clamp down on Black's queenside (meeting 8...b5 with 9.axb6 en passant)."
+            ]
+        },
+        {
+            "level": 49,
+            "type": "quiz",
+            "title": "Test: 6...Be7 and 6...Rb8",
+            "parts": [
+                {
+                    "line_id": "nbd7_be7",
+                    "from_ply": 12,
+                    "to_ply": 21
+                },
+                {
+                    "line_id": "nbd7_rb8",
+                    "from_ply": 12,
+                    "to_ply": 15
                 }
             ],
             "question_type": "play_move",
