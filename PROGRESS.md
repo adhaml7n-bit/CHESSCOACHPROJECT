@@ -4,7 +4,7 @@ ChessCoach is a desktop chess trainer built with **Python**, **Flet**, **python-
 It teaches openings move by move, talks to you while you learn ("you", "your opponent"), tests you on what
 you learned, remembers the moves you get wrong, and includes a 2D board with **Stockfish** analysis.
 
-**Status:** Catalan opening page, Chapter 1 (Closed Catalan, 40 levels) and the first levels of Chapter 2 (Open Catalan) playable · **Last updated:** 2026-11-18
+**Status:** Catalan opening page, Chapter 1 (Closed Catalan, 40 levels) and the first 39 levels of Chapter 2 (Open Catalan) playable · **Last updated:** 2026-11-19
 
 ---
 
@@ -33,7 +33,7 @@ you learned, remembers the moves you get wrong, and includes a 2D board with **S
 | Daily review | ✅ Done | The "Daily Revised" card shows how many positions are due and drills them, with the next review date after each answer |
 | "Why this move?" | ✅ Done | On a position's last review (day 7) you also pick the move's purpose from three answers; it is mastered only when both are right |
 | Engine second opinion | ✅ Done | A different move that Stockfish rates at most half a pawn worse than the lesson's move is praised, with no penalty; an optional "Use engine" card after each level shows where the engine agrees or prefers another move |
-| Chapter 2: Open Catalan | 🚧 In progress | Your opponent takes your c4-pawn. Levels 1-35 are ready: 4...Be7 with 6...dxc4 7.Qc2 a6 8.a4, winning the pawn back, the trap 16...Qxd4? 17.Ne4, Black's other tries (10...Nbd7, 10...a5, 8...Nc6, 7...Bd7), 7...b5 8.a4 with the double threat 11.Ng5, and 4...dxc4 5.Nf3 a6, where you stay a pawn down after 9.b3 for open lines and active pieces, 6...b5 7.Ne5, where you win a knight for two pawns, 5...c5, where Qa4 pins the c6-knight and you win the c4-pawn back, 5...Nc6 6.Qa4 with the check on b4, and 5...b5 6.a4 c6 7.Ne5, where you give up pawns to attack Black's king in the center or win them back against an isolated c-pawn. About 47 levels are planned, one group per Black defence (5...a6, 5...c5, 5...Nc6, 5...b5, 5...c6, 5...Bb4+, 4...Nbd7 and more) |
+| Chapter 2: Open Catalan | 🚧 In progress | Your opponent takes your c4-pawn. Levels 1-39 are ready: 4...Be7 with 6...dxc4 7.Qc2 a6 8.a4, winning the pawn back, the trap 16...Qxd4? 17.Ne4, Black's other tries (10...Nbd7, 10...a5, 8...Nc6, 7...Bd7), 7...b5 8.a4 with the double threat 11.Ng5, and 4...dxc4 5.Nf3 a6, where you stay a pawn down after 9.b3 for open lines and active pieces, 6...b5 7.Ne5, where you win a knight for two pawns, 5...c5, where Qa4 pins the c6-knight and you win the c4-pawn back, 5...Nc6 6.Qa4 with the check on b4, 5...b5 6.a4 c6 7.Ne5, where you give up pawns to attack Black's king in the center or win them back against an isolated c-pawn, and 5...c6 6.Ne5, covering Black's exchange sacrifice after 6...Bb4+ and pinning the c6-bishop after 6...b5. Remaining groups: 5...Bb4+, 5...Be7/Bd7, and 4...Nbd7 |
 | Chapters 3–6 | 📋 Planned | The Catalan against the King's Indian, Semi-Slav, Grünfeld and other defences |
 | Profile editing & online links | ⏸ Postponed | Rename profile, link Chess.com / Lichess accounts |
 
@@ -101,6 +101,9 @@ The database file `chesscoach.db` is created automatically on first launch and i
 ---
 
 ## Changelog
+
+### 2026-11-19 — Open Catalan: 5...c6
+- Chapter 2 levels 36-39: 5...c6 6.Ne5 (6...Bb4+ 7.Bd2 Be7 8.e3 with Black's exchange sacrifice after 8...b5 and winning c4 back after 8...O-O; and 6...b5 7.O-O Bb7 8.a4 a6 9.b3 cxb3 10.Bb2 Nbd7 11.Nxc6 with the c-file pin against 11...Qb6 and 11...Qc7).
 
 ### 2026-11-18 — Open Catalan begins
 - Chapter 2 (Open Catalan) is on the Catalan page with its first 35 levels: 4...Be7 5.Nf3 O-O 6.O-O dxc4 7.Qc2 a6 8.a4, winning the c4-pawn back, the trap 16...Qxd4? 17.Ne4, Black's other tries 10...Nbd7, 10...a5, 8...Nc6 and 7...Bd7, 7...b5 8.a4 (the double threat 11.Ng5, and 8...b4 9.Nfd2), and 4...dxc4 5.Nf3 a6 6.O-O Nc6, where 9.b3 leaves you a pawn down for open lines (Black's knight goes to b4, your knights answer from e5, a3 and c2), and 6...b5 7.Ne5, where you win a knight for two pawns and 12.Qh5 threatens mate on f7, and 5...c5 (7.Qa4 pins the c6-knight; 6...cxd4 and 6...Be7), and 5...Nc6 6.Qa4 (6...Bb4+ with 13.Nb5 and the queen trade; 6...Bd6), and 5...b5 6.a4 c6 7.Ne5 (13.d5 against Black's king in the center; 10...Nfd7, 10...Nbd7 and 7...Bb4+). More levels follow, one group per Black defence.
