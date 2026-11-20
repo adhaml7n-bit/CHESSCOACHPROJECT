@@ -4,7 +4,7 @@ ChessCoach is a desktop chess trainer built with **Python**, **Flet**, **python-
 It teaches openings move by move, talks to you while you learn ("you", "your opponent"), tests you on what
 you learned, remembers the moves you get wrong, and includes a 2D board with **Stockfish** analysis.
 
-**Status:** Catalan opening page, Chapter 1 (Closed Catalan, 40 levels) and the first 49 levels of Chapter 2 (Open Catalan) playable · **Last updated:** 2026-11-19
+**Status:** Catalan opening page, Chapter 1 (Closed Catalan, 40 levels) and Chapter 2 (Open Catalan, all 51 levels playable; Day-7 "Why this move?" questions in progress: 45/230) · **Last updated:** 2026-11-20
 
 ---
 
@@ -33,7 +33,7 @@ you learned, remembers the moves you get wrong, and includes a 2D board with **S
 | Daily review | ✅ Done | The "Daily Revised" card shows how many positions are due and drills them, with the next review date after each answer |
 | "Why this move?" | ✅ Done | On a position's last review (day 7) you also pick the move's purpose from three answers; it is mastered only when both are right |
 | Engine second opinion | ✅ Done | A different move that Stockfish rates at most half a pawn worse than the lesson's move is praised, with no penalty; an optional "Use engine" card after each level shows where the engine agrees or prefers another move |
-| Chapter 2: Open Catalan | 🚧 In progress | Your opponent takes your c4-pawn. Levels 1-49 are ready: 4...Be7 with 6...dxc4 7.Qc2 a6 8.a4, winning the pawn back, the trap 16...Qxd4? 17.Ne4, Black's other tries (10...Nbd7, 10...a5, 8...Nc6, 7...Bd7), 7...b5 8.a4 with the double threat 11.Ng5, and 4...dxc4 5.Nf3 a6, where you stay a pawn down after 9.b3 for open lines and active pieces, 6...b5 7.Ne5, where you win a knight for two pawns, 5...c5, where Qa4 pins the c6-knight and you win the c4-pawn back, 5...Nc6 6.Qa4 with the check on b4, 5...b5 6.a4 c6 7.Ne5, where you give up pawns to attack Black's king in the center or win them back against an isolated c-pawn, 5...c6 6.Ne5, covering Black's exchange sacrifice after 6...Bb4+ and pinning the c6-bishop after 6...b5, 5...Bb4+ 6.Bd2, winning back c4 against 6...a5 and creating a passed c6-pawn against 6...c5, 5...Be7 / 5...Bd7, winning back c4 cleanly and preparing a fast attack after 9...O-O-O, and 4...Nbd7 5.Nf3 dxc4 6.O-O (6...b5?, 6...Be7, 6...Rb8). Remaining lines: 4...Nbd7 5.Nf3 dxc4 6.O-O c5 7.Na3 |
+| Chapter 2: Open Catalan | 🚧 In progress | Your opponent takes your c4-pawn. All 51 levels (42 lines) are playable: 4...Be7 with 6...dxc4 7.Qc2 a6 8.a4, winning the pawn back, the trap 16...Qxd4? 17.Ne4, Black's other tries (10...Nbd7, 10...a5, 8...Nc6, 7...Bd7), 7...b5 8.a4 with the double threat 11.Ng5, and 4...dxc4 5.Nf3 a6, where you stay a pawn down after 9.b3 for open lines and active pieces, 6...b5 7.Ne5, where you win a knight for two pawns, 5...c5, where Qa4 pins the c6-knight and you win the c4-pawn back, 5...Nc6 6.Qa4 with the check on b4, 5...b5 6.a4 c6 7.Ne5, where you give up pawns to attack Black's king in the center or win them back against an isolated c-pawn, 5...c6 6.Ne5, covering Black's exchange sacrifice after 6...Bb4+ and pinning the c6-bishop after 6...b5, 5...Bb4+ 6.Bd2, winning back c4 against 6...a5 and creating a passed c6-pawn against 6...c5, 5...Be7 / 5...Bd7, winning back c4 cleanly and preparing a fast attack after 9...O-O-O, and 4...Nbd7 5.Nf3 dxc4 6.O-O (6...b5?, 6...Be7, 6...Rb8, and 6...c5 7.Na3). Next: Day-7 "Why this move?" purpose questions |
 | Chapters 3–6 | 📋 Planned | The Catalan against the King's Indian, Semi-Slav, Grünfeld and other defences |
 | Profile editing & online links | ⏸ Postponed | Rename profile, link Chess.com / Lichess accounts |
 
@@ -102,11 +102,15 @@ The database file `chesscoach.db` is created automatically on first launch and i
 
 ## Changelog
 
+### 2026-11-20 — Open Catalan Day-7 purpose questions begin
+- Chapter 2 Day-7 `"Why do you play ...?"` purpose questions: added Batch P1 (levels 1–9, 34 questions; 45 of 230 White-move positions now covered).
+
 ### 2026-11-19 — Open Catalan: 5...c6, 5...Bb4+, 5...Be7/Bd7, 4...Nbd7 & chapter locking
 - Chapter 2 levels 36-39: 5...c6 6.Ne5 (6...Bb4+ 7.Bd2 Be7 8.e3 with Black's exchange sacrifice after 8...b5 and winning c4 back after 8...O-O; and 6...b5 7.O-O Bb7 8.a4 a6 9.b3 cxb3 10.Bb2 Nbd7 11.Nxc6 with the c-file pin against 11...Qb6 and 11...Qc7).
 - Chapter 2 levels 40-43: 5...Bb4+ 6.Bd2 (6...a5 winning back c4 after 10.Qf4 Nd6 11.Na3 O-O 12.Ne5 ... 16.Nxc4; and 6...c5 7.Bxb4 cxb4 8.Ne5 with the passed c6-pawn and 14.a3).
 - Chapter 2 levels 44-45: 5...Be7 6.Qa4+ (winning c4 back at once and 10.Rd1) and 5...Bd7 6.Ne5 Bc6 7.Nxc6 (keeping the g2-bishop and preparing a queenside attack after 9...O-O-O).
 - Chapter 2 levels 46-49: 4...Nbd7 5.Nf3 dxc4 6.O-O (6...b5? 7.Ne5 winning the queen on 7...Rb8?? 8.Nc6 Bb7 9.Nxd8 and the exchange on 7...Ba6; 6...Be7 7.Nbd2 b6 8.Ne5 Nxe5 9.dxe5; and 6...Rb8 7.a4 a6 8.a5).
+- Chapter 2 levels 50-51: 4...Nbd7 5.Nf3 dxc4 6.O-O c5 7.Na3 (winning c4 back with 8.Nxc4 Nxc4 9.Qa4+ Bd7 10.Qxc4, then 11...Rc8 12.Ne5 against 12...Bd6 and 12...c4, and 11...Nd5 12.Qe1 cxd4 13.Nxd4), completing all 51 levels (42 lines) of Chapter 2's lessons and quizzes.
 - Opening hub: Chapter 2 (and future ready chapters) now stay locked (`🔒 LOCKED` / `Finish Chapter 1`) until the previous chapter is 100% completed (2 new unit tests, 187 in total).
 
 ### 2026-11-18 — Open Catalan begins
